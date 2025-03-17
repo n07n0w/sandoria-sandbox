@@ -1,0 +1,1113 @@
+.account,
+.account * {
+  box-sizing: border-box;
+}
+.account {
+  background: #ffffff;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+/*  display: block;*/
+/*  width: 100%;*/
+}
+.frame-5 {
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 0px 0px 1px 0px;
+  width: 1700px;
+  height: 140px;
+  position: absolute;
+  left: calc(50% - 850px);
+  top: 0px;
+}
+.frame-21 {
+  display: flex;
+  flex-direction: row;
+  gap: 9px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  left: 0px;
+  top: calc(50% - 14px);
+}
+.div {
+  color: #000000;
+  text-align: left;
+  font-family: "Roboto-Regular", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  position: relative;
+  width: 366px;
+}
+.button {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  right: 0px;
+  top: calc(50% - 46px);
+}
+.frame {
+  flex-shrink: 0;
+  width: 61px;
+  height: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.group {
+  width: 97.07%;
+  height: 95.92%;
+  position: absolute;
+  right: 1.46%;
+  left: 1.46%;
+  bottom: 2.06%;
+  top: 2.02%;
+  overflow: visible;
+}
+.ellipse-18 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 64.72%;
+  left: 32.15%;
+  bottom: 18.99%;
+  top: 77.04%;
+  transform-origin: 0 0;
+  transform: rotate(120.868deg) scale(1, 1);
+}
+.ellipse-11 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 19.83%;
+  left: 77.05%;
+  bottom: 46.03%;
+  top: 50%;
+}
+.ellipse-14 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 68%;
+  left: 28.88%;
+  bottom: 68.99%;
+  top: 27.04%;
+  transform-origin: 0 0;
+  transform: rotate(120.868deg) scale(1, 1);
+}
+.ellipse-12 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 21.47%;
+  left: 75.41%;
+  bottom: 73.11%;
+  top: 22.92%;
+}
+.ellipse-15 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 76.2%;
+  left: 20.68%;
+  bottom: 48.16%;
+  top: 47.87%;
+  transform-origin: 0 0;
+  transform: rotate(120.868deg) scale(1, 1);
+}
+.ellipse-17 {
+  background: #000000;
+  border-radius: 50%;
+  width: 3.12%;
+  height: 3.97%;
+  position: absolute;
+  right: 41.77%;
+  left: 55.11%;
+  bottom: 27.33%;
+  top: 68.7%;
+  transform-origin: 0 0;
+  transform: rotate(120.868deg) scale(1, 1);
+}
+.vector {
+  width: 39.34%;
+  height: 43.75%;
+  position: absolute;
+  right: 31.15%;
+  left: 29.51%;
+  bottom: -14.58%;
+  top: 70.83%;
+  transform: translate(-1px, -22px);
+  overflow: visible;
+}
+.div2 {
+  color: #000000;
+  text-align: center;
+  font-family: "Roboto-Regular", sans-serif;
+  font-size: 16px;
+  line-height: 110%;
+  font-weight: 400;
+  position: relative;
+  width: 93px;
+}
+.button2 {
+  background: #6d3737;
+  border-radius: 30px;
+  padding: 17px 47px 17px 47px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 1519px;
+  top: 162px;
+}
+.div3 {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Roboto-Bold", sans-serif;
+  font-size: 20px;
+  line-height: 110%;
+  font-weight: 700;
+  position: relative;
+}
+.div4 {
+  color: #000000;
+  text-align: left;
+  font-family: "Roboto-Bold", sans-serif;
+  font-size: 32px;
+  line-height: 110%;
+  font-weight: 700;
+  position: absolute;
+  left: 98px;
+  top: 172px;
+}
+.frame-117 {
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: absolute;
+  left: 98px;
+  top: 285px;
+}
+.frame-115 {
+  display: flex;
+  flex-direction: row;
+  gap: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.frame-119 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.frame2 {
+  flex-shrink: 0;
+  width: 128px;
+  height: 100px;
+  position: relative;
+  overflow: hidden;
+}
+.group2 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-108 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.div5 {
+  color: #000000;
+  text-align: center;
+  font-family: "Roboto-Regular", sans-serif;
+  font-size: 18px;
+  line-height: 110%;
+  font-weight: 400;
+  position: relative;
+  align-self: stretch;
+}
+.frame-120 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group3 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1082 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-121 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group4 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1083 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-122 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group5 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1084 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-123 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group6 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1085 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-124 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group7 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1086 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-125 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group8 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1087 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-126 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group9 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1088 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-127 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group10 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-1089 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-128 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.group11 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10810 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-1192 {
+  display: flex;
+  flex-direction: row;
+  gap: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.group12 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10811 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group13 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10812 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group14 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10813 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group15 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10814 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group16 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10815 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group17 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10816 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group18 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10817 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group19 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10818 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group20 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10819 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group21 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10820 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-1202 {
+  display: flex;
+  flex-direction: row;
+  gap: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.group22 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10821 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group23 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10822 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group24 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10823 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group25 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10824 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group26 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10825 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group27 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10826 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group28 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10827 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group29 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10828 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group30 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10829 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group31 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10830 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.frame-1212 {
+  display: flex;
+  flex-direction: row;
+  gap: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.group32 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10831 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group33 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10832 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group34 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10833 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group35 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10834 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group36 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10835 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group37 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10836 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group38 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10837 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group39 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10838 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group40 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10839 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}
+.group41 {
+  width: 100%;
+  height: 99.03%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0.97%;
+  overflow: visible;
+}
+.frame-10840 {
+  border-radius: 1000px;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  overflow: visible;
+}

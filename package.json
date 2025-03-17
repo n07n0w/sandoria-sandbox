@@ -1,0 +1,26 @@
+{
+  "name": "mysandbox",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "^3.1.10",
+    "express": "~4.16.1",
+    "express-session": "^1.18.1",
+    "http-errors": "~1.6.3",
+    "konva": "^9.3.16",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "pino": "^9.5.0",
+    "pino-pretty": "^13.0.0",
+    "pug": "2.0.0-beta11",
+    "uuid": "^11.0.3",
+    "ws": "^8.18.0"
+  }
+}

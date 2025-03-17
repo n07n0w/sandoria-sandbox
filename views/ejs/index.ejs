@@ -1,0 +1,1150 @@
+﻿<html>
+<head>
+
+<%
+	var categoryImagesPerRow = 3;
+	var categoryImageWidth  = 100;
+	var categoryImageHeight = 130;
+	var categoryImageSpacing = 24;	// расстояние между картинками категорий
+	var maxImageWidth  = 100;
+	var maxImageHeight = 130;
+	var clientMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined');
+	var viewMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined');
+%>
+
+<%/*
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+*/%>
+<link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+<link rel="stylesheet" href="/stylesheets/jquery.slidein.css">
+<link rel="stylesheet" href="/stylesheets/sandbox.css">
+
+
+  <script src="/javascripts/jquery-3.7.1.js"></script>
+  <script src="/javascripts/jquery-ui.js"></script>
+  <!-- https://konvajs.org/docs/index.html -->
+  <script src="/javascripts/konva.min.js"></script>
+
+  <script src="/javascripts/peerjs.min.js"></script>
+
+<style>
+.ui-dialog-titlebar {
+	display: none;
+}
+</style>
+
+	<% if (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined') { %>
+	<script src="/javascripts/jquery.slidein.js"></script>
+	<% } %>
+
+  <script type="text/javascript">
+      var sandboxBackground = "";
+      var width = window.innerWidth;
+      var height = window.innerHeight;
+      var sandboxLayer, backgroundLayer;
+	  var backgroundImage;
+      var background;
+      var transformer;
+      var prevCategoryId;
+      var myPeer;
+      var myConn;
+	  var stage;
+	  var invitePopupDialog;
+	  var categoryImageMaxPanelWidth = 0;
+	  var categoryImageMinPanelWidth = 0;
+
+	  var maxImageWidth  = <%=maxImageWidth %>;
+	  var maxImageHeight = <%=maxImageHeight %>;
+	  var categoryImagesPerRow = <%=categoryImagesPerRow %>;
+		var categoryImageWidth  = <%=categoryImageWidth %>;
+		var categoryImageHeight = <%=categoryImageHeight %>;
+		var categoryImageSpacing = <%=categoryImageSpacing %>;
+	  var ws;
+	  <% if (typeof sessionId !== 'undefined') { %>
+	  var sessionId = '<%= sessionId%>';
+      <% } else { %>
+	  var sessionId = null;
+      <% } %>
+
+	  <% if (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined') { %>
+	  var notifyViewer = true;
+	  var guest = true;
+      <% } else { %>
+	  var notifyViewer = false;
+	  var guest = false;
+      <% } %>
+
+    const sendEvent = function (ev) {
+      myConn?.send(ev);
+    };
+
+    const notifyImageSelect = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyShapeClick = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyShapeDrag = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyMeDrag = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyTransform = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyRemoveSelected = function (jsonData) {
+      sendEvent(jsonData);
+    };
+    const notifyRemoveAll = function (jsonData) {
+      sendEvent(jsonData);
+    };
+    const notifyCopySelected = function (jsonData) {
+      sendEvent(jsonData);
+    };
+    const notifySkewSelected = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyLevelUp = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifyLevelDown = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const notifySaveStateToImage = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+	const notifySaveStateToImageResponse = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const imageSelectEvent = function(imgSource, categoryId, imageId) {
+      var jsonData = {};
+      jsonData['event']      = 'imageSelect';
+      jsonData['imgSource']  = imgSource;
+      jsonData['categoryId'] = categoryId;
+	  jsonData['imageId']    = imageId;
+      jsonData['notify']     = false;
+      return jsonData;
+    };
+
+    const imageSelect = function (jsonObject, notify = false) {
+	  loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+	  if (notify) {
+	    notifyImageSelect(jsonObject);
+	  }
+	};
+
+    const shapeClick = function(jsonData) {
+      console.log(jsonData);
+      var node = sandboxLayer.findOne(node => {
+        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
+      });
+      node.fire('click');
+    };
+
+    const shapeClickEvent = function (shape) {
+      var jsonData = {};
+      jsonData['event']  = 'shapeClick';
+      var shapeObject = {};
+      shapeObject['_id'] = shape._id;
+      jsonData['shape']  = shapeObject;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+	const sendCanvasImageToServer = function(data) {
+		let cnv = $('canvas')[0];
+		let sessionId = data['sessionId'];
+//		let dataURL = cnv.toDataURL();
+////		let dataURL = cnv.toDataURL('image/svg+xml');
+		let dataURL = stage.toDataURL();
+		$.ajax({
+			type: "POST",
+			url: "/image/".concat(sessionId),
+			data: {
+				sessionId: sessionId,
+				imgBase64: dataURL
+			}
+		}).done(function(o) {
+			console.log('saved');
+			var event = saveStateToImageResponseEvent(o);
+			notifySaveStateToImageResponse(event);
+		});
+	};
+
+    const showCanvasImage = function(data) {
+		var takeScreenshotBtn = $('#takeScreenshotBtn');
+		var anchor = takeScreenshotBtn.find('a')[0];
+		anchor.text = 'Снимок сделан';
+		takeScreenshotBtn.toggleClass("finished");
+		setTimeout(function() { 
+			anchor.text = 'Сделать снимок';
+			takeScreenshotBtn.toggleClass("finished");
+		}, 3000);
+
+		$('#iterations').append(
+			$('<img />')
+			.attr({ src : '/images/screenshots/'+ data['image']})
+			.addClass("screenshot")
+		);
+    };
+
+    const saveStateToImageEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'sendCanvasImageToServer';
+      jsonData['sessionId']  = sessionId;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const saveStateToImageResponseEvent = function (imageResponse) {
+      var jsonData = {};
+      jsonData['event']  = 'showCanvasImage';
+      jsonData['sessionId']  = sessionId;
+      jsonData['image']  = imageResponse;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const removeSelectedEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'removeSelected';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const copySelectedEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'copySelected';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const skewSelectedEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'skewSelected';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const removeAllEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'removeAll';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const levelUpEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'levelUp';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const levelDownEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'levelDown';
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const shapeDrag = function(jsonData) {
+      console.log(jsonData);
+      jsonData['nodes'].forEach((nd) => {
+        var node = sandboxLayer.findOne(node => {
+          return node.getType() === 'Shape' && node._id == nd._id;
+        });
+        node?.setAttrs({x: nd.x, y: nd.y});
+      });
+    };
+
+    const meDrag = function(jsonData) {
+      console.log(jsonData);
+      jsonData['nodes'].forEach((nd) => {
+        var node = sandboxLayer.findOne(node => {
+          return node.getType() === 'Shape' && node._id == nd._id;
+        });
+        node?.setAttrs({x: nd.x, y: nd.y});
+      });
+    };
+
+    const shapeDragEvent = function (evt) {
+      var ri = evt.target;
+      var jsonData = {};
+      jsonData['event']  = 'shapeDrag';
+      var nodes = [];
+      ri._nodes.forEach((node) => {
+        nodes.push({
+          _id: node._id,
+          x: node.attrs.x,
+          y: node.attrs.y})
+      });
+      jsonData['nodes'] = nodes;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const meDragEvent = function (evt) {
+      var me = evt.target;
+      var jsonData = {};
+      jsonData['event']  = 'meDrag';
+      var nodes = [];
+      nodes.push({
+        _id: me._id,
+        x: me.attrs.x,
+        y: me.attrs.y});
+      jsonData['nodes'] = nodes;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const transform = function(jsonData) {
+      var transform = jsonData['transform'];
+      var transformNode = sandboxLayer.findOne(node => {
+        return node.getType() === 'Group' && node._id == transform._id;
+      });
+      transformNode?.setAttrs({
+        offsetX:  transform.offsetX,
+        offsetY:  transform.offsetY,
+        rotation: transform.rotation,
+        scaleX:   transform.scaleX,
+        scaleY:   transform.scaleY,
+        skewX:    transform.skewX,
+        skewY:    transform.skewY,
+        x:        transform.x,
+        y:        transform.y,
+      });
+
+      jsonData['nodes'].forEach((nd) => {
+        var node = sandboxLayer.findOne(node => {
+          return node.getType() === 'Shape' && node._id == nd._id;
+        });
+        node?.setAttrs({
+          rotation: nd.rotation,
+          scaleX: nd.scaleX,
+          scaleY: nd.scaleY,
+          skewX:  nd.skewX,
+          skewY:  nd.skewY,
+          x:      nd.x,
+          y:      nd.y});
+      });
+    };
+
+    const transformEvent = function (evt) {
+      var ri = evt.currentTarget;
+
+      var transform = {
+        _id: ri._id,
+        offsetX:  ri.attrs.offsetX,
+        offsetY:  ri.attrs.offsetY,
+        rotation: ri.attrs.rotation,
+        scaleX:   ri.attrs.scaleX,
+        scaleY:   ri.attrs.scaleY,
+        skewX:    ri.attrs.skewX,
+        skewY:    ri.attrs.skewY,
+        x:        ri.attrs.x,
+        y:        ri.attrs.y,
+      };
+
+      var jsonData = {};
+      jsonData['event']  = 'transform';
+      var nodes = [];
+      ri._nodes.forEach((node) => {
+        nodes.push({
+          _id: node._id,
+          rotation: node.attrs.rotation,
+          scaleX: node.attrs.scaleX,
+          scaleY: node.attrs.scaleY,
+          skewX: node.attrs.skewX,
+          skewY: node.attrs.skewY,
+          x:     node.attrs.x,
+          y:     node.attrs.y})
+      });
+      jsonData['nodes'] = nodes;
+	  jsonData['transform'] = transform;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+      const calcScaledImageWidthHeight = function(image) {
+        var width  = image.width;
+        var height = image.height;
+        var c  = width / height;
+		var c1 = width / maxImageWidth;
+		width = width / c1;
+		height = width / c;
+		if (height > maxImageHeight) {
+			c1 = height / maxImageHeight;
+			height = height / c1;
+			width = height * c;
+		}
+        return [width, height];
+      }
+
+	function loadImage(imgSource, categoryId, imageId) {
+		image = new Image();
+		image.src = imgSource;
+		image.onload = function() {
+			var [imgWidth, imgHeight] = calcScaledImageWidthHeight(image);
+			let stageMiddleX = stage.width() >> 1;
+			let stageMiddleY = stage.height() >> 1;;
+			
+			let newImageX = stageMiddleX - (imgWidth >> 1);
+			let newImageY = stageMiddleY - (imgHeight >> 1);
+			var pic = new Konva.Image({
+				image: image,
+//				x: image.x,
+//				y: image.y,
+				x: newImageX,
+				y: newImageY,
+				width: imgWidth,
+				height: imgHeight,
+				draggable: true,
+			});
+			pic.setAttr('category', categoryId);
+			pic.setAttr('imgId', imageId);
+			pic.on('dragstart', function () {
+				this.moveToTop();
+			});
+			pic.on('click', function (evt) {
+				let target = evt.target;
+				transformer.nodes([target]);
+			});
+			pic.offsetX(pic.width() >> 1);
+
+			sandboxLayer.add(pic);
+		}
+	}
+
+      function removeSelected() {
+          transformer.nodes().forEach(function (currentValue, index, arr) {
+              currentValue.destroy();
+          });
+          transformer.detach();
+          sandboxLayer.draw();
+          if (notifyViewer) {
+            var event = removeSelectedEvent();
+            notifyRemoveSelected(event);
+          }
+      }
+
+	function copySelected() {
+		transformer.nodes().forEach(function (currentValue, index, arr) {
+			var clone = currentValue.clone();
+			clone.attrs.x += 20;
+			clone.attrs.y += 20;
+			sandboxLayer.add(clone);
+		});
+		sandboxLayer.draw();
+		if (notifyViewer) {
+			var event = copySelectedEvent();
+			notifyCopySelected(event);
+		}
+	}
+
+	function skewSelected() {
+		transformer.nodes().forEach(function (currentValue, index, arr) {
+//			currentValue.offsetX(currentValue.width() / 2);
+			currentValue.to({
+				scaleX: -currentValue.scaleX(),
+			});
+
+			if (notifyViewer) {
+				var event = skewSelectedEvent();
+				notifySkewSelected(event);
+			}
+		});
+	}
+
+	function removeAll() {
+		var nodes = sandboxLayer.find(node => {
+			return 'Image' === node.className;
+		});
+		nodes.forEach(function (currentValue, index, arr) {
+			currentValue.destroy();
+		});
+
+		transformer.nodes().forEach(function (currentValue, index, arr) {
+			currentValue.destroy();
+		});
+		transformer.detach();
+		sandboxLayer.draw();
+		if (notifyViewer) {
+			var event = removeAllEvent();
+			notifyRemoveAll(event);
+		}
+	}
+
+      function levelUp() {
+          transformer.nodes().forEach(function (currentValue, index, arr) {
+              currentValue.moveUp();
+              if (notifyViewer) {
+                var event = levelUpEvent();
+                notifyLevelUp(event);
+              }
+          });
+      }
+
+      function levelDown() {
+          transformer.nodes().forEach(function (currentValue, index, arr) {
+              currentValue.moveDown();
+              if (notifyViewer) {
+                var event = levelDownEvent();
+                notifyLevelDown(event);
+              }
+          });
+      }
+
+      function saveStateToImage() {
+        var event = saveStateToImageEvent();
+        notifySaveStateToImage(event);
+      }
+
+	function initStage() {
+		let containerElement = $('#container');
+		stage = new Konva.Stage({
+			container: 'container',
+			width: containerElement.width(),
+			height: containerElement.height(),
+		});
+		sandboxLayer = new Konva.Layer();
+		backgroundLayer = new Konva.Layer();
+
+		transformer = new Konva.Transformer({
+			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+		});
+
+		transformer.on('transform', function(evt) {
+			if (notifyViewer) {
+				var event = transformEvent(evt);
+				notifyTransform(event);
+			}
+		});
+		transformer.on('dragmove', function(evt) {
+			if (notifyViewer) {
+				var dragEvent = shapeDragEvent(evt);
+				notifyShapeDrag(dragEvent);
+			}
+		});
+
+		sandboxLayer.add(transformer);
+
+		sandboxLayer.on('click', function(evt) {
+			var shape = evt.target;
+			var group = evt.currentTarget;
+			if (notifyViewer) {
+				var clickEvent = shapeClickEvent(shape);
+				notifyShapeClick(clickEvent);
+			}
+		});
+		sandboxLayer.on('dragmove', function(evt) {
+			if (notifyViewer) {
+				var event = meDragEvent(evt);
+				notifyMeDrag(event);
+			}
+		});
+
+		stage.add(backgroundLayer, sandboxLayer);
+
+		backgroundImage = new Image();
+//		backgroundImage.src = "/images/sandbox/sand.png";
+		backgroundImage.src = "/images/sandbox/sandbox.jpg";
+
+		backgroundImage.onload = function() {
+			backgroundImage.width = stage.width();
+			backgroundImage.height = stage.height();
+/*
+			background = new Konva.Rect({
+				x: 0,
+				y: 0,
+				width: stage.width(),
+				height: stage.height(),
+				fillPatternImage: backgroundImage,
+//				image: backgroundImage,
+				listening: false,
+			});
+*/
+
+			background = new Konva.Image({
+				x: 0,
+				y: 0,
+				width: stage.width(),
+				height: stage.height(),
+				listening: false,
+				strokeScaleEnabled: false
+			});
+			background.image(backgroundImage);
+			console.log(background.zIndex());
+			background.zIndex(0);
+			backgroundLayer.add(background);
+			recalcSandboxSizes();
+		}
+	}
+
+	const recalcSandboxSizes = function() {
+		let screenWidth = window.innerWidth;
+		let screenHeight = window.innerHeight;
+//		let screenWidth = screen.width;
+//		let screenHeight = screen.height;
+//		let screenWidth = document.documentElement.clientWidth;
+//		let screenHeight = document.documentElement.clientHeight;
+//		const sizeRelations = 1300/940;
+		const sizeRelations = 7/5;
+		const leftSideWidth = document.getElementById('lside').offsetWidth;	// ширина левой части не мняется!
+//		let minRsideWidth = categoryImagesPerRow * categoryImageWidth + (categoryImagesPerRow - 1) * categoryImageSpacing + (categoryImageSpacing << 1);
+		let minRsideWidth = $('.rsidecontent').width() + 10;
+
+		let sandboxWidth = screenWidth - leftSideWidth - minRsideWidth;
+		categoryImageMaxPanelWidth = screenWidth - leftSideWidth - 2;
+		let sandboxHeight = sandboxWidth / sizeRelations;
+		if (sandboxHeight > screenHeight) {
+			sandboxHeight = screenHeight;
+			sandboxWidth = sandboxHeight * sizeRelations;
+		}
+		let rightSideWidth = screenWidth - leftSideWidth - sandboxWidth;
+		categoryImageMinPanelWidth = rightSideWidth - 2;
+
+		let element = document.getElementById('sandbox');
+		element.width  = sandboxWidth + 'px';
+		element.height = sandboxHeight + 'px';
+
+		element = document.getElementById('container');
+		element.style.width  = sandboxWidth + 'px';
+		element.style.height = sandboxHeight + 'px';
+		$("#slideToggle").css('left', (sandboxWidth  >> 1) + 'px');
+		$("#iterations").css('width', (sandboxWidth) + 'px');
+		$("#iterationsHolder").css('bottom', ((screenHeight - sandboxHeight) >> 1) + 'px');
+		
+		element = document.getElementById('rside');
+		element.width  = rightSideWidth + 'px';
+/* */
+		element = document.getElementById('categoryImages');
+//		let categoryImageHeight = screenHeight - 164;
+		let categoryImageHeight = screenHeight - 184;
+		element.style.height = categoryImageHeight + 'px';
+		element.style.width = (categoryImageMinPanelWidth) + 'px';
+
+		var slider = $("#categoryImageSlider");
+		slider.css('top', (categoryImageHeight >> 1) + 'px');
+//		slider.css('right', (rightSideWidth - 20) + 'px');
+
+/* */
+/*
+		element = document.getElementsByClassName('user_section')[0];
+		var lsideElement = document.getElementById('lside');
+		var logoElement  = document.getElementsByClassName('logo')[0];
+		var cpElement    = document.getElementsByClassName('control_panel')[0];
+		let calculatedUserSectionHeight = (lsideElement.scrollHeight - logoElement.scrollHeight - cpElement.scrollHeight) + 'px';
+		element.style.height = calculatedUserSectionHeight;
+		element.style.lineHeight = calculatedUserSectionHeight;
+*/		
+		if (typeof stage !== 'undefined') {
+			stage.width(sandboxWidth);
+			stage.height(sandboxHeight);
+/*
+			let stageContainer = stage.container();
+			stageContainer.style.width(sandboxWidth);
+			stageContainer.style.height(sandboxHeight);
+*/
+			if (typeof background !== 'undefined') {
+//				backgroundImage.width = sandboxWidth + 'px';
+//				backgroundImage.height = sandboxHeight + 'px';
+				backgroundImage.width = sandboxWidth;
+				backgroundImage.height = sandboxHeight;
+/*
+				background.setAttrs({
+					scaleX: 1,
+					scaleY: 1,
+					width: sandboxWidth,
+					height: sandboxHeight,
+				});
+*/
+				background.width(sandboxWidth);
+				background.height(sandboxHeight);
+			}
+
+			stage.draw();
+		}
+	};
+
+	window.addEventListener('resize', recalcSandboxSizes, true);
+
+	const updateCategoryLabel = function(label) {
+		$('#category_label').text( label );
+	};
+
+	const categoryHoverIn = function() {
+		updateCategoryLabel($(this).attr('cname'));
+//		$('#category_label').text( $(this).attr('cname') );
+	};
+	const categoryHoverOut = function() {
+		updateCategoryLabel((typeof selectedCategoryName !== 'undefined') ? selectedCategoryName : "");
+//		$('#category_label').text( "" );
+	};
+
+    const notifyCategorySelect = function (jsonData) {
+      sendEvent(jsonData);
+    };
+
+    const selectedCategoryClassName = "cselected";
+
+    const unselectPreviousCategory = function () {
+      if (prevCategoryId) {
+        $("[cid="+prevCategoryId+"]").removeClass(selectedCategoryClassName);
+		updateCategoryLabel("");
+      }
+    }
+
+    var prevShownCategoryId = "01";
+    function showImages(catecory) {
+//		$("#images_" + prevShownCategoryId).hide();
+		$("#images_" + prevShownCategoryId).removeClass('images_visible');
+		prevShownCategoryId = catecory;
+//		$("#images_" + prevShownCategoryId).show();
+		$("#images_" + prevShownCategoryId).addClass('images_visible');
+    }
+
+	var selectedCategoryId;
+	var selectedCategoryName;
+    const selectCategory = function (categoryId, categoryName) {
+      unselectPreviousCategory();
+      $("[cid="+categoryId+"]").addClass(selectedCategoryClassName);
+      prevCategoryId = categoryId;
+	  updateCategoryLabel(categoryName);
+	  selectedCategoryId = categoryId;
+	  selectedCategoryName = categoryName;
+    }
+
+    const categorySelect = function (jsonObject, notify = false) {
+      selectCategory(jsonObject['categoryId'], jsonObject['categoryName']);
+      showImages(jsonObject['categoryId']);
+      if (notify) {
+        notifyCategorySelect(jsonObject);
+      }
+    };
+
+    const categorySelectEvent = function(categoryId, categoryName, notify) {
+      var jsonData = {};
+      jsonData['event'] = 'categorySelect';
+      jsonData['categoryId'] = categoryId;
+      jsonData['categoryName'] = categoryName;
+      jsonData['notify'] = notify;
+      return jsonData;
+    };
+
+	const selectFirstCategoryFromStart = function() {
+		// Надо найти первую катерогию в списке, взять ее ID ("cid" аттрибут) и выбрать ее
+		let allCategories = $(".topCategory");
+		if (typeof allCategories !== 'undefined') {
+			categorySelect(categorySelectEvent(allCategories[0].attributes['cid'].value, allCategories[0].attributes['cname'].value), true);
+		}
+	};
+
+	const copyInliteLinkToClipboard = async function(inviteJson) {
+		await copyContent(inviteJson.sessionLink);
+	};
+
+	const copyContent = async function(text){
+		try {
+			await navigator.clipboard.writeText(text);
+			console.log('Content copied to clipboard');
+		} catch (err) {
+			console.error('Failed to copy: ', err);
+		}
+	};
+
+	const showInvitePopup = function(inviteJson) {
+//		$("#invitelink").text(inviteJson.sessionLink);
+		invitePopupDialog.dialog( "open" );
+	};
+
+	const inviteClient = function() {
+      $.ajax({
+        type: "POST",
+        url: "/session/init"
+      }).done(function(res) {
+        console.log('invited');
+		console.log(res);
+		copyInliteLinkToClipboard(res);
+		showInvitePopup(res);
+//		launchPeer(res.sessionId, res.opponentSessionId);
+		launchPeer(res.opponentSessionId);
+      });
+	};
+
+	const launchPeer = function(sessionId, opponentSessionId) {
+		myPeer = new Peer(sessionId);
+		myPeer.on('open', function(id) {
+			console.log('My peer ID is: ' + id);
+			if (typeof opponentSessionId !== 'undefined') {
+				myConn = myPeer.connect(opponentSessionId);
+				myConn?.on('open', function(){
+					console.log(myConn);
+					myConn.send('hi!');
+				});
+				myConn?.on('data', function(data){
+					if (typeof data === 'object' && data.hasOwnProperty('event'))
+						try {
+							eval(data.event)(data);
+						} catch (ex) {
+							console.log(ex);
+						}
+				});
+				myConn?.on('close', function() { 
+					// if the clients connection closes set up a reconnect request loop - when the host takes back control
+					// the client will auto reconnect...
+					myPeer.destroy();   // destroy the link
+					connected = false;  // set the connected flag to false
+					conn = null;        // destroy the conn
+					myPeer = null;      // destroy the peer
+
+					// set a variable which means function calls to launchPeer will not overlap
+					var run_next = true;
+
+					// periodically attempt to reconnect
+					reconnect_timer = setInterval(function() { 
+						if (connected===false && run_next===true) {
+							run_next = false;   // stop this bit rerunning before launchPeer has finished...
+							if (launchPeer(sessionId, opponentSessionId)===true) { 
+								clearInterval(reconnect_timer); 
+							} else {
+								run_next == true;
+							}
+						}
+					}, 1000);
+				});
+			}
+		});
+
+		myPeer.on('connection', function(conn) {
+			console.log(conn);
+			myConn = conn;
+			conn?.on('data', function(data){
+				console.log(data);
+				if (typeof data === 'object' && data.hasOwnProperty('event'))
+					try {
+						eval(data.event)(data);
+					} catch (ex) {
+						console.log(ex);
+					}
+			});
+		});
+
+		return true;
+	}; // END OF function launchPeer
+
+
+  $( function() {
+    var dialog, form,
+ 
+      // From https://html.spec.whatwg.org/multipage/input.html#e-mail-state-%28type=email%29
+      emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+      name = $( "#name" ),
+      email = $( "#email" ),
+      password = $( "#password" ),
+      allFields = $( [] ).add( name ).add( email ).add( password ),
+      tips = $( ".validateTips" );
+
+    <% if (typeof sessionId !== 'undefined') { %>
+
+	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
+
+    <% } %>
+
+    function updateTips( t ) {
+      tips
+        .text( t )
+        .addClass( "ui-state-highlight" );
+      setTimeout(function() {
+        tips.removeClass( "ui-state-highlight", 1500 );
+      }, 500 );
+    }
+ 
+    function checkLength( o, n, min, max ) {
+      if ( o.val().length > max || o.val().length < min ) {
+        o.addClass( "ui-state-error" );
+        updateTips( "Length of " + n + " must be between " +
+          min + " and " + max + "." );
+        return false;
+      } else {
+        return true;
+      }
+    }
+ 
+    function checkRegexp( o, regexp, n ) {
+      if ( !( regexp.test( o.val() ) ) ) {
+        o.addClass( "ui-state-error" );
+        updateTips( n );
+        return false;
+      } else {
+        return true;
+      }
+    }
+ 
+    function addUser() {
+      var valid = true;
+      allFields.removeClass( "ui-state-error" );
+ 
+      valid = valid && checkLength( name, "username", 3, 16 );
+      valid = valid && checkLength( email, "email", 6, 80 );
+      valid = valid && checkLength( password, "password", 5, 16 );
+ 
+      valid = valid && checkRegexp( name, /^[a-z]([0-9a-z_\s])+$/i, "Username may consist of a-z, 0-9, underscores, spaces and must begin with a letter." );
+      valid = valid && checkRegexp( email, emailRegex, "eg. ui@jquery.com" );
+      valid = valid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "Password field only allow : a-z 0-9" );
+ 
+      if ( valid ) {
+        $( "#users tbody" ).append( "<tr>" +
+          "<td>" + name.val() + "</td>" +
+          "<td>" + email.val() + "</td>" +
+          "<td>" + password.val() + "</td>" +
+        "</tr>" );
+        dialog.dialog( "close" );
+      }
+      return valid;
+    }
+
+//	var imagesRightPanel = $("#categoryImages");
+	var imagesRightPanel = $("#categoryImagesHolder");
+	$( ".images_hidden" ).each(function(){
+		$(this).remove();
+		imagesRightPanel.append($(this));
+	});
+
+
+	$( "#tabs" ).tabs();
+
+    dialog = $( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 400,
+      modal: true,
+      close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+      }
+    });
+
+	invitePopupDialog = $( "#invite-dialog" ).dialog({
+      autoOpen: false,
+      height: 453,
+      width: 643,
+/*
+      close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+      }
+*/
+    });
+
+    $(".topCategory").hover( categoryHoverIn, categoryHoverOut );
+
+    $(".topCategory").on("click", function() {
+      var categoryId = $(this).attr("cid");
+      var categoryName = $(this).attr("cname");
+//	  $(this).addClass('cselected');
+      categorySelect(categorySelectEvent(categoryId, categoryName), true);
+    });
+
+    $( "#login" ).on( "click", function() {
+      dialog.dialog( "open" );
+    });
+
+	closeInviteDialog = function() {
+		invitePopupDialog.dialog( "close" );
+	}
+	$("#slideToggle").click(function(){
+		$(this).toggleClass("slideUp");
+		$(this).toggleClass("slideDown");
+		$("#iterations").slideToggle("slow");
+	});
+	var categoryImagesSate = 0;
+	$("#categoryImageSlider").click(function(){
+		$(this).toggleClass("slideLeft");
+		$(this).toggleClass("slideRight");
+//		$(this)
+		if (0 == categoryImagesSate) {
+			$("#categoryImages").animate({width: categoryImageMaxPanelWidth + 'px'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+		} else {
+			$("#categoryImages").animate({width: categoryImageMinPanelWidth + 'px'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+		}
+		categoryImagesSate ^= 1;
+//		$("#iterations").slideToggle("slow");
+	});
+	initStage();
+	recalcSandboxSizes();
+	selectFirstCategoryFromStart();
+  });
+
+  </script>
+</head>
+<body>
+	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td id="lside" class="left_side_menu">
+				<div class="logo">
+					<img src="/images/sandbox/logo.svg" width="100px" height="100px"/>
+					<h2 style="color: #244A65">Sandoria</h2>
+					<p class="slogan" style="color: #244A65">Песочная терапия онлайн</p>
+				</div>
+				<div class="control_panel">
+					<p class="control_line" onclick="levelDown()">
+						<span class="icon"><img src="/images/svg/control_back.svg"></span>На задний план
+					</p>
+
+					<p class="control_line" onclick="levelUp()">
+						<span class="icon"><img src="/images/svg/control_forward.svg"></span>На передний план
+					</p>
+					<p class="control_line" onclick="copySelected()">
+						<span class="icon"><img src="/images/svg/control_copy.svg"></span>Копировать
+					</p>
+					<p class="control_line" onclick="skewSelected()">
+						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>Отразить
+					</p>
+					<p class="control_line" onclick="removeSelected()">
+						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
+					</p>
+					<p class="control_line" onclick="removeAll()">
+						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>Очистить все
+					</p>
+				</div>
+
+			<% if (!clientMode) { %>
+				<div class="spaces h40">&nbsp;</div>
+				<div class="inviteBtn btn1" onclick="inviteClient();">
+					<span>
+						<p><a href="#">Пригласить клиента</a></p>
+					</span>
+				</div>
+				<div class="spaces h40">&nbsp;</div>
+				<div class="inviteBtn btn2" id="takeScreenshotBtn" onclick="saveStateToImage()">
+					<span>
+						<p><a href="#">Сделать снимок</a></p>
+					</span>
+				</div>
+			<% } %>
+			</td>
+			<td id="sandbox">
+				<div id="container"></div>
+			<% if (!clientMode) { %>
+				<div id="iterationsHolder">
+					<span id="slideToggle" class="slideUp"></span>
+					<div id="iterations"></div>
+				</div>
+			<% } %>
+			</td>
+			<td id="rside">
+				<div class="rsidecontent">
+					<span id="category_label"></span>
+					<div id="top_categories">
+
+					<% 
+					let categoryLastIndex = categories.size - 1;
+					let currntCategoryIndex = 0;
+					for (let category of categories.values()) {
+					%>
+					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>">
+						<img src="<%= category.icon %>" title="<%= category.title %>" alt="<%= category.title %>"/>
+					</span>
+						<% if (currntCategoryIndex < categoryLastIndex) { %>
+						<span class="category_delimiter">&nbsp;</span>
+						<% } %>
+					
+					<div id="images_<%= category.id %>" class="images_hidden">
+					<%
+						let lastImageIndex = category.images.length - 1;
+						for (const [imageIndex, image] of category.images.entries()) {
+					%>
+							<span class="imageCell">
+								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" onclick="imageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+							</span>
+					<%  } %>
+					</div>
+				<% 
+						++currntCategoryIndex;
+					}
+				%>
+
+					</div>
+					<div id="categoryImages">
+<!--
+						<span id="categoryImageSlider" class="slideLeft"></span>
+-->
+						<div id="categoryImagesHolder" style="position: relative;">
+<!-- -->
+							<span id="categoryImageSlider" class="slideLeft"></span>
+<!-- -->
+						</div>
+					</div>
+				</div>
+			</td>
+		</td>
+	</table>
+
+<div id="invite-dialog">
+	<div class="halign_center mtop20 mbottom20">
+		<img src="/images/svg/InfoMan.svg" />
+	</div>
+	<div class="halign_center">
+		<p class="invitepbс">Ссылка на песочницу</p>
+		<p class="invitepb">скопирована</p>
+		<div class="spaces" style="height: 20px;">&nbsp;</div>
+		<p class="inviteps mauto">Отправьте ссылку клиенту для совместного использования песочницы любым удобным для Вас способом</p>
+	</div>
+	<div class="spaces" style="height: 32px;">&nbsp;</div>
+	<div class="halign_center">
+		<div class="inviteBtn btn1 mauto">
+			<span>
+				<p><a href="#" onclick="closeInviteDialog();">Закрыть</a></p>
+			</span>
+		</div>
+	</div>
+</div>
+
+<div id="dialog-form">
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">Вход</a></li>
+    <li><a href="#tabs-2">Регистрация</a></li>
+  </ul>
+  <div id="tabs-1">
+    <form action="/auth" method="POST">
+      <fieldset>
+        <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all" placeholder="Введите почту">
+        <input type="password" name="password" id="password" class="text ui-widget-content ui-corner-all" placeholder="Введите пароль">
+
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" value="Войти в аккаунт">
+      </fieldset>
+    </form>
+  </div>
+  <div id="tabs-2">
+    <form action="/register" method="POST">
+      <fieldset>
+        <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" placeholder="Ваше имя">
+        <input type="text" name="email" id="email" class="text ui-widget-content ui-corner-all" placeholder="Введите почту">
+        <input type="password" name="password" id="password" class="text ui-widget-content ui-corner-all" placeholder="Придумйте пароль">
+
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" value="Зарегистрироваться">
+		<p>Нажимая кнопку "Зарегистрироваться", я даю свое согласие на сбор и обработку моих персональных данных в соответствии с <a href="#" target="blank">Политикой</a> и принимаю условия <a href="#" target="blank">Пользовательствого соглащения</a></p>
+      </fieldset>
+    </form>
+  </div>
+</div> 
+</div>
+
+</body>
+</html>

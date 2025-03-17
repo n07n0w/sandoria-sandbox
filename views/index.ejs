@@ -1,0 +1,92 @@
+﻿<html>
+<head>
+<style>
+:root {
+  --header-height: 15%;
+  --right-width-wo-uom: 45;
+  --left-width-wo-uom: 25;
+  --right-width: calc(var(--right-width-wo-uom) * 1%);
+  --left-width: calc(var(--left-width-wo-uom) * 1%);
+  --content-width-wo-uom: calc(100 - var(--right-width-wo-uom) - var(--left-width-wo-uom));
+  --content-width:  calc(var(--content-width-wo-uom) * 1%);
+  --main-height: calc(98% - var(--header-height));
+}
+
+body {
+	margin: 0;
+}
+
+div {
+	border: 1px solid black;
+	background-color: white;
+}
+
+.all {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.top {
+	position: sticky;
+	width: 100%;
+	height: var(--header-height);
+	border-bottom: 1px solid black;
+}
+.top td {
+	border-bottom: 1px solid black;
+}
+.right {
+	width: 20%;
+	height: 100%;
+	border-left: 1px solid black;
+}
+.main {
+	height: var(--main-height);
+	width: 100%;
+	background-color: gray;
+	overflow: hidden;
+}
+.content {
+    width: var(--content-width);
+    height: 100%;
+    overflow-y: scroll;
+    padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
+    box-sizing: content-box; /* So the width will be 100% + 17px */
+}
+.left {
+	width: 15%;
+	height: 100%;
+	border-right: 1px solid black;
+}
+#top_menu {
+	float: left;
+}
+</style>
+</head>
+<body>
+	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+		<tr class="top">
+			<td colspan="2" id="top_menu">
+				<div class="top_menu_element" id="user">
+				<% if (user) { %>
+					<h2><%= user.name %></h2>
+				<% } else { %>
+					<a href="">Войти</a>
+				<% } %>
+				</div>
+			</td>
+			<td id="top_categories" style="border-left: 1px solid black;">
+			</td>
+		</tr>
+		<tr>
+			<td class="left">
+			</td>
+			<td class="sandbox" id="main">
+			</td>
+			<td class="right">
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

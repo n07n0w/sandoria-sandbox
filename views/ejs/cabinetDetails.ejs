@@ -1,0 +1,179 @@
+﻿<html>
+<head>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+<style>
+:root {
+  --header-height: 20%;
+  --right-width-wo-uom: 45;
+  --left-width-wo-uom: 25;
+  --right-width: calc(var(--right-width-wo-uom) * 1%);
+  --left-width: calc(var(--left-width-wo-uom) * 1%);
+  --content-width-wo-uom: calc(100 - var(--right-width-wo-uom) - var(--left-width-wo-uom));
+  --content-width:  calc(var(--content-width-wo-uom) * 1%);
+  --main-height: calc(98% - var(--header-height));
+  --border-radius: 25px;
+  --top-buttons-middle-width: 70%;
+}
+
+body {
+	margin: 0;
+}
+
+.all {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.top {
+	position: sticky;
+	width: 100%;
+	height: var(--header-height);
+	border-bottom: 1px solid black;
+}
+.top td {
+	border-bottom: 1px solid black;
+}
+.right {
+	width: 20%;
+	height: 100%;
+	border-left: 1px solid black;
+	vertical-align: top;
+}
+.main {
+	height: var(--main-height);
+	width: 100%;
+	background-color: gray;
+	overflow: hidden;
+}
+.content {
+    width: var(--content-width);
+    height: 100%;
+    overflow-y: scroll;
+    padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
+    box-sizing: content-box; /* So the width will be 100% + 17px */
+}
+.left {
+	width: 15%;
+	height: 100%;
+	border-right: 1px solid black;
+}
+#top_menu {
+<!--	float: left;-->
+}
+.top_menu_item {
+	width: 80px;
+	float: right;
+	text-align: center;
+	margin: 0 25px;
+}
+fieldset {
+	border: none;
+}
+.ui-widget input {
+    border-radius: var(--border-radius);
+    margin: 5px;
+    padding: 3px;
+    height: 40px;
+    text-indent: 10px;
+}
+.ui-widget.ui-widget-content {
+	border: none;
+}
+
+#dialog-form, div[aria-describedby="dialog-form"] {
+	border-radius: var(--border-radius);
+	height: fit-content;
+}
+.ui-dialog-titlebar {
+	background: transparent;
+	border: none;
+}
+#middle {
+	width: fit-content;
+	margin-left: 100px;
+}
+#logo {
+	width: fit-content;
+	float: left;
+}
+.float_left {
+	float: left;
+}
+.float_right {
+	float: right;
+}
+.margin_left_20 {
+	margin-left: 20px;
+}
+.topCategory {
+	margin: 7px;
+	float: left;
+	width: 25px;
+	height: 25px;
+}
+.topCategory img {
+	width: 25px;
+	height: 25px;
+}
+.images_hidden {
+	display: none;
+}
+.category_image {
+	max-width: 50px;
+	max-height: 100px;
+	float: left;
+	margin: 10px;
+}
+#container {
+	height: 100%;
+}
+title {
+	display: inline;
+	font-weight: bold;
+}
+.sandbox {
+	vertical-align: top;
+}
+.main {
+	width: 100%;
+	padding: 20px 40px;
+}
+</style>
+
+</head>
+<body>
+	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+		<tr class="top">
+			<td id="top_menu">
+				<div class="float_left">
+					<span>Личный кабинет</span><br/>
+					<span><a href="logout">Выйти из акаунта</a></span>
+				</div>
+				<div class="float_right">
+					<span><img src="/images/svg/account.svg"></span><br/>
+					<span><a href="/">Вернуться в песочницу</a></span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="sandbox" id="main">
+				<div class="float_left">
+					<span><a href="/cabinet">&larr; Назад</b></a></span>
+				</div>
+				<div class="float_right">
+					<span>Сессия для клиента: <div><%= sessionLink %></div></span>
+				</div>
+				<br/>
+				<div class="float_right">
+					<span>Просмотр сессии: <div><%= sessionViewLink %></div></span>
+				</div>
+				<div class="main">
+					<b><%= sandbox.name %></b>
+				</div>     
+			</td>
+		</tr>
+	</table>
+
+</body>
+</html>
