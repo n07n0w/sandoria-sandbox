@@ -679,8 +679,13 @@
 
 	window.addEventListener('resize', recalcSandboxSizes, true);
 
-	const updateCategoryLabel = function(label) {
+	const updateCategoryLabel = function(label, bold) {
 		$('#category_label').text( label );
+		if (bold) {
+			$('#category_label').css( "font-weight", "bold" );
+		} else {
+			$('#category_label').css( "font-weight", "normal" );
+		}
 	};
 
 	const categoryHoverIn = function() {
@@ -688,7 +693,11 @@
 //		$('#category_label').text( $(this).attr('cname') );
 	};
 	const categoryHoverOut = function() {
-		updateCategoryLabel((typeof selectedCategoryName !== 'undefined') ? selectedCategoryName : "");
+		if (typeof selectedCategoryName !== 'undefined') {
+			updateCategoryLabel(selectedCategoryName, true);
+		} else {
+			updateCategoryLabel("");
+		}
 //		$('#category_label').text( "" );
 	};
 
@@ -720,7 +729,7 @@
       unselectPreviousCategory();
       $("[cid="+categoryId+"]").addClass(selectedCategoryClassName);
       prevCategoryId = categoryId;
-	  updateCategoryLabel(categoryName);
+	  updateCategoryLabel(categoryName, true);
 	  selectedCategoryId = categoryId;
 	  selectedCategoryName = categoryName;
     }

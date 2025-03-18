@@ -15,7 +15,7 @@
   --content-width-wo-uom: calc(100 - var(--right-width-wo-uom) - var(--left-width-wo-uom));
   --content-width:  calc(var(--content-width-wo-uom) * 1%);
   --main-height: calc(98% - var(--header-height));
-  --border-radius: 25px;
+  --border-radius: 5px;
   --top-buttons-middle-width: 70%;
   --screenshot-width: 100px;
 /*  --screenshot-height: calc(calc(var(--screenshot-width) / 1px) * 5 / 7 * 1px);*/
@@ -140,6 +140,7 @@ body {
 }
 .cselected {
 	filter: invert(1);
+	border-radius: var(--border-radius);
 /*	background-color: #6F899B;*/
 	background-color: #907664;
 }
