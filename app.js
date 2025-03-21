@@ -20,18 +20,8 @@ console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 
+// Create express app
 var app = express();
-
-// Initialize database when the app starts
-if (process.env.NODE_ENV === 'production') {
-  console.log('Attempting to initialize database...');
-  initializeDatabase()
-    .then(() => console.log('Database initialized successfully'))
-    .catch(err => {
-      console.error('Failed to initialize database:', err);
-      // Don't crash the app if database init fails
-    });
-}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views/ejs'));
@@ -59,32 +49,53 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-app.use('/', require('./routes/index'));
-app.use('/users', require('./routes/users'));
-app.use('/register', require('./routes/register'));
-app.use('/auth', require('./routes/auth'));
-app.use('/image', require('./routes/image'));
-app.use('/cabinet', require('./routes/cabinet'));
-app.use('/session', require('./routes/session'));
-app.use('/s', require('./routes/s'));
+// Don't set up routes until database is initialized
+let routesInitialized = false;
 
+async function initializeApp() {
+    try {
+        if (process.env.NODE_ENV === 'production') {
+            console.log('Attempting to initialize database...');
+            await initializeDatabase();
+            console.log('Database initialized successfully');
+        }
 
+        if (!routesInitialized) {
+            console.log('Initializing routes...');
+            app.use('/', require('./routes/index'));
+            app.use('/users', require('./routes/users'));
+            app.use('/register', require('./routes/register'));
+            app.use('/auth', require('./routes/auth'));
+            app.use('/image', require('./routes/image'));
+            app.use('/cabinet', require('./routes/cabinet'));
+            app.use('/session', require('./routes/session'));
+            app.use('/s', require('./routes/s'));
+            routesInitialized = true;
+            console.log('Routes initialized successfully');
+        }
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-console.log(req);
-  next(createError(404));
-});
+        // catch 404 and forward to error handler
+        app.use(function(req, res, next) {
+            console.log('404 Not Found:', req.path);
+            next(createError(404));
+        });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-console.log(err);
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+        // error handler
+        app.use(function(err, req, res, next) {
+            console.error('Error occurred:', err);
+            res.locals.message = err.message;
+            res.locals.error = req.app.get('env') === 'development' ? err : {};
+            res.status(err.status || 500);
+            res.render('error');
+        });
 
-module.exports = app;
+        console.log('Application initialization completed successfully');
+        return true;
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        throw error;
+    }
+}
+
+// Export both the app and the initialization function
+module.exports = { app, initializeApp };
