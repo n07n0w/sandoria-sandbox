@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 function parseJawsDBUrl() {
 	const dbUrl = process.env.JAWSDB_MARIA_URL || process.env.JAWSDB_URL;
 	if (dbUrl) {
@@ -8,9 +10,9 @@ function parseJawsDBUrl() {
 			user: url.username,
 			password: url.password,
 			database: url.pathname.substring(1),
-			ssl: process.env.NODE_ENV === 'production' ? {
+			ssl: {
 				rejectUnauthorized: false
-			} : false
+			}
 		};
 	}
 	return null;
@@ -18,16 +20,19 @@ function parseJawsDBUrl() {
 
 const jawsConfig = parseJawsDBUrl();
 
+// Check if the host is AWS RDS
+const isAWSRDS = (host) => host && host.includes('.rds.amazonaws.com');
+
 module.exports = jawsConfig || {
-	host: process.env.DB_HOST || 'localhost',
-        port: process.env.DB_PORT || 3306,
-	user: process.env.DB_USER || 'sandboxu',
-	password: process.env.DB_PASSWORD || 'BuEAutVLFdVX',
-	database: process.env.DB_NAME || 'sandbox',
+	host: process.env.DB_HOST,
+	port: parseInt(process.env.DB_PORT, 10),
+	user: process.env.DB_USER,
+	password: process.env.DB_PASSWORD,
+	database: process.env.DB_NAME,
 	waitForConnections: true,
 	connectionLimit: 10,
 	queueLimit: 0,
-	ssl: process.env.NODE_ENV === 'production' ? {
+	ssl: isAWSRDS(process.env.DB_HOST) ? {
 		rejectUnauthorized: false
 	} : false
 };

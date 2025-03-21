@@ -1060,9 +1060,10 @@
 					<div id="top_categories">
 
 					<% 
-					let categoryLastIndex = categories.size - 1;
-					let currntCategoryIndex = 0;
-					for (let category of categories.values()) {
+					if (categories && categories.size > 0) {
+						let categoryLastIndex = categories.size - 1;
+						let currntCategoryIndex = 0;
+						for (let category of categories.values()) {
 					%>
 					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>">
 						<img src="<%= category.icon %>" title="<%= category.title %>" alt="<%= category.title %>"/>
@@ -1084,7 +1085,12 @@
 				<% 
 						++currntCategoryIndex;
 					}
-				%>
+					} else { 
+					%>
+						<div class="no-categories">
+							<p>No categories available at the moment.</p>
+						</div>
+					<% } %>
 
 					</div>
 					<div id="categoryImages">
