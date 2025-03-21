@@ -1,6 +1,7 @@
 function parseJawsDBUrl() {
-	if (process.env.JAWSDB_URL) {
-		const url = new URL(process.env.JAWSDB_URL);
+	const dbUrl = process.env.JAWSDB_MARIA_URL || process.env.JAWSDB_URL;
+	if (dbUrl) {
+		const url = new URL(dbUrl);
 		return {
 			host: url.hostname,
 			port: parseInt(url.port, 10),
