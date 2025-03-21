@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const initializeDatabase = require('./init-db');
 
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -17,6 +18,17 @@ var logger = require('morgan');
 
 
 var app = express();
+
+// Initialize database when the app starts
+if (process.env.NODE_ENV === 'production') {
+  console.log('Attempting to initialize database...');
+  initializeDatabase()
+    .then(() => console.log('Database initialized successfully'))
+    .catch(err => {
+      console.error('Failed to initialize database:', err);
+      // Don't crash the app if database init fails
+    });
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views/ejs'));
