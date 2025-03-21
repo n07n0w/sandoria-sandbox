@@ -3,6 +3,14 @@ const fs = require('fs').promises;
 const path = require('path');
 const config = require('./dbConfig');
 
+console.log('Database config loaded:', {
+    host: config.host,
+    port: config.port,
+    database: config.database,
+    user: config.user,
+    // password hidden for security
+});
+
 async function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -10,9 +18,12 @@ async function wait(ms) {
 async function tryConnect(config, retries = 5, delay = 5000) {
     for (let i = 0; i < retries; i++) {
         try {
+            console.log(`Connection attempt ${i + 1} of ${retries}...`);
             const connection = await mysql.createConnection(config);
+            console.log('Connection successful!');
             return connection;
         } catch (err) {
+            console.error(`Connection attempt ${i + 1} failed:`, err.message);
             if (i === retries - 1) throw err;
             console.log(`Failed to connect, retrying in ${delay/1000} seconds...`);
             await wait(delay);

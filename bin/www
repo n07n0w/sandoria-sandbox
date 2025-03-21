@@ -8,12 +8,15 @@ var app = require('../app');
 var debug = require('debug')('mysandbox:server');
 var http = require('http');
 
+console.log('Starting server...');
+
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
+console.log('Port set to:', port);
 
 /**
  * Create HTTP server.
@@ -28,6 +31,19 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+// Handle uncaught exceptions
+process.on('uncaughtException', function(err) {
+    console.error('Uncaught exception:', err);
+    console.error(err.stack);
+    process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', function(reason, promise) {
+    console.error('Unhandled Rejection at:', promise);
+    console.error('Reason:', reason);
+});
 
 /**
  * Normalize a port into a number, string, or false.

@@ -16,6 +16,9 @@ var logger = require('morgan');
 
 //const doctorService = require('./service/doctorService');
 
+console.log('Starting application...');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 
 var app = express();
 
