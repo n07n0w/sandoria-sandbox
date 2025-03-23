@@ -113,15 +113,13 @@ body {
 }
 
 #container {
-	border: 1px solid black;
+/*	border: 1px solid black;*/
 }
 #sandbox {
 	vertical-align: middle;
 }
 .rsidecontent {
 	width: 390px;
-/*	height: 90%;*/
-/*	border: 1px dotted black;*/
 	margin: auto;
 }
 #category_label {
@@ -139,10 +137,8 @@ body {
 	box-shadow: none;
 }
 .cselected {
-	filter: invert(1);
 	border-radius: var(--border-radius);
-/*	background-color: #6F899B;*/
-	background-color: #907664;
+	background-color: #6F899B;
 }
 .icon:hover {
 	box-shadow: none;
@@ -335,4 +331,7 @@ body {
 	vertical-align: top;
 	text-align: left;
 	display: flex;
+}
+.shadow{
+	box-shadow: -2px -2px 2px #6F899B4D;
 }

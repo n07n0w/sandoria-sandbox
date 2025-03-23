@@ -29,9 +29,9 @@ module.exports = jawsConfig || {
 	user: process.env.DB_USER,
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_NAME,
-	waitForConnections: true,
-	connectionLimit: 10,
-	queueLimit: 0,
+	waitForConnections: process.env.DB_waitForConnections,
+	connectionLimit: process.env.DB_connectionLimit,
+	queueLimit: process.env.DB_queueLimit,
 	ssl: isAWSRDS(process.env.DB_HOST) ? {
 		rejectUnauthorized: false
 	} : false

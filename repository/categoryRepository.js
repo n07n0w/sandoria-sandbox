@@ -12,7 +12,6 @@ CategoryRepository = function() {
 			try {
 				var sql = "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryImage ci ON ci.categoryId = c.id";
 				const [results, fields] = await pool.execute(sql);
-				
 				if (!results || results.length === 0) {
 					logger.info(["No categories found in database, using empty map"])
 					this.categories = new Map();
@@ -23,7 +22,7 @@ CategoryRepository = function() {
 						let image = {"id": category.imageId, "image": category.image, "title": category.imageTitle};
 						let existingCategory = categories.get(categoryId);
 						if (typeof existingCategory === 'undefined') {
-							let cat = { "name": category.name, "id": category.id, "icon": category.icon, "title": category.title, "images": [image] }
+							let cat = { "name": category.name, "id": category.id, "icon": category.icon, "invert_icon": category.invert_icon, "title": category.title, "images": [image] }
 							categories.set(categoryId, cat);
 						} else {
 							existingCategory.images.push(image);

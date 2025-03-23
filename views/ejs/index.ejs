@@ -403,8 +403,6 @@
 			let newImageY = stageMiddleY - (imgHeight >> 1);
 			var pic = new Konva.Image({
 				image: image,
-//				x: image.x,
-//				y: image.y,
 				x: newImageX,
 				y: newImageY,
 				width: imgWidth,
@@ -454,7 +452,6 @@
 
 	function skewSelected() {
 		transformer.nodes().forEach(function (currentValue, index, arr) {
-//			currentValue.offsetX(currentValue.width() / 2);
 			currentValue.to({
 				scaleX: -currentValue.scaleX(),
 			});
@@ -563,17 +560,6 @@
 		backgroundImage.onload = function() {
 			backgroundImage.width = stage.width();
 			backgroundImage.height = stage.height();
-/*
-			background = new Konva.Rect({
-				x: 0,
-				y: 0,
-				width: stage.width(),
-				height: stage.height(),
-				fillPatternImage: backgroundImage,
-//				image: backgroundImage,
-				listening: false,
-			});
-*/
 
 			background = new Konva.Image({
 				x: 0,
@@ -584,8 +570,8 @@
 				strokeScaleEnabled: false
 			});
 			background.image(backgroundImage);
-			console.log(background.zIndex());
-			background.zIndex(0);
+//			console.log(background.zIndex());
+//			background.zIndex(0);
 			backgroundLayer.add(background);
 			recalcSandboxSizes();
 		}
@@ -627,48 +613,21 @@
 		
 		element = document.getElementById('rside');
 		element.width  = rightSideWidth + 'px';
-/* */
+
 		element = document.getElementById('categoryImages');
-//		let categoryImageHeight = screenHeight - 164;
 		let categoryImageHeight = screenHeight - 184;
 		element.style.height = categoryImageHeight + 'px';
 		element.style.width = (categoryImageMinPanelWidth) + 'px';
 
 		var slider = $("#categoryImageSlider");
 		slider.css('top', (categoryImageHeight >> 1) + 'px');
-//		slider.css('right', (rightSideWidth - 20) + 'px');
 
-/* */
-/*
-		element = document.getElementsByClassName('user_section')[0];
-		var lsideElement = document.getElementById('lside');
-		var logoElement  = document.getElementsByClassName('logo')[0];
-		var cpElement    = document.getElementsByClassName('control_panel')[0];
-		let calculatedUserSectionHeight = (lsideElement.scrollHeight - logoElement.scrollHeight - cpElement.scrollHeight) + 'px';
-		element.style.height = calculatedUserSectionHeight;
-		element.style.lineHeight = calculatedUserSectionHeight;
-*/		
 		if (typeof stage !== 'undefined') {
 			stage.width(sandboxWidth);
 			stage.height(sandboxHeight);
-/*
-			let stageContainer = stage.container();
-			stageContainer.style.width(sandboxWidth);
-			stageContainer.style.height(sandboxHeight);
-*/
 			if (typeof background !== 'undefined') {
-//				backgroundImage.width = sandboxWidth + 'px';
-//				backgroundImage.height = sandboxHeight + 'px';
 				backgroundImage.width = sandboxWidth;
 				backgroundImage.height = sandboxHeight;
-/*
-				background.setAttrs({
-					scaleX: 1,
-					scaleY: 1,
-					width: sandboxWidth,
-					height: sandboxHeight,
-				});
-*/
 				background.width(sandboxWidth);
 				background.height(sandboxHeight);
 			}
@@ -690,7 +649,6 @@
 
 	const categoryHoverIn = function() {
 		updateCategoryLabel($(this).attr('cname'));
-//		$('#category_label').text( $(this).attr('cname') );
 	};
 	const categoryHoverOut = function() {
 		if (typeof selectedCategoryName !== 'undefined') {
@@ -698,7 +656,6 @@
 		} else {
 			updateCategoryLabel("");
 		}
-//		$('#category_label').text( "" );
 	};
 
     const notifyCategorySelect = function (jsonData) {
@@ -707,32 +664,34 @@
 
     const selectedCategoryClassName = "cselected";
 
-    const unselectPreviousCategory = function () {
-      if (prevCategoryId) {
-        $("[cid="+prevCategoryId+"]").removeClass(selectedCategoryClassName);
-		updateCategoryLabel("");
-      }
-    }
+	const unselectPreviousCategory = function () {
+		if (prevCategoryId) {
+			let catElement = $("[cid="+prevCategoryId+"]");
+			catElement.removeClass(selectedCategoryClassName);
+			catElement.children('img').attr("src", catElement.attr("icon"));
+			updateCategoryLabel("");
+		}
+	}
 
     var prevShownCategoryId = "01";
     function showImages(catecory) {
-//		$("#images_" + prevShownCategoryId).hide();
 		$("#images_" + prevShownCategoryId).removeClass('images_visible');
 		prevShownCategoryId = catecory;
-//		$("#images_" + prevShownCategoryId).show();
 		$("#images_" + prevShownCategoryId).addClass('images_visible');
     }
 
 	var selectedCategoryId;
 	var selectedCategoryName;
-    const selectCategory = function (categoryId, categoryName) {
-      unselectPreviousCategory();
-      $("[cid="+categoryId+"]").addClass(selectedCategoryClassName);
-      prevCategoryId = categoryId;
-	  updateCategoryLabel(categoryName, true);
-	  selectedCategoryId = categoryId;
-	  selectedCategoryName = categoryName;
-    }
+	const selectCategory = function (categoryId, categoryName) {
+		unselectPreviousCategory();
+		let catElement = $("[cid="+categoryId+"]");
+		catElement.addClass(selectedCategoryClassName);
+		catElement.children("img").attr("src", catElement.attr("inverticon"));
+		prevCategoryId = categoryId;
+		updateCategoryLabel(categoryName, true);
+		selectedCategoryId = categoryId;
+		selectedCategoryName = categoryName;
+	}
 
     const categorySelect = function (jsonObject, notify = false) {
       selectCategory(jsonObject['categoryId'], jsonObject['categoryName']);
@@ -773,7 +732,6 @@
 	};
 
 	const showInvitePopup = function(inviteJson) {
-//		$("#invitelink").text(inviteJson.sessionLink);
 		invitePopupDialog.dialog( "open" );
 	};
 
@@ -923,7 +881,6 @@
       return valid;
     }
 
-//	var imagesRightPanel = $("#categoryImages");
 	var imagesRightPanel = $("#categoryImagesHolder");
 	$( ".images_hidden" ).each(function(){
 		$(this).remove();
@@ -945,23 +902,16 @@
     });
 
 	invitePopupDialog = $( "#invite-dialog" ).dialog({
-      autoOpen: false,
-      height: 453,
-      width: 643,
-/*
-      close: function() {
-        form[ 0 ].reset();
-        allFields.removeClass( "ui-state-error" );
-      }
-*/
-    });
+		autoOpen: false,
+		height: 453,
+		width: 643,
+	});
 
     $(".topCategory").hover( categoryHoverIn, categoryHoverOut );
 
     $(".topCategory").on("click", function() {
       var categoryId = $(this).attr("cid");
       var categoryName = $(this).attr("cname");
-//	  $(this).addClass('cselected');
       categorySelect(categorySelectEvent(categoryId, categoryName), true);
     });
 
@@ -981,16 +931,16 @@
 	$("#categoryImageSlider").click(function(){
 		$(this).toggleClass("slideLeft");
 		$(this).toggleClass("slideRight");
-//		$(this)
 		if (0 == categoryImagesSate) {
 			$("#categoryImages").animate({width: categoryImageMaxPanelWidth + 'px'}, "fast");
 			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$("#categoryImages").addClass('shadow');
 		} else {
 			$("#categoryImages").animate({width: categoryImageMinPanelWidth + 'px'}, "fast");
 			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$("#categoryImages").removeClass('shadow');
 		}
 		categoryImagesSate ^= 1;
-//		$("#iterations").slideToggle("slow");
 	});
 	initStage();
 	recalcSandboxSizes();
@@ -1065,8 +1015,8 @@
 						let currntCategoryIndex = 0;
 						for (let category of categories.values()) {
 					%>
-					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>">
-						<img src="<%= category.icon %>" title="<%= category.title %>" alt="<%= category.title %>"/>
+					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>" icon="<%= category.icon %>" inverticon="<%= category.invert_icon %>">
+						<img src="<%= category.icon %>"/>
 					</span>
 						<% if (currntCategoryIndex < categoryLastIndex) { %>
 						<span class="category_delimiter">&nbsp;</span>
@@ -1094,13 +1044,8 @@
 
 					</div>
 					<div id="categoryImages">
-<!--
-						<span id="categoryImageSlider" class="slideLeft"></span>
--->
 						<div id="categoryImagesHolder" style="position: relative;">
-<!-- -->
 							<span id="categoryImageSlider" class="slideLeft"></span>
-<!-- -->
 						</div>
 					</div>
 				</div>

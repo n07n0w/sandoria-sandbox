@@ -26,27 +26,28 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(250) NOT NULL DEFAULT '',
   `icon` varchar(250) NOT NULL DEFAULT '',
+  `invert_icon` varchar(250) NOT NULL DEFAULT '',
   `title` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table sandbox.categories: ~15 rows (approximately)
-REPLACE INTO `categories` (`id`, `name`, `icon`, `title`) VALUES
-	(1, 'Люди', '/images/svg/categories/cat01/icon.svg', 'Люди'),
-	(2, 'Мебель', '/images/svg/categories/cat02/icon.svg', 'Мебель'),
-	(3, 'Архитектура', '/images/svg/categories/cat03/icon.svg', 'Архитектура'),
-	(4, 'Транспорт', '/images/svg/categories/cat04/icon.svg', 'Транспорт'),
-	(5, 'Военные', '/images/svg/categories/cat05/icon.svg', 'Военные'),
-	(6, 'Медицина', '/images/svg/categories/cat06/icon.svg', 'Медицина'),
-	(7, 'Животные', '/images/svg/categories/cat07/icon.svg', 'Животные'),
-	(8, 'Волшебные существа', '/images/svg/categories/cat08/icon.svg', 'Волшебные существа'),
-	(9, 'Динозавры', '/images/svg/categories/cat09/icon.svg', 'Динозавры'),
-	(10, 'Смерть', '/images/svg/categories/cat10/icon.svg', 'Смерть'),
-	(11, 'Стихии', '/images/svg/categories/cat11/icon.svg', 'Стихии'),
-	(12, 'Природа', '/images/svg/categories/cat12/icon.svg', 'Природа'),
-	(13, 'Соединения и разделители', '/images/svg/categories/cat13/icon.svg', 'Соединения и разделители'),
-	(14, 'Стройка', '/images/svg/categories/cat14/icon.svg', 'Стройка'),
-	(15, 'Еда', '/images/svg/categories/cat15/icon.svg', 'Еда');
+REPLACE INTO `categories` (`id`, `name`, `icon`, `invert_icon`, `title`) VALUES
+	(1, 'Люди', '/images/svg/categories/cat01/icon.svg', '/images/svg/categories/cat01/icon_inv.svg', 'Люди'),
+	(2, 'Мебель', '/images/svg/categories/cat02/icon.svg', '/images/svg/categories/cat02/icon_inv.svg', 'Мебель'),
+	(3, 'Архитектура', '/images/svg/categories/cat03/icon.svg', '/images/svg/categories/cat03/icon_inv.svg', 'Архитектура'),
+	(4, 'Транспорт', '/images/svg/categories/cat04/icon.svg', '/images/svg/categories/cat04/icon_inv.svg', 'Транспорт'),
+	(5, 'Военные', '/images/svg/categories/cat05/icon.svg', '/images/svg/categories/cat05/icon_inv.svg', 'Военные'),
+	(6, 'Медицина', '/images/svg/categories/cat06/icon.svg', '/images/svg/categories/cat06/icon_inv.svg', 'Медицина'),
+	(7, 'Животные', '/images/svg/categories/cat07/icon.svg', '/images/svg/categories/cat07/icon_inv.svg', 'Животные'),
+	(8, 'Волшебные существа', '/images/svg/categories/cat08/icon.svg', '/images/svg/categories/cat08/icon_inv.svg', 'Волшебные существа'),
+	(9, 'Динозавры', '/images/svg/categories/cat09/icon.svg', '/images/svg/categories/cat09/icon_inv.svg', 'Динозавры'),
+	(10, 'Смерть', '/images/svg/categories/cat10/icon.svg', '/images/svg/categories/cat10/icon_inv.svg', 'Смерть'),
+	(11, 'Стихии', '/images/svg/categories/cat11/icon.svg', '/images/svg/categories/cat11/icon_inv.svg', 'Стихии'),
+	(12, 'Природа', '/images/svg/categories/cat12/icon.svg', '/images/svg/categories/cat12/icon_inv.svg', 'Природа'),
+	(13, 'Соединения и разделители', '/images/svg/categories/cat13/icon.svg', '/images/svg/categories/cat13/icon_inv.svg', 'Соединения и разделители'),
+	(14, 'Стройка', '/images/svg/categories/cat14/icon.svg', '/images/svg/categories/cat14/icon_inv.svg', 'Стройка'),
+	(15, 'Еда', '/images/svg/categories/cat15/icon.svg', '/images/svg/categories/cat15/icon_inv.svg', 'Еда');
 
 -- Dumping structure for table sandbox.categoryimage
 DROP TABLE IF EXISTS `categoryimage`;
@@ -235,13 +236,17 @@ CREATE TABLE IF NOT EXISTS `sandboxes` (
   `createdt` datetime DEFAULT uuid(),
   PRIMARY KEY (`id`),
   KEY `Index 2` (`ownerId`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table sandbox.sandboxes: ~3 rows (approximately)
+-- Dumping data for table sandbox.sandboxes: ~7 rows (approximately)
 REPLACE INTO `sandboxes` (`id`, `name`, `ownerId`, `sessionUuid`, `uuid`, `createdt`) VALUES
 	(1, 'Test1', 1, '0a6bd202-afd1-4fb5-9f41-f416a8376c9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', '0000-00-00 00:00:00'),
 	(2, 'erteportipo', 1, 'd686b8e4-65a2-4aaf-96b5-5fd5b7b23649', '68de3e36-e8a0-11ef-ad91-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(58, NULL, NULL, '4000fa7c-c5af-4a02-86cc-44689fe96b4f', 'bf1f48ab-ff9e-11ef-9faa-e840f2c38b9b', '0000-00-00 00:00:00');
+	(58, NULL, NULL, '4000fa7c-c5af-4a02-86cc-44689fe96b4f', 'bf1f48ab-ff9e-11ef-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(59, NULL, NULL, 'c0374ab0-71df-44a2-bbc8-53442b781356', '7f97bb46-041b-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(60, NULL, NULL, '54c7e7e2-3884-4321-af0f-2e57d687f03e', 'b7b39334-041c-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(61, NULL, NULL, 'da16f20a-a0c1-43a9-9fde-346c46edbbc5', 'fea66817-0421-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(62, NULL, NULL, 'ea93b583-95ad-40c3-9bc6-8daaf5496a28', '05eb7fc5-0422-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00');
 
 -- Dumping structure for table sandbox.sessionimage
 DROP TABLE IF EXISTS `sessionimage`;
