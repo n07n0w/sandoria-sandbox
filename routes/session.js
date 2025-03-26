@@ -3,6 +3,8 @@ var router = express.Router();
 
 const pool = require('../dbConnection');
 const logger = require('../logger');
+const constants = require('../constants');
+
 const CategoryRepository = require('../repository/categoryRepository').CategoryRepository;
 var categoryRepository = new CategoryRepository();
 
@@ -40,7 +42,8 @@ const handleGetSessionView = async (req, res, next) => {
 const handlePostSessionInit = async (req, res, next) => {
 	var sandboxInsertResult = await sandboxRepository.insertNewSandbox(null, null);
 	var newSandbox = await sandboxRepository.getSandboxById(sandboxInsertResult.insertId);
-	var sessionLink = configurationDB.configuration.servername.concat("/s/", newSandbox.uuid);
+	var sessionLink = constants.BASE_URL.concat("/s/", newSandbox.uuid);
+
 	res.json({
 		sessionId: newSandbox.sessionUuid,
 		opponentSessionId: newSandbox.uuid,

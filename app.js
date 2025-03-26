@@ -3,13 +3,15 @@ var express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const initializeDatabase = require('./init-db');
-
+const constants = require('./constants');
+const baseUrl = constants.BASE_URL;
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
+console.log('Base URL:', baseUrl);
 console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 
 // Create express app
