@@ -6,33 +6,6 @@ const logger = require('../logger');
 const CategoryRepository = require('../repository/categoryRepository').CategoryRepository;
 var categoryRepository = new CategoryRepository();
 
-/*
-async function getCategories() {
-	logger.info(["getCategories :: START"])
-        var categories = {};
-	try {
-		var sql = "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryImage ci ON ci.categoryId = c.id";
-		const [results, fields] = await pool.execute(sql);
-		logger.info(results);
-		for (let category of results) {
-			let categoryId = category.id;
-			let image = {"id": category.imageId, "image": category.image, "title": category.imageTitle};
-			if (typeof categories[categoryId] === 'undefined') {
-				let cat = { "name": category.name, "id": category.id, "icon": category.icon, "title": category.title, "images": [image] }
-				categories[categoryId] = cat;
-			} else {
-				categories[categoryId].images.push(image);
-			}
-		}
-		logger.info(["getCategories :: END"])
-		return categories;
-	} catch (error) {
-		logger.error('getCategories ERROR:', error);
-		return null;
-	}
-}
-*/
-
 async function getSessionIdByOpponentSessionId(opponentSessionId) {
 	logger.info(["getSessionIdByOpponentSessionId :: START"], opponentSessionId)
 	try {
@@ -52,7 +25,6 @@ async function getSessionIdByOpponentSessionId(opponentSessionId) {
 const handleGetSession = async (req, res, next) => {
 	var sessionId = req.params.sessionId;
 	var opponentSessionId = req.params.opponentSessionId;
-//	var categories = await getCategories();
 	var categories = await categoryRepository.getCategories();
         var sessionId = await getSessionIdByOpponentSessionId(opponentSessionId);
         if (!sessionId) return res.status(400).json({ 'message': 'Cannot find appropriate session' });

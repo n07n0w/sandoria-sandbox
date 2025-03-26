@@ -5,11 +5,6 @@ const pool = require('../dbConnection');
 const logger = require('../logger');
 
 const cabinetController = require('../controllers/cabinetController');
-/*
-const sandboxesDB = {
-    sandboxes: require('../model/sandboxes.json')
-}
-*/
 
 const configurationDB = {
     configuration: require('../model/configuration.json')
@@ -66,7 +61,6 @@ const handleGetCabinet = async (req, res) => {
 	var user = req.session.user;
 	var cabinetUuid = req.params.cabinetUuid;
 	console.log(cabinetUuid);
-//  var sandbox = sandboxesDB.sandboxes.find(sandbox => sandbox.uuid === cabinetUuid);
 	var sandbox = await getSandboxByUuid(cabinetUuid);
 	console.log(sandbox);
 	if (!sandbox) return res.sendStatus(404); //Unauthorized 

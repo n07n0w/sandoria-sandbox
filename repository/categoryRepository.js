@@ -10,7 +10,7 @@ CategoryRepository = function() {
 			logger.info(["Categories cache not init. Loading categories from database."])
 			var categories = new Map();
 			try {
-				var sql = "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryImage ci ON ci.categoryId = c.id";
+				var sql = "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryimage ci ON ci.categoryId = c.id";
 				const [results, fields] = await pool.execute(sql);
 				if (!results || results.length === 0) {
 					logger.info(["No categories found in database, using empty map"])
