@@ -402,5 +402,9 @@ body {
 	left: 12px;
     display: flex;
     justify-content: center;
-    align-items: center;	box-shadow: 0px 3px 3px #6F899B33;
+    align-items: center;
+	box-shadow: 0px 3px 3px #6F899B33;
+}
+.homeBtn:hover {
+	box-shadow: none;
 }
