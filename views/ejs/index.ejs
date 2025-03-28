@@ -165,8 +165,6 @@
 	const sendCanvasImageToServer = function(data) {
 		let cnv = $('canvas')[0];
 		let sessionId = data['sessionId'];
-//		let dataURL = cnv.toDataURL();
-////		let dataURL = cnv.toDataURL('image/svg+xml');
 		let dataURL = stage.toDataURL();
 		$.ajax({
 			type: "POST",
@@ -412,9 +410,10 @@
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
 			pic.on('dragstart', function () {
-				this.moveToTop();
+//				this.moveToTop();
 			});
 			pic.on('click', function (evt) {
+//				this.moveToTop();
 				let target = evt.target;
 				transformer.nodes([target]);
 			});
@@ -461,6 +460,17 @@
 				notifySkewSelected(event);
 			}
 		});
+	}
+
+	function removeAllConfirmation() {
+		showPopupDialog("#clearall-confirm-dialog");
+	}
+
+	function closeClearConfirmationDialog(remove) {
+		closePopupDialog("#clearall-confirm-dialog");
+		if (remove) {
+			removeAll();
+		}
 	}
 
 	function removeAll() {
@@ -519,9 +529,13 @@
 
 		transformer = new Konva.Transformer({
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+			borderStroke: '#244A65',
+			anchorStroke: '#244A65',
+			shouldOverdrawWholeArea: true,
 		});
 
 		transformer.on('transform', function(evt) {
+			forceUpdate();
 			if (notifyViewer) {
 				var event = transformEvent(evt);
 				notifyTransform(event);
@@ -554,7 +568,6 @@
 		stage.add(backgroundLayer, sandboxLayer);
 
 		backgroundImage = new Image();
-//		backgroundImage.src = "/images/sandbox/sand.png";
 		backgroundImage.src = "/images/sandbox/sandbox.jpg";
 
 		backgroundImage.onload = function() {
@@ -570,8 +583,6 @@
 				strokeScaleEnabled: false
 			});
 			background.image(backgroundImage);
-//			console.log(background.zIndex());
-//			background.zIndex(0);
 			backgroundLayer.add(background);
 			recalcSandboxSizes();
 		}
@@ -617,10 +628,11 @@
 		element = document.getElementById('categoryImages');
 		let categoryImageHeight = screenHeight - 184;
 		element.style.height = categoryImageHeight + 'px';
-		element.style.width = (categoryImageMinPanelWidth) + 'px';
+		element.style.width = $('.rsidecontent').width() + 'px';
 
+		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
-		slider.css('top', (categoryImageHeight >> 1) + 'px');
+		slider.css('top', ((categoryImageHeight >> 1) - (topCategoriesHeight >> 1) ) + 'px');
 
 		if (typeof stage !== 'undefined') {
 			stage.width(sandboxWidth);
@@ -810,6 +822,47 @@
 		return true;
 	}; // END OF function launchPeer
 
+	const getElementWidth = function(element) {
+		let width = element.attr('width');
+		if (!width) {
+			width = element.css('width');
+		}
+		if (!width) {
+			width = element.width();
+		}
+		return width;
+	}
+
+	const getElementHeight = function(element) {
+		let height = element.attr('height');
+		if (!height) {
+			height = element.css('height');
+		}
+		if (!height) {
+			height = element.height();
+		}
+		return height;
+	}
+
+	const closePopupDialog = function(popupId) {
+		let element = $(popupId);
+		element.removeClass('popup');
+		element.hide();
+	}
+
+	const showPopupDialog = function(popupId) {
+		let screenOuterWidth  = window.outerWidth;
+		let screenOuterHeight = window.outerHeight;
+		let element = $(popupId);
+		let elementWidth  = getElementWidth(element);
+		let elementHeight = getElementHeight(element);
+		let elTop  = (screenOuterHeight / 2 - elementHeight / 2);
+		let elLeft = (screenOuterWidth / 2  - elementWidth / 2);
+		element.hide();
+		element.addClass('popup');
+		element.css({top: elTop, left: elLeft, width: elementWidth + 'px', height: elementHeight + 'px'});
+		element.show();
+	};
 
   $( function() {
     var dialog, form,
@@ -956,7 +1009,7 @@
 				<div class="logo">
 					<img src="/images/sandbox/logo.svg" width="100px" height="100px"/>
 					<h2 style="color: #244A65">Sandoria</h2>
-					<p class="slogan" style="color: #244A65">Песочная терапия онлайн</p>
+					<span class="slogan" style="color: #244A65">Песочная терапия онлайн</span>
 				</div>
 				<div class="control_panel">
 					<p class="control_line" onclick="levelDown()">
@@ -975,7 +1028,7 @@
 					<p class="control_line" onclick="removeSelected()">
 						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
 					</p>
-					<p class="control_line" onclick="removeAll()">
+					<p class="control_line" onclick="removeAllConfirmation()">
 						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>Очистить все
 					</p>
 				</div>
@@ -1018,10 +1071,6 @@
 					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>" icon="<%= category.icon %>" inverticon="<%= category.invert_icon %>">
 						<img src="<%= category.icon %>"/>
 					</span>
-						<% if (currntCategoryIndex < categoryLastIndex) { %>
-						<span class="category_delimiter">&nbsp;</span>
-						<% } %>
-					
 					<div id="images_<%= category.id %>" class="images_hidden">
 					<%
 						let lastImageIndex = category.images.length - 1;
@@ -1065,10 +1114,29 @@
 	</div>
 	<div class="spaces" style="height: 32px;">&nbsp;</div>
 	<div class="halign_center">
-		<div class="inviteBtn btn1 mauto">
+		<div class="inviteBtn btn1 mauto" onclick="closeInviteDialog();">
 			<span>
-				<p><a href="#" onclick="closeInviteDialog();">Закрыть</a></p>
+				<p><a href="#">Закрыть</a></p>
 			</span>
+		</div>
+	</div>
+</div>
+
+<div id="clearall-confirm-dialog" width="437" height="272" style="display: none">
+	<div class="confirm-dialog-content">
+		<div class="halign_center">
+			<span class="invitepbс">Очистить&nbsp;</span><span class="invitepb">&nbsp;песочницу</span>
+			<div class="spaces" style="height: 16px;">&nbsp;</div>
+			<div class="fs18">Вы действительно хотите удалить все объекты из песочницы?</div>
+		</div>
+		<div class="spaces" style="height: 32px;">&nbsp;</div>
+		<div class="halign_center flex_cg_32">
+			<div class="flexbtn_128_56 btn2 mauto" onclick="closeClearConfirmationDialog(true);">
+				<span>Да</span>
+			</div>
+			<div class="flexbtn_128_56 btn1 mauto" onclick="closeClearConfirmationDialog(false);">
+				<span>Нет</span>
+			</div>
 		</div>
 	</div>
 </div>

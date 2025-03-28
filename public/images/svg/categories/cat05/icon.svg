@@ -1,17 +1,17 @@
-<svg width="35" height="24" viewBox="0 0 35 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_346_203)">
-<path d="M29.3496 23.0059H5.44667C3.25863 23.0059 1.48486 21.2241 1.48486 19.0262C1.48486 16.8282 3.25863 15.0464 5.44667 15.0464H29.3496C31.5376 15.0464 33.3114 16.8282 33.3114 19.0262C33.3114 21.2241 31.5376 23.0059 29.3496 23.0059Z" stroke="black" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M6.29395 14.9874V11.074M6.29395 11.074H28.5025V15.0538M6.29395 11.074V7.02066H10.7714V11.074V4.97375H20.7935C22.9428 4.97375 24.6853 6.72417 24.6853 8.88318V11.074M33.3115 1.4099L23.7911 6.00397M11.6526 0.994019H21.163M13.2301 0.994019H19.5854V4.97375H13.2301V0.994019Z" stroke="black" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="5.5002" cy="19" r="1.3" fill="black"/>
-<circle cx="10.1003" cy="19" r="1.3" fill="black"/>
-<circle cx="14.7004" cy="19" r="1.3" fill="black"/>
-<circle cx="19.3" cy="19" r="1.3" fill="black"/>
-<circle cx="23.9001" cy="19" r="1.3" fill="black"/>
-<circle cx="28.5002" cy="19" r="1.3" fill="black"/>
+<svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_896_502)">
+<path d="M25.4552 21.0889H4.36436C2.43374 21.0889 0.868652 19.4556 0.868652 17.4408C0.868652 15.426 2.43374 13.7927 4.36436 13.7927H25.4552C27.3858 13.7927 28.9509 15.426 28.9509 17.4408C28.9509 19.4556 27.3858 21.0889 25.4552 21.0889Z" stroke="#244A65" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.11133 13.7387V10.1514M5.11133 10.1514H24.7071V13.7995M5.11133 10.1514V6.4358H9.06206V10.1514V4.55947H17.905C19.8015 4.55947 21.339 6.16402 21.339 8.1431V10.1514M28.9503 1.2926L20.55 5.50383M9.83951 0.911377H18.2311M11.2315 0.911377H16.8391V4.55947H11.2315V0.911377Z" stroke="#244A65" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="4.41171" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
+<ellipse cx="8.47079" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
+<ellipse cx="12.5299" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
+<ellipse cx="16.5885" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
+<ellipse cx="20.6471" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
+<ellipse cx="24.7057" cy="17.4165" rx="1.14706" ry="1.19167" fill="#244A65"/>
 </g>
 <defs>
-<clipPath id="clip0_346_203">
-<rect width="34" height="24" fill="white" transform="translate(0.5)"/>
+<clipPath id="clip0_896_502">
+<rect width="30" height="22" fill="white"/>
 </clipPath>
 </defs>
 </svg>

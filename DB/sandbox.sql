@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `categoryimage` (
   `title` varchar(350) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `Index 2` (`categoryId`)
-) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=226 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table sandbox.categoryimage: ~162 rows (approximately)
+-- Dumping data for table sandbox.categoryimage: ~225 rows (approximately)
 REPLACE INTO `categoryimage` (`id`, `categoryId`, `image`, `title`) VALUES
 	(1, 1, '/images/svg/categories/cat01/img1.svg', NULL),
 	(2, 1, '/images/svg/categories/cat01/img2.svg', NULL),
@@ -223,7 +223,70 @@ REPLACE INTO `categoryimage` (`id`, `categoryId`, `image`, `title`) VALUES
 	(159, 14, '/images/svg/categories/cat14/img38.svg', NULL),
 	(160, 14, '/images/svg/categories/cat14/img39.svg', NULL),
 	(161, 14, '/images/svg/categories/cat14/img40.svg', NULL),
-	(162, 14, '/images/svg/categories/cat14/img41.svg', NULL);
+	(162, 14, '/images/svg/categories/cat14/img41.svg', NULL),
+	(163, 13, '/images/svg/categories/cat13/img01.svg', NULL),
+	(164, 13, '/images/svg/categories/cat13/img02.svg', NULL),
+	(165, 13, '/images/svg/categories/cat13/img03.svg', NULL),
+	(166, 13, '/images/svg/categories/cat13/img04.svg', NULL),
+	(167, 13, '/images/svg/categories/cat13/img05.svg', NULL),
+	(168, 13, '/images/svg/categories/cat13/img06.svg', NULL),
+	(169, 13, '/images/svg/categories/cat13/img07.svg', NULL),
+	(170, 13, '/images/svg/categories/cat13/img08.svg', NULL),
+	(171, 13, '/images/svg/categories/cat13/img09.svg', NULL),
+	(172, 13, '/images/svg/categories/cat13/img10.svg', NULL),
+	(173, 13, '/images/svg/categories/cat13/img11.svg', NULL),
+	(174, 13, '/images/svg/categories/cat13/img12.svg', NULL),
+	(175, 13, '/images/svg/categories/cat13/img13.svg', NULL),
+	(176, 13, '/images/svg/categories/cat13/img14.svg', NULL),
+	(177, 13, '/images/svg/categories/cat13/img15.svg', NULL),
+	(178, 13, '/images/svg/categories/cat13/img16.svg', NULL),
+	(179, 13, '/images/svg/categories/cat13/img17.svg', NULL),
+	(180, 13, '/images/svg/categories/cat13/img18.svg', NULL),
+	(181, 13, '/images/svg/categories/cat13/img19.svg', NULL),
+	(182, 13, '/images/svg/categories/cat13/img20.svg', NULL),
+	(183, 13, '/images/svg/categories/cat13/img21.svg', NULL),
+	(184, 13, '/images/svg/categories/cat13/img22.svg', NULL),
+	(185, 13, '/images/svg/categories/cat13/img23.svg', NULL),
+	(186, 13, '/images/svg/categories/cat13/img24.svg', NULL),
+	(187, 13, '/images/svg/categories/cat13/img25.svg', NULL),
+	(188, 13, '/images/svg/categories/cat13/img26.svg', NULL),
+	(189, 13, '/images/svg/categories/cat13/img27.svg', NULL),
+	(190, 13, '/images/svg/categories/cat13/img28.svg', NULL),
+	(191, 13, '/images/svg/categories/cat13/img29.svg', NULL),
+	(192, 13, '/images/svg/categories/cat13/img30.svg', NULL),
+	(193, 13, '/images/svg/categories/cat13/img31.svg', NULL),
+	(194, 13, '/images/svg/categories/cat13/img32.svg', NULL),
+	(195, 13, '/images/svg/categories/cat13/img33.svg', NULL),
+	(196, 13, '/images/svg/categories/cat13/img34.svg', NULL),
+	(197, 13, '/images/svg/categories/cat13/img35.svg', NULL),
+	(198, 13, '/images/svg/categories/cat13/img36.svg', NULL),
+	(199, 13, '/images/svg/categories/cat13/img37.svg', NULL),
+	(200, 13, '/images/svg/categories/cat13/img38.svg', NULL),
+	(201, 13, '/images/svg/categories/cat13/img39.svg', NULL),
+	(202, 13, '/images/svg/categories/cat13/img40.svg', NULL),
+	(203, 13, '/images/svg/categories/cat13/img41.svg', NULL),
+	(204, 13, '/images/svg/categories/cat13/img42.svg', NULL),
+	(205, 13, '/images/svg/categories/cat13/img43.svg', NULL),
+	(206, 13, '/images/svg/categories/cat13/img44.svg', NULL),
+	(207, 13, '/images/svg/categories/cat13/img45.svg', NULL),
+	(208, 13, '/images/svg/categories/cat13/img46.svg', NULL),
+	(209, 13, '/images/svg/categories/cat13/img47.svg', NULL),
+	(210, 13, '/images/svg/categories/cat13/img48.svg', NULL),
+	(211, 13, '/images/svg/categories/cat13/img49.svg', NULL),
+	(212, 13, '/images/svg/categories/cat13/img50.svg', NULL),
+	(213, 13, '/images/svg/categories/cat13/img51.svg', NULL),
+	(214, 13, '/images/svg/categories/cat13/img52.svg', NULL),
+	(215, 13, '/images/svg/categories/cat13/img53.svg', NULL),
+	(216, 13, '/images/svg/categories/cat13/img54.svg', NULL),
+	(217, 13, '/images/svg/categories/cat13/img55.svg', NULL),
+	(218, 13, '/images/svg/categories/cat13/img56.svg', NULL),
+	(219, 13, '/images/svg/categories/cat13/img57.svg', NULL),
+	(220, 13, '/images/svg/categories/cat13/img58.svg', NULL),
+	(221, 13, '/images/svg/categories/cat13/img59.svg', NULL),
+	(222, 13, '/images/svg/categories/cat13/img60.svg', NULL),
+	(223, 13, '/images/svg/categories/cat13/img61.svg', NULL),
+	(224, 13, '/images/svg/categories/cat13/img62.svg', NULL),
+	(225, 13, '/images/svg/categories/cat13/img63.svg', NULL);
 
 -- Dumping structure for table sandbox.sandboxes
 DROP TABLE IF EXISTS `sandboxes`;
@@ -236,9 +299,9 @@ CREATE TABLE IF NOT EXISTS `sandboxes` (
   `createdt` datetime DEFAULT uuid(),
   PRIMARY KEY (`id`),
   KEY `Index 2` (`ownerId`)
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table sandbox.sandboxes: ~7 rows (approximately)
+-- Dumping data for table sandbox.sandboxes: ~6 rows (approximately)
 REPLACE INTO `sandboxes` (`id`, `name`, `ownerId`, `sessionUuid`, `uuid`, `createdt`) VALUES
 	(1, 'Test1', 1, '0a6bd202-afd1-4fb5-9f41-f416a8376c9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', '0000-00-00 00:00:00'),
 	(2, 'erteportipo', 1, 'd686b8e4-65a2-4aaf-96b5-5fd5b7b23649', '68de3e36-e8a0-11ef-ad91-e840f2c38b9b', '0000-00-00 00:00:00'),
@@ -246,7 +309,11 @@ REPLACE INTO `sandboxes` (`id`, `name`, `ownerId`, `sessionUuid`, `uuid`, `creat
 	(59, NULL, NULL, 'c0374ab0-71df-44a2-bbc8-53442b781356', '7f97bb46-041b-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
 	(60, NULL, NULL, '54c7e7e2-3884-4321-af0f-2e57d687f03e', 'b7b39334-041c-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
 	(61, NULL, NULL, 'da16f20a-a0c1-43a9-9fde-346c46edbbc5', 'fea66817-0421-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(62, NULL, NULL, 'ea93b583-95ad-40c3-9bc6-8daaf5496a28', '05eb7fc5-0422-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00');
+	(62, NULL, NULL, 'ea93b583-95ad-40c3-9bc6-8daaf5496a28', '05eb7fc5-0422-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(63, NULL, NULL, 'd1f12abc-cfc7-45e1-be2d-cd5083f3ee02', 'd9134a60-0aa7-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(64, NULL, NULL, '4d24659a-0b21-416b-93ee-4253601a33d4', 'dc4beee4-0aa9-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(65, NULL, NULL, 'a87e5c04-b469-4383-9915-2968a59550b2', 'e8c08c6a-0aa9-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
+	(66, NULL, NULL, 'd1a5e19a-0cd8-4097-9ff2-57c908c27df0', '82498979-0b59-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00');
 
 -- Dumping structure for table sandbox.sessionimage
 DROP TABLE IF EXISTS `sessionimage`;
@@ -256,7 +323,7 @@ CREATE TABLE IF NOT EXISTS `sessionimage` (
   KEY `Index 1` (`sessionId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table sandbox.sessionimage: ~115 rows (approximately)
+-- Dumping data for table sandbox.sessionimage: ~114 rows (approximately)
 REPLACE INTO `sessionimage` (`sessionId`, `image`) VALUES
 	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/0.png'),
 	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/1.png'),
