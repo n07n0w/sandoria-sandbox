@@ -17,6 +17,8 @@ console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 // Create express app
 var app = express();
 
+app.locals.constants = constants;
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views/ejs'));
 app.set('view engine', 'ejs');
