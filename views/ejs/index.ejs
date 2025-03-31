@@ -10,6 +10,7 @@
 	var maxImageHeight = 130;
 	var clientMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined');
 	var viewMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined');
+	var iterationHolderSandboxWidthPercent = 75;
 %>
 
 <%/*
@@ -52,6 +53,7 @@
 	  var invitePopupDialog;
 	  var categoryImageMaxPanelWidth = 0;
 	  var categoryImageMinPanelWidth = 0;
+	  var iterationHolderSandboxWidthPercent = <%=iterationHolderSandboxWidthPercent %>;
 
 	  var maxImageWidth  = <%=maxImageWidth %>;
 	  var maxImageHeight = <%=maxImageHeight %>;
@@ -165,13 +167,15 @@
 	const sendCanvasImageToServer = function(data) {
 		let cnv = $('canvas')[0];
 		let sessionId = data['sessionId'];
+		let eventTime = data['eventTime'];
 		let dataURL = stage.toDataURL();
 		$.ajax({
 			type: "POST",
 			url: "/image/".concat(sessionId),
 			data: {
 				sessionId: sessionId,
-				imgBase64: dataURL
+				imgBase64: dataURL,
+				eventTime: eventTime,
 			}
 		}).done(function(o) {
 			console.log('saved');
@@ -179,6 +183,18 @@
 			notifySaveStateToImageResponse(event);
 		});
 	};
+
+	const timestampToHoursMinutes = function (ts) {
+		let tsDate = new Date(ts);
+		var h = tsDate.getHours();
+		var m = tsDate.getMinutes();
+
+		h = (h<10) ? '0' + h : h;
+		m = (m<10) ? '0' + m : m;
+
+		var output = h + ':' + m;
+		return output;
+	}
 
     const showCanvasImage = function(data) {
 		var takeScreenshotBtn = $('#takeScreenshotBtn');
@@ -190,16 +206,19 @@
 			takeScreenshotBtn.toggleClass("finished");
 		}, 3000);
 
-		$('#iterations').append(
-			$('<img />')
-			.attr({ src : '/images/screenshots/'+ data['image']})
-			.addClass("screenshot")
-		);
+		var topDiv = $("<div>").append(
+				$('<img />')
+				.attr({ src : '/images/screenshots/'+ data['image'], width: 84, height: 60})
+			);
+		var bottomDiv = $("<div class='eventtime'>").html(timestampToHoursMinutes(parseInt(data['eventTime'])));
+		topDiv.append(bottomDiv);
+		$('#iterations').append(topDiv);
     };
 
     const saveStateToImageEvent = function () {
       var jsonData = {};
       jsonData['event']  = 'sendCanvasImageToServer';
+	  jsonData['eventTime']  = Date.now();
       jsonData['sessionId']  = sessionId;
       jsonData['notify'] = false;
       return jsonData;
@@ -209,7 +228,8 @@
       var jsonData = {};
       jsonData['event']  = 'showCanvasImage';
       jsonData['sessionId']  = sessionId;
-      jsonData['image']  = imageResponse;
+      jsonData['image']  = imageResponse.imagePath;
+	  jsonData['eventTime']  = imageResponse.eventTime;
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -410,10 +430,10 @@
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
 			pic.on('dragstart', function () {
-//				this.moveToTop();
+				this.moveToTop();
 			});
 			pic.on('click', function (evt) {
-//				this.moveToTop();
+				this.moveToTop();
 				let target = evt.target;
 				transformer.nodes([target]);
 			});
@@ -531,11 +551,9 @@
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
 			borderStroke: '#244A65',
 			anchorStroke: '#244A65',
-			shouldOverdrawWholeArea: true,
 		});
 
 		transformer.on('transform', function(evt) {
-			forceUpdate();
 			if (notifyViewer) {
 				var event = transformEvent(evt);
 				notifyTransform(event);
@@ -618,9 +636,12 @@
 		element = document.getElementById('container');
 		element.style.width  = sandboxWidth + 'px';
 		element.style.height = sandboxHeight + 'px';
-		$("#slideToggle").css('left', (sandboxWidth  >> 1) + 'px');
-		$("#iterations").css('width', (sandboxWidth) + 'px');
+		let iterationHolderWidth = sandboxWidth * iterationHolderSandboxWidthPercent / 100.0;
+		let iterationHolderLeft = leftSideWidth + ((sandboxWidth - iterationHolderWidth) >> 1);
+		$("#iterationsHolder").css('width', iterationHolderWidth + 'px');
 		$("#iterationsHolder").css('bottom', ((screenHeight - sandboxHeight) >> 1) + 'px');
+		$("#iterationsHolder").css('left', iterationHolderLeft + 'px');
+		$("#slideToggle").css('left', (iterationHolderWidth  >> 1) + 'px');
 		
 		element = document.getElementById('rside');
 		element.width  = rightSideWidth + 'px';
@@ -997,6 +1018,7 @@
 	});
 	initStage();
 	recalcSandboxSizes();
+	$("#iterations").hide();
 	selectFirstCategoryFromStart();
   });
 
@@ -1126,12 +1148,12 @@
 <div id="clearall-confirm-dialog" width="437" height="272" style="display: none">
 	<div class="confirm-dialog-content">
 		<div class="halign_center">
-			<span class="invitepbс">Очистить&nbsp;</span><span class="invitepb">&nbsp;песочницу</span>
+			<span class="invitepbс">Очистить</span><span class="invitepb">&nbsp;песочницу</span>
 			<div class="spaces" style="height: 16px;">&nbsp;</div>
 			<div class="fs18">Вы действительно хотите удалить все объекты из песочницы?</div>
 		</div>
 		<div class="spaces" style="height: 32px;">&nbsp;</div>
-		<div class="halign_center flex_cg_32">
+		<div class="halign_center flex_cg_31">
 			<div class="flexbtn_128_56 btn2 mauto" onclick="closeClearConfirmationDialog(true);">
 				<span>Да</span>
 			</div>

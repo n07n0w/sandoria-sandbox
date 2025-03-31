@@ -26,36 +26,39 @@ async function getSessionImagesCount(sessionId) {
 	}
 }
 
-async function saveSessionImageToDatabase(sessionId, imagePath) {
-	logger.info(["saveSessionImageToDatabase :: START", sessionId, imagePath, '***']);
+async function saveSessionImageToDatabase(sessionId, imagePath, createDt) {
+	logger.info(["saveSessionImageToDatabase :: START", sessionId, imagePath, createDt, '***']);
 	try {
-		let values = [sessionId, imagePath];
-		var sql = "INSERT INTO sessionimage (`sessionId`, `image`) VALUES (?, ?)";
+		let values = [sessionId, imagePath, createDt];
+		var sql = "INSERT INTO sessionimage (`sessionId`, `image`, `createDt`) VALUES (?, ?, ?)";
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
 		return results;
 	} catch (error) {
 		logger.error('saveSessionImageToDatabase ERROR:', error);
-console.log(error);
 		return null;
 	}
 }
 
 const handlePost = async (req, res, next) => {
     var sessionId = req.params.sessionId;
+    var createDt  = req.body.eventTime;
     var sessionImagesCount = await getSessionImagesCount(sessionId);
     const image = req.body.imgBase64;
-console.log(image);
+
     if (image) {
         let imageDbPath = `${sessionId}/${sessionImagesCount}.png`;
         let newpath = `public/images/screenshots/${imageDbPath}`;
-console.log(newpath);
+
         ensureDirectoryExistence(newpath);
         const data = image.replace(/^data:image\/\w+;base64,/, "");
         const buf = Buffer.from(data, "base64");
         await fs.writeFileSync(newpath, buf);
-        saveSessionImageToDatabase(sessionId, imageDbPath);
-        return res.send(imageDbPath);
+        await saveSessionImageToDatabase(sessionId, imageDbPath, createDt);
+	res.json({
+		imagePath: imageDbPath,
+		eventTime: createDt	
+	});
     } else {
     	return res.status(5000).json({ 'message': 'POST canvas image processing error' });
     }
