@@ -456,7 +456,8 @@
 			pic.offsetX(pic.width() >> 1);
 
 			sandboxLayer.add(pic);
-//			stage.add(pic);
+			transformer.remove();
+			sandboxLayer.add(transformer);
 			transformer.nodes([pic]);
 		}
 	}
