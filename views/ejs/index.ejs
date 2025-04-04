@@ -8,6 +8,10 @@
 	var categoryImageSpacing = 24;	// расстояние между картинками категорий
 	var maxImageWidth  = 100;
 	var maxImageHeight = 130;
+	var sandboxBorderTopHeight = 35;
+	var sandboxBorderBottomHeight = 35;
+	var sandboxBorderLeftWidth = 30;
+	var sandboxBorderRightWidth = 40;
 	var clientMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined');
 	var viewMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined');
 	var iterationHolderSandboxWidthPercent = 75;
@@ -24,7 +28,11 @@
   <script src="/javascripts/jquery-3.7.1.js"></script>
   <script src="/javascripts/jquery-ui.js"></script>
   <!-- https://konvajs.org/docs/index.html -->
+  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+<%/*
   <script src="/javascripts/konva.min.js"></script>
+*/%>
+
 
   <script src="/javascripts/peerjs.min.js"></script>
 
@@ -54,6 +62,11 @@
 	  var categoryImageMaxPanelWidth = 0;
 	  var categoryImageMinPanelWidth = 0;
 	  var iterationHolderSandboxWidthPercent = <%=iterationHolderSandboxWidthPercent %>;
+	  var sandboxBorderTopHeight = <%=sandboxBorderTopHeight %>;
+	  var sandboxBorderBottomHeight = <%=sandboxBorderBottomHeight %>;
+	  var sandboxBorderLeftWidth = <%=sandboxBorderLeftWidth %>;
+	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
+
 
 	  var maxImageWidth  = <%=maxImageWidth %>;
 	  var maxImageHeight = <%=maxImageHeight %>;
@@ -426,9 +439,11 @@
 				width: imgWidth,
 				height: imgHeight,
 				draggable: true,
+				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
+/*
 			pic.on('dragstart', function () {
 				this.moveToTop();
 			});
@@ -437,9 +452,12 @@
 				let target = evt.target;
 				transformer.nodes([target]);
 			});
+*/
 			pic.offsetX(pic.width() >> 1);
 
 			sandboxLayer.add(pic);
+//			stage.add(pic);
+			transformer.nodes([pic]);
 		}
 	}
 
@@ -537,8 +555,80 @@
         notifySaveStateToImage(event);
       }
 
+	// Helper functions for calculating bounding boxes
+	function getCorner(pivotX, pivotY, diffX, diffY, angle) {
+		const distance = Math.sqrt(diffX * diffX + diffY * diffY);
+
+		// Find angle from pivot to corner
+		angle += Math.atan2(diffY, diffX);
+
+		// Get new x and y coordinates
+		const x = pivotX + distance * Math.cos(angle);
+		const y = pivotY + distance * Math.sin(angle);
+
+		return {
+			x,
+			y
+		};
+	}
+
+	// Calculate total bounding box of multiple shapes
+	function getTotalBox(boxes) {
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+
+		boxes.forEach((box) => {
+			minX = Math.min(minX, box.x);
+			minY = Math.min(minY, box.y);
+			maxX = Math.max(maxX, box.x + box.width);
+			maxY = Math.max(maxY, box.y + box.height);
+		});
+
+		return {
+			x: minX,
+			y: minY,
+			width: maxX - minX,
+			height: maxY - minY,
+		};
+	}
+
+	// Calculate client rect accounting for rotation
+	function getClientRect(rotatedBox) {
+		const {
+			x,
+			y,
+			width,
+			height
+		} = rotatedBox;
+		const rad = rotatedBox.rotation;
+
+		const p1 = getCorner(x, y, 0, 0, rad);
+		const p2 = getCorner(x, y, width, 0, rad);
+		const p3 = getCorner(x, y, width, height, rad);
+		const p4 = getCorner(x, y, 0, height, rad);
+
+		const minX = Math.min(p1.x, p2.x, p3.x, p4.x);
+		const minY = Math.min(p1.y, p2.y, p3.y, p4.y);
+		const maxX = Math.max(p1.x, p2.x, p3.x, p4.x);
+		const maxY = Math.max(p1.y, p2.y, p3.y, p4.y);
+
+		return {
+			x: minX,
+			y: minY,
+			width: maxX - minX,
+			height: maxY - minY,
+		};
+	}
+
 	function initStage() {
 		let containerElement = $('#container');
+		let selectionRectangle = new Konva.Rect({
+			fill: 'rgba(0,0,255,0.5)',
+			visible: false,
+		});
+
 		stage = new Konva.Stage({
 			container: 'container',
 			width: containerElement.width(),
@@ -551,6 +641,25 @@
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
 			borderStroke: '#244A65',
 			anchorStroke: '#244A65',
+			boundBoxFunc: (oldBox, newBox) => {
+				// Calculate the actual bounding box of the transformed shape
+				const box = getClientRect(newBox);
+
+				// Check if the new box is outside the stage boundaries
+				const isOut =
+					(box.x - sandboxBorderLeftWidth) < 0 ||
+					(box.y - sandboxBorderTopHeight) < 0 ||
+					(box.x + box.width + sandboxBorderBottomHeight) > stage.width() ||
+					(box.y + box.height + sandboxBorderRightWidth) > stage.height();
+
+				// If outside boundaries, keep the old box
+				if (isOut) {
+					return oldBox;
+				}
+
+				// If within boundaries, allow the transformation
+				return newBox;
+			},
 		});
 
 		transformer.on('transform', function(evt) {
@@ -560,6 +669,44 @@
 			}
 		});
 		transformer.on('dragmove', function(evt) {
+//			console.log('rect', transformer.__getNodeRect());
+			const boxes = transformer.nodes().map((node) => node.getClientRect());
+
+			// Get the total bounding box of all shapes
+			const box = getTotalBox(boxes);
+
+			// Keep shapes within stage boundaries
+			transformer.nodes().forEach((node) => {
+				const absPos = node.getAbsolutePosition();
+
+				// Calculate node position relative to group bounding box
+				const offsetX = box.x - absPos.x;
+				const offsetY = box.y - absPos.y;
+
+				// Adjust position if outside boundaries
+				const newAbsPos = {
+					...absPos
+				};
+
+//				if (box.x < 0) {
+				if (box.x < sandboxBorderLeftWidth) {
+					newAbsPos.x = -offsetX + sandboxBorderLeftWidth;
+				}
+//				if (box.y < 0) {
+				if (box.y < sandboxBorderTopHeight) {
+					newAbsPos.y = -offsetY + sandboxBorderTopHeight;
+				}
+//				if (box.x + box.width > stage.width()) {
+				if (box.x + box.width > stage.width() - sandboxBorderRightWidth) {
+					newAbsPos.x = stage.width() - box.width - offsetX - sandboxBorderRightWidth;
+				}
+//				if (box.y + box.height > stage.height()) {
+				if (box.y + box.height > stage.height() - sandboxBorderBottomHeight) {
+					newAbsPos.y = stage.height() - box.height - offsetY - sandboxBorderBottomHeight;
+				}
+
+				node.setAbsolutePosition(newAbsPos);
+			});
 			if (notifyViewer) {
 				var dragEvent = shapeDragEvent(evt);
 				notifyShapeDrag(dragEvent);
@@ -567,6 +714,7 @@
 		});
 
 		sandboxLayer.add(transformer);
+		sandboxLayer.add(selectionRectangle);
 
 		sandboxLayer.on('click', function(evt) {
 			var shape = evt.target;
@@ -584,6 +732,7 @@
 		});
 
 		stage.add(backgroundLayer, sandboxLayer);
+//		stage.add(sandboxLayer);
 
 		backgroundImage = new Image();
 		backgroundImage.src = "/images/sandbox/sandbox.jpg";
@@ -604,6 +753,96 @@
 			backgroundLayer.add(background);
 			recalcSandboxSizes();
 		}
+
+		let x1, y1, x2, y2;
+		stage.on('mousedown touchstart', (e) => {
+			// do nothing if we mousedown on any shape
+			if (e.target !== stage) {
+				return;
+			}
+			x1 = stage.getPointerPosition().x;
+			y1 = stage.getPointerPosition().y;
+			x2 = stage.getPointerPosition().x;
+			y2 = stage.getPointerPosition().y;
+
+			selectionRectangle.visible(true);
+			selectionRectangle.width(0);
+			selectionRectangle.height(0);
+		});
+
+		stage.on('mousemove touchmove', () => {
+			// do nothing if we didn't start selection
+			if (!selectionRectangle.visible()) {
+				return;
+			}
+			x2 = stage.getPointerPosition().x;
+			y2 = stage.getPointerPosition().y;
+
+			selectionRectangle.setAttrs({
+				x: Math.min(x1, x2),
+				y: Math.min(y1, y2),
+				width: Math.abs(x2 - x1),
+				height: Math.abs(y2 - y1),
+			});
+		});
+
+		stage.on('mouseup touchend', () => {
+			// do nothing if we didn't start selection
+			if (!selectionRectangle.visible()) {
+				return;
+			}
+			// update visibility in timeout, so we can check it in click event
+			setTimeout(() => {
+				selectionRectangle.visible(false);
+			});
+
+			var shapes = stage.find('.catpic');
+			var box = selectionRectangle.getClientRect();
+			var selected = shapes.filter((shape) =>
+					Konva.Util.haveIntersection(box, shape.getClientRect()));
+			transformer.nodes(selected);
+		});
+
+		// clicks should select/deselect shapes
+		stage.on('click tap', function (e) {
+			// if we are selecting with rect, do nothing
+			if (selectionRectangle.visible()) {
+				return;
+			}
+
+			// if click on empty area - remove all selections
+			if (e.target === stage) {
+				transformer.nodes([]);
+				return;
+			}
+
+			// do nothing if clicked NOT on our rectangles
+			if (!e.target.hasName('catpic')) {
+				return;
+			}
+
+			// do we pressed shift or ctrl?
+			const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+			const isSelected = transformer.nodes().indexOf(e.target) >= 0;
+
+			if (!metaPressed && !isSelected) {
+				// if no key pressed and the node is not selected
+				// select just one
+				transformer.nodes([e.target]);
+			} else if (metaPressed && isSelected) {
+				// if we pressed keys and node was selected
+				// we need to remove it from selection:
+				const nodes = transformer.nodes().slice(); // use slice to have new copy of array
+				// remove node from array
+				nodes.splice(nodes.indexOf(e.target), 1);
+				transformer.nodes(nodes);
+			} else if (metaPressed && !isSelected) {
+				// add the node into selection
+				const nodes = transformer.nodes().concat([e.target]);
+				transformer.nodes(nodes);
+			}
+		});
+
 	}
 
 	const recalcSandboxSizes = function() {
@@ -617,10 +856,12 @@
 		const sizeRelations = 7/5;
 		const leftSideWidth = document.getElementById('lside').offsetWidth;	// ширина левой части не мняется!
 //		let minRsideWidth = categoryImagesPerRow * categoryImageWidth + (categoryImagesPerRow - 1) * categoryImageSpacing + (categoryImageSpacing << 1);
-		let minRsideWidth = $('.rsidecontent').width() + 10;
+		let rSideContentWidth  = $('.rsidecontent').width();
+		let rSideContentHeight = $('.rsidecontent').height();
+		let minRsideWidth = rSideContentWidth + 10;
 
 		let sandboxWidth = screenWidth - leftSideWidth - minRsideWidth;
-		categoryImageMaxPanelWidth = screenWidth - leftSideWidth - 2;
+		categoryImageMaxPanelWidth = screenWidth - leftSideWidth;
 		let sandboxHeight = sandboxWidth / sizeRelations;
 		if (sandboxHeight > screenHeight) {
 			sandboxHeight = screenHeight;
@@ -647,9 +888,9 @@
 		element.width  = rightSideWidth + 'px';
 
 		element = document.getElementById('categoryImages');
-		let categoryImageHeight = screenHeight - 184;
+		let categoryImageHeight = screenHeight - rSideContentHeight;
 		element.style.height = categoryImageHeight + 'px';
-		element.style.width = $('.rsidecontent').width() + 'px';
+		element.style.width = (rSideContentWidth + 10) + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -1076,6 +1317,13 @@
 			<% if (!clientMode) { %>
 				<div id="iterationsHolder">
 					<span id="slideToggle" class="slideUp"></span>
+<%/*
+
+					<div id="slideToggle">
+						<img src="/images/svg/slideUp.svg" />
+					</div>
+*/%>
+
 					<div id="iterations"></div>
 				</div>
 			<% } %>
