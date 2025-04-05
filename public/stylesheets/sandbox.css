@@ -115,6 +115,7 @@ body {
 	display: flex;
 	line-height: 24px;
 	align-items: end;
+	cursor: pointer;
 }
 
 .control_panel img {

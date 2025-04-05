@@ -47,6 +47,7 @@
 	<% } %>
 
   <script type="text/javascript">
+      const leftSideWidth = 208;	// ширина левой части не мняется!
       var sandboxBackground = "";
       var width = window.innerWidth;
       var height = window.innerHeight;
@@ -855,7 +856,9 @@
 //		let screenHeight = document.documentElement.clientHeight;
 //		const sizeRelations = 1300/940;
 		const sizeRelations = 7/5;
-		const leftSideWidth = document.getElementById('lside').offsetWidth;	// ширина левой части не мняется!
+//		const leftSideWidth = document.getElementById('lside').offsetWidth;	// ширина левой части не мняется!
+//		const leftSideWidth = document.getElementById('lside').clientWidth;	// ширина левой части не мняется!
+//		const leftSideWidth = document.getElementById('lside').scrollWidth;	// ширина левой части не мняется!
 //		let minRsideWidth = categoryImagesPerRow * categoryImageWidth + (categoryImagesPerRow - 1) * categoryImageSpacing + (categoryImageSpacing << 1);
 		let rSideContentWidth  = $('.rsidecontent').width();
 		let rSideContentHeight = $('.rsidecontent').height();
@@ -892,6 +895,8 @@
 		let categoryImageHeight = screenHeight - rSideContentHeight;
 		element.style.height = categoryImageHeight + 'px';
 		element.style.width = (rSideContentWidth + 10) + 'px';
+//		element.style.width = (rSideContentWidth - 10) + 'px';
+//		element.style.width = 348 + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -909,6 +914,7 @@
 
 			stage.draw();
 		}
+console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideWidth", leftSideWidth, "rSideContentWidth", rSideContentWidth, "sandboxWidth", sandboxWidth, "sandboxHeight", sandboxHeight);
 	};
 
 	window.addEventListener('resize', recalcSandboxSizes, true);
