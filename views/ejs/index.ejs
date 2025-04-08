@@ -1034,6 +1034,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 	};
 
 	const launchPeer = function(sessionId, opponentSessionId) {
+		console.log("launchPeer", sessionId, opponentSessionId);
 		myPeer = new Peer(sessionId);
 		myPeer.on('open', function(id) {
 			console.log('My peer ID is: ' + id);
