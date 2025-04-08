@@ -83,14 +83,17 @@
       <% } %>
 
 	  <% if (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined') { %>
+	  console.log("notifyViewer set to true");
 	  var notifyViewer = true;
 	  var guest = true;
       <% } else { %>
+	  console.log("notifyViewer set to false");
 	  var notifyViewer = false;
 	  var guest = false;
       <% } %>
 
     const sendEvent = function (ev) {
+		console.log("sendEvent", myConn, ev);
       myConn?.send(ev);
     };
 
@@ -1041,6 +1044,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 					myConn.send('hi!');
 				});
 				myConn?.on('data', function(data){
+					console.log("Connection data", data);
 					if (typeof data === 'object' && data.hasOwnProperty('event'))
 						try {
 							eval(data.event)(data);
@@ -1049,6 +1053,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 						}
 				});
 				myConn?.on('close', function() { 
+					console.log("Connection closed");
 					// if the clients connection closes set up a reconnect request loop - when the host takes back control
 					// the client will auto reconnect...
 					myPeer.destroy();   // destroy the link
