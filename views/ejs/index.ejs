@@ -1042,6 +1042,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 				myConn?.on('open', function(){
 					console.log(myConn);
 					myConn.send('hi!');
+					selectFirstCategoryFromStart();
 				});
 				myConn?.on('data', function(data){
 					console.log("Connection data", data);
@@ -1272,7 +1273,9 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 	initStage();
 	recalcSandboxSizes();
 	$("#iterations").hide();
-	selectFirstCategoryFromStart();
+    <% if (!(typeof sessionId !== 'undefined')) { %>
+		selectFirstCategoryFromStart();
+	<% } %>
   });
 
   </script>
