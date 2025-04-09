@@ -9,6 +9,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const { PeerServer } = require("peer");
+const peerServer = PeerServer({ port: constants.PEER_SERVER_PORT, path: constants.PEER_SERVER_PATH });
 
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
@@ -19,6 +21,10 @@ console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 var app = express();
 
 app.locals.constants = constants;
+app.locals.peerserverhost = constants.PEER_SERVER_HOST;
+app.locals.peerserverport = constants.PEER_SERVER_PORT;
+app.locals.peerserverpath = constants.PEER_SERVER_PATH;
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views/ejs'));

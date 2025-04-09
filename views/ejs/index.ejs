@@ -1035,7 +1035,17 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 
 	const launchPeer = function(sessionId, opponentSessionId) {
 		console.log("launchPeer", sessionId, opponentSessionId);
-		myPeer = new Peer(sessionId);
+		myPeer = new Peer(sessionId, {
+/*
+			host: "localhost",
+			port: 9000,
+			path: "/sandpeer",
+*/
+			host: '<%=locals.peerserverhost %>',
+			port: <%=locals.peerserverport %>,
+			path: '<%=locals.peerserverpath %>',
+		});
+
 		myPeer.on('open', function(id) {
 			console.log('My peer ID is: ' + id);
 			if (typeof opponentSessionId !== 'undefined') {
