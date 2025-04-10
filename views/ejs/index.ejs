@@ -1044,6 +1044,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 			host: '<%=locals.peerserverhost %>',
 			port: <%=locals.peerserverport %>,
 			path: '<%=locals.peerserverpath %>',
+			secure: <%=locals.peerserversecure %>,
 		});
 
 		myPeer.on('open', function(id) {
