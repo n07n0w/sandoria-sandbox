@@ -9,9 +9,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-const { PeerServer } = require("peer");
-const peerServer = PeerServer({ port: constants.PEER_SERVER_PORT, path: constants.PEER_SERVER_PATH });
-
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Base URL:', baseUrl);
