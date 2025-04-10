@@ -19,6 +19,11 @@ console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 var app = express();
 
 app.locals.constants = constants;
+app.locals.peerserverhost = constants.PEER_SERVER_HOST;
+app.locals.peerserverport = constants.PEER_SERVER_PORT;
+app.locals.peerserverpath = constants.PEER_SERVER_PATH;
+app.locals.peerserversecure = constants.PEER_SERVER_SECURE;
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views/ejs'));
