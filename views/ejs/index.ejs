@@ -1036,11 +1036,6 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 	const launchPeer = function(sessionId, opponentSessionId) {
 		console.log("launchPeer", sessionId, opponentSessionId);
 		myPeer = new Peer(sessionId, {
-/*
-			host: "localhost",
-			port: 9000,
-			path: "/sandpeer",
-*/
 			host: '<%=locals.peerserverhost %>',
 			port: <%=locals.peerserverport %>,
 			path: '<%=locals.peerserverpath %>',
@@ -1050,11 +1045,15 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 		myPeer.on('open', function(id) {
 			console.log('My peer ID is: ' + id);
 			if (typeof opponentSessionId !== 'undefined') {
+				console.log("Trying to connect to opponent session");
 				myConn = myPeer.connect(opponentSessionId);
 				myConn?.on('open', function(){
 					console.log(myConn);
 					myConn.send('hi!');
 					selectFirstCategoryFromStart();
+				});
+				myConn?.on('error', (err) => {
+					console.error('Ошибка соединения:', err);
 				});
 				myConn?.on('data', function(data){
 					console.log("Connection data", data);
