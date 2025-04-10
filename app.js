@@ -9,6 +9,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Base URL:', baseUrl);
