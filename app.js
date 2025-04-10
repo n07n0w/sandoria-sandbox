@@ -21,6 +21,7 @@ app.locals.constants = constants;
 app.locals.peerserverhost = constants.PEER_SERVER_HOST;
 app.locals.peerserverport = constants.PEER_SERVER_PORT;
 app.locals.peerserverpath = constants.PEER_SERVER_PATH;
+app.locals.peerserversecure = constants.PEER_SERVER_SECURE;
 
 
 // view engine setup
