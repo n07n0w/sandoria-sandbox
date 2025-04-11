@@ -1017,6 +1017,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 
 	const showInvitePopup = function(inviteJson) {
 		invitePopupDialog.dialog( "open" );
+		$("#sessionLink").text(inviteJson.sessionLink);
 	};
 
 	const inviteClient = function() {
@@ -1405,6 +1406,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 	</div>
 	<div class="halign_center">
 		<p class="invitepbс">Ссылка на песочницу</p>
+		<p class="invitepbсsmall" id="sessionLink"></p>
 		<p class="invitepb">скопирована</p>
 		<div class="spaces" style="height: 20px;">&nbsp;</div>
 		<p class="inviteps mauto">Отправьте ссылку клиенту для совместного использования песочницы любым удобным для Вас способом</p>
