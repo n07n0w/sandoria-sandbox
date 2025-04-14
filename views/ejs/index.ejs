@@ -15,6 +15,9 @@
 	var clientMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId !== 'undefined');
 	var viewMode = (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined');
 	var iterationHolderSandboxWidthPercent = 75;
+
+	// интервал, по истечении которого сессия психолог-клиент ватоматически разрівается (в миллисекундах)
+	var sessionConnectionTimeout = (locals.sessionConnectionTimeout) ? locals.sessionConnectionTimeout : 3600000; // по умолчанию - 1 час (3600 секунд * 1000 = 3600000 миллисекунд)
 %>
 
 <%/*
@@ -74,6 +77,7 @@
 	  var sandboxBorderBottomHeight = <%=sandboxBorderBottomHeight %>;
 	  var sandboxBorderLeftWidth = <%=sandboxBorderLeftWidth %>;
 	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
+	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
 
 
 	  var maxImageWidth  = <%=maxImageWidth %>;
@@ -100,7 +104,6 @@
       <% } %>
 
     const sendEvent = function (ev) {
-		console.log("sendEvent", myConn, ev);
       myConn?.send(ev);
     };
 
@@ -171,7 +174,6 @@
 	};
 
     const shapeClick = function(jsonData) {
-      console.log(jsonData);
       var node = sandboxLayer.findOne(node => {
         return node.getType() === 'Shape' && node._id == jsonData.shape._id;
       });
@@ -184,6 +186,13 @@
       var shapeObject = {};
       shapeObject['_id'] = shape._id;
       jsonData['shape']  = shapeObject;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+    const disconnectEvent = function () {
+      var jsonData = {};
+      jsonData['event']  = 'disconnectPeer';
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -301,7 +310,6 @@
     };
 
     const shapeDrag = function(jsonData) {
-      console.log(jsonData);
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
           return node.getType() === 'Shape' && node._id == nd._id;
@@ -311,7 +319,6 @@
     };
 
     const meDrag = function(jsonData) {
-      console.log(jsonData);
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
           return node.getType() === 'Shape' && node._id == nd._id;
@@ -454,16 +461,6 @@
 			});
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
-/*
-			pic.on('dragstart', function () {
-				this.moveToTop();
-			});
-			pic.on('click', function (evt) {
-				this.moveToTop();
-				let target = evt.target;
-				transformer.nodes([target]);
-			});
-*/
 			pic.offsetX(pic.width() >> 1);
 
 			sandboxLayer.add(pic);
@@ -681,7 +678,6 @@
 			}
 		});
 		transformer.on('dragmove', function(evt) {
-//			console.log('rect', transformer.__getNodeRect());
 			const boxes = transformer.nodes().map((node) => node.getClientRect());
 
 			// Get the total bounding box of all shapes
@@ -700,19 +696,15 @@
 					...absPos
 				};
 
-//				if (box.x < 0) {
 				if (box.x < sandboxBorderLeftWidth) {
 					newAbsPos.x = -offsetX + sandboxBorderLeftWidth;
 				}
-//				if (box.y < 0) {
 				if (box.y < sandboxBorderTopHeight) {
 					newAbsPos.y = -offsetY + sandboxBorderTopHeight;
 				}
-//				if (box.x + box.width > stage.width()) {
 				if (box.x + box.width > stage.width() - sandboxBorderRightWidth) {
 					newAbsPos.x = stage.width() - box.width - offsetX - sandboxBorderRightWidth;
 				}
-//				if (box.y + box.height > stage.height()) {
 				if (box.y + box.height > stage.height() - sandboxBorderBottomHeight) {
 					newAbsPos.y = stage.height() - box.height - offsetY - sandboxBorderBottomHeight;
 				}
@@ -744,7 +736,6 @@
 		});
 
 		stage.add(backgroundLayer, sandboxLayer);
-//		stage.add(sandboxLayer);
 
 		backgroundImage = new Image();
 		backgroundImage.src = "/images/sandbox/sandbox.jpg";
@@ -860,16 +851,7 @@
 	const recalcSandboxSizes = function() {
 		let screenWidth = window.innerWidth;
 		let screenHeight = window.innerHeight;
-//		let screenWidth = screen.width;
-//		let screenHeight = screen.height;
-//		let screenWidth = document.documentElement.clientWidth;
-//		let screenHeight = document.documentElement.clientHeight;
-//		const sizeRelations = 1300/940;
 		const sizeRelations = 7/5;
-//		const leftSideWidth = document.getElementById('lside').offsetWidth;	// ширина левой части не мняется!
-//		const leftSideWidth = document.getElementById('lside').clientWidth;	// ширина левой части не мняется!
-//		const leftSideWidth = document.getElementById('lside').scrollWidth;	// ширина левой части не мняется!
-//		let minRsideWidth = categoryImagesPerRow * categoryImageWidth + (categoryImagesPerRow - 1) * categoryImageSpacing + (categoryImageSpacing << 1);
 		let rSideContentWidth  = $('.rsidecontent').width();
 		let rSideContentHeight = $('.rsidecontent').height();
 		let minRsideWidth = rSideContentWidth + 10;
@@ -905,8 +887,6 @@
 		let categoryImageHeight = screenHeight - rSideContentHeight;
 		element.style.height = categoryImageHeight + 'px';
 		element.style.width = (rSideContentWidth + 10) + 'px';
-//		element.style.width = (rSideContentWidth - 10) + 'px';
-//		element.style.width = 348 + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -924,10 +904,23 @@
 
 			stage.draw();
 		}
-console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideWidth", leftSideWidth, "rSideContentWidth", rSideContentWidth, "sandboxWidth", sandboxWidth, "sandboxHeight", sandboxHeight);
 	};
 
 	window.addEventListener('resize', recalcSandboxSizes, true);
+
+	const updateConnectionState = function(connected) {
+	<% if (clientMode) { %>
+		let imgSrc = connected ? "/images/svg/connectionStatusConnected.svg" : "/images/svg/connectionStatusDisconnected.svg";
+		$("#connectionStatusImg").attr("src",imgSrc);
+		let statusLabel = connected ? "Сессия активна" : "Сессия неактивна";
+		$("#connectionStatusLabel").text(statusLabel);
+		if (connected) {
+			$("#connectionStatusLabel").addClass('connectionEstablishet');
+		} else {
+			$("#connectionStatusLabel").removeClass('connectionEstablishet');
+		}
+	<% } %>
+	}
 
 	const updateCategoryLabel = function(label, bold) {
 		$('#category_label').text( label );
@@ -1033,13 +1026,40 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
         url: "/session/init"
       }).done(function(res) {
         console.log('invited');
-		console.log(res);
 		copyInliteLinkToClipboard(res);
 		showInvitePopup(res);
-//		launchPeer(res.sessionId, res.opponentSessionId);
 		launchPeer(res.opponentSessionId);
+
+		var inviteClientBtn = $('#inviteClientBtn');
+		var anchor = inviteClientBtn.find('a')[0];
+		anchor.text = "Ссылка скопирована";
+		inviteClientBtn.off('click');
       });
 	};
+
+	const onConnectionClosed = function() {
+		var inviteClientBtn = $('#inviteClientBtn');
+		inviteClientBtn.removeClass('closeSessionBtn');
+		var anchor = inviteClientBtn.find('a')[0];
+		anchor.text = "Пригласить клиента";
+		inviteClientBtn.off('click').on('click', inviteClient);
+	}
+
+	const onConnectionEstablished = function() {
+		var inviteClientBtn = $('#inviteClientBtn');
+		inviteClientBtn.addClass('closeSessionBtn');
+		var anchor = inviteClientBtn.find('a')[0];
+		anchor.text = "Завершить сессию";
+		inviteClientBtn.off('click').on('click', disconnectPeer);
+	}
+
+	const disconnectPeer = function(eventData) {
+		if (!eventData || !eventData.event) {
+			sendEvent(disconnectEvent());
+		}
+		myPeer?.destroy();
+		onConnectionClosed();
+	}
 
 	const launchPeer = function(sessionId, opponentSessionId) {
 		console.log("launchPeer", sessionId, opponentSessionId);
@@ -1055,15 +1075,16 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 			if (typeof opponentSessionId !== 'undefined') {
 				console.log("Trying to connect to opponent session");
 				myConn = myPeer.connect(opponentSessionId);
-				myConn?.on('open', function(){
+				myConn.on('open', function(){
 					console.log(myConn);
 					myConn.send('hi!');
+					updateConnectionState(true);
 					selectFirstCategoryFromStart();
 				});
-				myConn?.on('error', (err) => {
+				myConn.on('error', (err) => {
 					console.error('Ошибка соединения:', err);
 				});
-				myConn?.on('data', function(data){
+				myConn.on('data', function(data){
 					console.log("Connection data", data);
 					if (typeof data === 'object' && data.hasOwnProperty('event'))
 						try {
@@ -1072,8 +1093,9 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 							console.log(ex);
 						}
 				});
-				myConn?.on('close', function() { 
+				myConn.on('close', function() {
 					console.log("Connection closed");
+					updateConnectionState(false);
 					// if the clients connection closes set up a reconnect request loop - when the host takes back control
 					// the client will auto reconnect...
 					myPeer.destroy();   // destroy the link
@@ -1100,10 +1122,14 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 		});
 
 		myPeer.on('connection', function(conn) {
+			onConnectionEstablished();
 			console.log(conn);
 			myConn = conn;
+			setTimeout(function() { 
+				disconnectPeer();
+			}, sessionConnectionTimeout);
+
 			conn?.on('data', function(data){
-				console.log(data);
 				if (typeof data === 'object' && data.hasOwnProperty('event'))
 					try {
 						eval(data.event)(data);
@@ -1295,8 +1321,13 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
     <% if (!(typeof sessionId !== 'undefined')) { %>
 		selectFirstCategoryFromStart();
 	<% } %>
+	$('#inviteClientBtn').click(inviteClient);
   });
 
+	window.onbeforeunload = function (event) {
+		disconnectPeer();
+		return null;
+	};
   </script>
 </head>
 <body>
@@ -1333,7 +1364,7 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 
 			<% if (!clientMode) { %>
 				<div class="spaces h40">&nbsp;</div>
-				<div class="inviteBtn btn1" onclick="inviteClient();">
+				<div class="inviteBtn btn1" id="inviteClientBtn">
 					<span>
 						<p><a href="#">Пригласить клиента</a></p>
 					</span>
@@ -1344,7 +1375,14 @@ console.log("screenWidth", screenWidth, "screenHeight", screenHeight, "leftSideW
 						<p><a href="#">Сделать снимок</a></p>
 					</span>
 				</div>
-			<% } %>
+			<% } else { %>
+				<!-- CONNECTION STATUS SECTION START -->
+				<span id="connectionStatusSection">
+					<div><img id='connectionStatusImg' src="/images/svg/connectionStatusDisconnected.svg"/></div>
+					<div id="connectionStatusLabel" class="connectionStatusLabel">Сессия неактивна</div>
+				</span>
+				<!-- CONNECTION STATUS SECTION END -->
+			<% }%>
 			</td>
 			<td id="sandbox">
 				<div id="container"></div>

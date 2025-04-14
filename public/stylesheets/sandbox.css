@@ -457,3 +457,18 @@ body {
 	text-align: center;
 	margin-top: 2px;
 }
+.closeSessionBtn {
+	background-color: #9D4F31;
+}
+.connectionStatusLabel {
+	font-size: 16px;
+	color: #6F899B;
+}
+.connectionEstablishet {
+	color: #091721;
+}
+#connectionStatusSection {
+	position: absolute;
+    bottom: 40px;
+    left: 44px;
+}
