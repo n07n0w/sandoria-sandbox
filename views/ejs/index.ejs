@@ -166,8 +166,27 @@
       return jsonData;
     };
 
+    const positionedImageSelectEvent = function(imgSource, categoryId, imageId, x, y) {
+      var jsonData = {};
+      jsonData['event']      = 'positionedImageSelect';
+      jsonData['imgSource']  = imgSource;
+      jsonData['categoryId'] = categoryId;
+	  jsonData['imageId']    = imageId;
+	  jsonData['x']          = x;
+	  jsonData['y']          = y;
+      jsonData['notify']     = false;
+      return jsonData;
+    };
+
     const imageSelect = function (jsonObject, notify = false) {
 	  loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+	  if (notify) {
+	    notifyImageSelect(jsonObject);
+	  }
+	};
+
+    const positionedImageSelect = function (jsonObject, notify = false) {
+	  loadPositionedImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId, jsonObject.x, jsonObject.y);
 	  if (notify) {
 	    notifyImageSelect(jsonObject);
 	  }
@@ -470,6 +489,37 @@
 		}
 	}
 
+	function loadPositionedImage(imgSource, categoryId, imageId, x, y) {
+		image = new Image();
+		image.src = imgSource;
+		image.onload = function() {
+			var [imgWidth, imgHeight] = calcScaledImageWidthHeight(image);
+//			let stageMiddleX = stage.width() >> 1;
+//			let stageMiddleY = stage.height() >> 1;;
+			
+//			let newImageX = stageMiddleX - (imgWidth >> 1);
+//			let newImageY = stageMiddleY - (imgHeight >> 1);
+			var pic = new Konva.Image({
+				image: image,
+				x: x,
+				y: y,
+				width: imgWidth,
+				height: imgHeight,
+				draggable: true,
+				name: 'catpic',
+			});
+			pic.setAttr('category', categoryId);
+			pic.setAttr('imgId', imageId);
+			pic.offsetX(imgWidth >> 1);
+			pic.offsetY(imgHeight >> 1);
+
+			sandboxLayer.add(pic);
+			transformer.remove();
+			sandboxLayer.add(transformer);
+			transformer.nodes([pic]);
+		}
+	}
+
       function removeSelected() {
           transformer.nodes().forEach(function (currentValue, index, arr) {
               currentValue.destroy();
@@ -645,6 +695,52 @@
 		});
 		sandboxLayer = new Konva.Layer();
 		backgroundLayer = new Konva.Layer();
+
+		const container = stage.container();
+
+		container.addEventListener('dragover', function (e) {
+			e.preventDefault();
+		});
+
+		container.addEventListener('drop', function (e) {
+			e.preventDefault();
+			const pointerPosition = stage.getPointerPosition();
+
+			const imageURL = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+			const catIdAttr = e.dataTransfer.getData('catId');
+			const imgIdAttr = e.dataTransfer.getData('imgId');
+			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, e.layerX, e.layerY), notifyViewer);
+/*
+			const img = new window.Image();
+			img.src = imageURL;
+
+			img.onload = function () {
+				var [imgWidth, imgHeight] = calcScaledImageWidthHeight(img);
+				const konvaImage = new Konva.Image({
+					image: img,
+//					x: pointerPosition.x,
+//					y: pointerPosition.y,
+					x: e.layerX,
+					y: e.layerY,
+					draggable: true,
+					width: imgWidth,
+					height: imgHeight,
+					name: 'catpic',
+				});
+//				pic.setAttr('category', categoryId);
+//				pic.setAttr('imgId', imageId);
+				konvaImage.offsetX(konvaImage.width() >> 1);
+				konvaImage.offsetY(konvaImage.height() >> 1);
+//				konvaImage.offsetX(konvaImage.width());
+
+				sandboxLayer.add(konvaImage);
+//				sandboxLayer.draw();
+				transformer.remove();
+				sandboxLayer.add(transformer);
+				transformer.nodes([konvaImage]);
+			};
+*/
+		});
 
 		transformer = new Konva.Transformer({
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
@@ -908,11 +1004,11 @@
 
 	window.addEventListener('resize', recalcSandboxSizes, true);
 
-	const updateConnectionState = function(connected) {
+	const updateConnectionState = function(connected, middle = false) {
 	<% if (clientMode) { %>
-		let imgSrc = connected ? "/images/svg/connectionStatusConnected.svg" : "/images/svg/connectionStatusDisconnected.svg";
+		let imgSrc = connected ? "/images/svg/connectionStatusConnected.svg" : (middle ? "/images/connect.gif" : "/images/svg/connectionStatusDisconnected.svg");
 		$("#connectionStatusImg").attr("src",imgSrc);
-		let statusLabel = connected ? "Сессия активна" : "Сессия неактивна";
+		let statusLabel = connected ? "Сессия активна" : (middle ? "Соединяем..." :"Сессия неактивна");
 		$("#connectionStatusLabel").text(statusLabel);
 		if (connected) {
 			$("#connectionStatusLabel").addClass('connectionEstablishet');
@@ -1021,20 +1117,22 @@
 	};
 
 	const inviteClient = function() {
-      $.ajax({
-        type: "POST",
-        url: "/session/init"
-      }).done(function(res) {
-        console.log('invited');
-		copyInliteLinkToClipboard(res);
-		showInvitePopup(res);
-		launchPeer(res.opponentSessionId);
-
 		var inviteClientBtn = $('#inviteClientBtn');
-		var anchor = inviteClientBtn.find('a')[0];
-		anchor.text = "Ссылка скопирована";
-		inviteClientBtn.off('click');
-      });
+		inviteClientBtn.addClass("pressed");
+		$.ajax({
+			type: "POST",
+			url: "/session/init"
+		}).done(function(res) {
+			console.log('invited');
+			copyInliteLinkToClipboard(res);
+			showInvitePopup(res);
+			launchPeer(res.opponentSessionId);
+
+			inviteClientBtn.removeClass("pressed");
+			var anchor = inviteClientBtn.find('a')[0];
+			anchor.text = "Ссылка скопирована";
+			inviteClientBtn.off('click');
+		});
 	};
 
 	const onConnectionClosed = function() {
@@ -1059,11 +1157,24 @@
 		}
 		myPeer?.destroy();
 		onConnectionClosed();
+		sessionStorage.clear();
 	}
 
 	const launchPeer = function(sessionId, opponentSessionId) {
 		console.log("launchPeer", sessionId, opponentSessionId);
+/*
+		if (sessionStorage.getItem("activeSession") === "true") {
+			console.log("Была перезагрузка страницы");
+			myPeer = sessionStorage.getItem("sessionPeer");
+			myConn = sessionStorage.getItem("sessionConnect");
+		}
+
+		if (myPeer && myConn) {
+			return true;
+		}
+*/
 		myPeer = new Peer(sessionId, {
+//		myPeer = new Peer(undefined, {
 			host: '<%=locals.peerserverhost %>',
 			port: <%=locals.peerserverport %>,
 			path: '<%=locals.peerserverpath %>',
@@ -1072,11 +1183,18 @@
 
 		myPeer.on('open', function(id) {
 			console.log('My peer ID is: ' + id);
+			updateConnectionState(false, true);
+			
+
+//			sessionStorage.setItem("activeSession", "true");
+//			sessionStorage.setItem("sessionPeer", myPeer);
+
 			if (typeof opponentSessionId !== 'undefined') {
 				console.log("Trying to connect to opponent session");
 				myConn = myPeer.connect(opponentSessionId);
 				myConn.on('open', function(){
 					console.log(myConn);
+//					sessionStorage.setItem("sessionConnect", myConn);
 					myConn.send('hi!');
 					updateConnectionState(true);
 					selectFirstCategoryFromStart();
@@ -1182,6 +1300,18 @@
 		element.addClass('popup');
 		element.css({top: elTop, left: elLeft, width: elementWidth + 'px', height: elementHeight + 'px'});
 		element.show();
+	};
+
+	const processHotKeys = (event) => {
+		let altPart = (event.altKey) ? "alt_" : "";
+		let ctrlPart = (event.ctrlKey) ? "ctrl_" : "";
+		let shiftPart = (event.shiftKey) ? "shift_" : "";
+		let hotkeyKey = altPart + ctrlPart + shiftPart + event.key;
+		const selector = "*[hotkey='" + hotkeyKey + "']";
+		const hotkeyElement = document.querySelector(selector);
+		if (hotkeyElement) {
+			hotkeyElement.click();
+		}
 	};
 
   $( function() {
@@ -1324,10 +1454,50 @@
 	$('#inviteClientBtn').click(inviteClient);
   });
 
+/*
 	window.onbeforeunload = function (event) {
 		disconnectPeer();
 		return null;
 	};
+*/
+	let unloadProcessed = false;
+	const unloadProcessor = function() {
+		console.log("unloadProcessor", unloadProcessed);
+		if (!unloadProcessed) {
+			unloadProcessed = true;
+			disconnectPeer();
+			sessionStorage.setItem("activeSession", "false");
+		}
+	}
+
+/*
+	window.addEventListener("beforeunload", (event) => {
+//		console.log("Пользователь покидает страницу (возможно, обновление).");
+//		// Можно сохранить данные, отправить статистику и т.д.
+		unloadProcessor();
+		return null;
+	});
+*/
+
+	window.addEventListener("unload", () => {
+		unloadProcessor();
+		return null;
+	});
+
+	window.addEventListener("keydown", (event) => {
+		processHotKeys(event);
+		if ("Delete" === event.code) {
+		}
+	});
+
+	document.addEventListener('dragstart', function (e) {
+		if (e.target.classList.contains('category_image')) {
+			e.dataTransfer.setData('text/uri-list', e.target.src);
+			e.dataTransfer.setData('catId', e.target.attributes.getNamedItem('catId').value);
+			e.dataTransfer.setData('imgId', e.target.attributes.getNamedItem('imgId').value);
+		}
+	});
+
   </script>
 </head>
 <body>
@@ -1354,7 +1524,7 @@
 					<p class="control_line" onclick="skewSelected()">
 						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>Отразить
 					</p>
-					<p class="control_line" onclick="removeSelected()">
+					<p class="control_line" onclick="removeSelected()" hotkey="Delete">
 						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
 					</p>
 					<p class="control_line" onclick="removeAllConfirmation()">
@@ -1378,7 +1548,7 @@
 			<% } else { %>
 				<!-- CONNECTION STATUS SECTION START -->
 				<span id="connectionStatusSection">
-					<div><img id='connectionStatusImg' src="/images/svg/connectionStatusDisconnected.svg"/></div>
+					<div><img id='connectionStatusImg' src="/images/svg/connectionStatusDisconnected.svg" width="61" height="54" /></div>
 					<div id="connectionStatusLabel" class="connectionStatusLabel">Сессия неактивна</div>
 				</span>
 				<!-- CONNECTION STATUS SECTION END -->
@@ -1420,7 +1590,7 @@
 						for (const [imageIndex, image] of category.images.entries()) {
 					%>
 							<span class="imageCell">
-								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" onclick="imageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="imageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
 							</span>
 					<%  } %>
 					</div>

@@ -206,6 +206,10 @@ body {
     align-items: center;
     height: 60px;
 }
+.inviteBtn:hover {
+    background-color: #091721;
+}
+
 .inviteBtn a {
 	text-decoration: none;
 }
@@ -215,6 +219,12 @@ body {
 .btn1 {
 	background-color: #244A65;
 	color: #F2D2A9;
+}
+.pressed {
+	background-color: #6F899B;
+}
+.pressed:hover {
+	background-color: #6F899B;
 }
 .btn1 a{
 	color: #F2D2A9;
