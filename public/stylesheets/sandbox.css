@@ -359,16 +359,32 @@ body {
 	bottom: -20px;
 }
 .slideLeft {
-	background-image: url("/images/svg/slideLeft.svg");
+/*	background-image: url("/images/svg/slideLeft.svg");*/
+	background-image: url("/images/svg/expandArrowLeft.svg");
 	background-size: 17px 37px;
+/*	filter: drop-shadow(2px 1px 1px #6F899B);*/
+	filter: drop-shadow(2px 1px 1px #6F899B55);
+/*	filter: drop-shadow(2px 1px 1px rgba(#6F, #89, #9B, 0.4));*/
 }
 .slideLeft:hover {
-	background-image: url("/images/svg/slideLeftHover.svg");
+/*	background-image: url("/images/svg/slideLeftHover.svg");*/
+	background-image: url("/images/svg/expandArrowLeftHover.svg");
 	background-size: 17px 37px;
 }
 
 .slideRight {
-	background-image: url("/images/svg/slideRight.svg");
+/*	background-image: url("/images/svg/slideRight.svg");*/
+	background-image: url("/images/svg/expandArrowLeft.svg");
+	transform: rotate(180deg);
+	background-size: 17px 37px;
+/*	filter: drop-shadow(-2px 1px 1px #6F899B);*/
+	filter: drop-shadow(-2px 1px 1px #6F899B55);
+/*	filter: drop-shadow(-2px 1px 1px rgba(#6F, #89, #9B, 0.4));*/
+}
+.slideRight:hover {
+/*	background-image: url("/images/svg/slideRight.svg");*/
+	background-image: url("/images/svg/expandArrowLeftHover.svg");
+	transform: rotate(180deg);
 	background-size: 17px 37px;
 }
 
