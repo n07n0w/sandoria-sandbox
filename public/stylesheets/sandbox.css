@@ -369,6 +369,7 @@ body {
 .slideLeft:hover {
 /*	background-image: url("/images/svg/slideLeftHover.svg");*/
 	background-image: url("/images/svg/expandArrowLeftHover.svg");
+	filter: none;
 	background-size: 17px 37px;
 }
 
@@ -386,6 +387,7 @@ body {
 	background-image: url("/images/svg/expandArrowLeftHover.svg");
 	transform: rotate(180deg);
 	background-size: 17px 37px;
+	filter: none;
 }
 
 .screenshot {
