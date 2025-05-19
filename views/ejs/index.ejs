@@ -972,7 +972,7 @@
 		let iterationHolderWidth = sandboxWidth * iterationHolderSandboxWidthPercent / 100.0;
 		let iterationHolderLeft = leftSideWidth + ((sandboxWidth - iterationHolderWidth) >> 1);
 		$("#iterationsHolder").css('width', iterationHolderWidth + 'px');
-		$("#iterationsHolder").css('bottom', ((screenHeight - sandboxHeight) >> 1) + 'px');
+		$("#iterationsHolder").css('bottom', (((screenHeight - sandboxHeight) >> 1) + 2) + 'px');
 		$("#iterationsHolder").css('left', iterationHolderLeft + 'px');
 		$("#slideToggle").css('left', (iterationHolderWidth  >> 1) + 'px');
 		
