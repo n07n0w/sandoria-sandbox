@@ -500,3 +500,11 @@ body {
     bottom: 40px;
     left: 44px;
 }
+.fly-img {
+	position: absolute;
+	width: 100px;
+	height: auto;
+	pointer-events: none;
+	transition: all 1s ease-in-out;
+	z-index: 9999;
+}

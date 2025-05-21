@@ -178,12 +178,28 @@
       return jsonData;
     };
 
-    const imageSelect = function (jsonObject, notify = false) {
-	  loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
-	  if (notify) {
-	    notifyImageSelect(jsonObject);
-	  }
+	const imageSelect = function (jsonObject, notify = false) {
+//		let img = document.querySelector(`img.category_image[src='${jsonObject.imgSource}']`);
+		let img = document.querySelector(`img.category_image[imgid='${jsonObject.imageId}']`);
+		let stageMiddleX = stage.width() >> 1;
+		let stageMiddleY = stage.height() >> 1;
+		let newImageX = stageMiddleX - (img.offsetWidth >> 1);
+		let newImageY = stageMiddleY - (img.offsetHeight >> 1);
+
+		animateImageMoveToCanvasCenter(img, newImageX, newImageY);
+		if ( categoryImageMaxPanelWidth == $("#categoryImages").width() ) {
+			requestAnimationFrame((timestamp) => animateBackground(timestamp, $("#categoryImages")[0], 1));
+		}
+
+		setTimeout(() => {
+			loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+		}, 1100);
+//		loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+		if (notify) {
+			notifyImageSelect(jsonObject);
+		}
 	};
+
 
     const positionedImageSelect = function (jsonObject, notify = false) {
 	  loadPositionedImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId, jsonObject.x, jsonObject.y);
@@ -465,7 +481,7 @@
 		image.onload = function() {
 			var [imgWidth, imgHeight] = calcScaledImageWidthHeight(image);
 			let stageMiddleX = stage.width() >> 1;
-			let stageMiddleY = stage.height() >> 1;;
+			let stageMiddleY = stage.height() >> 1;
 			
 			let newImageX = stageMiddleX - (imgWidth >> 1);
 			let newImageY = stageMiddleY - (imgHeight >> 1);
@@ -1498,7 +1514,53 @@
 		}
 	});
 
+	const animateBackground = (timestamp, el, direction) => {
+		opacity = parseFloat(el.style.opacity);
+		if (Number.isNaN(opacity)) {
+			opacity = 1.0;
+		}
+		opacity = opacity  - .05 * direction;
+		el.style.opacity = opacity;
+		if (0 >= opacity) {
+			direction = -direction;
+		} 
+		if (1 > opacity) {
+			requestAnimationFrame((newtimestamp) => animateBackground(newtimestamp, el, direction));
+		}
+	};
+
+	const animateImageMoveToCanvasCenter = (img, targetCanvasX, targetCanvasY) => {
+		const flyingImg = img.cloneNode(true);
+		flyingImg.classList.add('fly-img');
+		document.body.appendChild(flyingImg);
+
+		const rect = img.getBoundingClientRect();
+		const startX = rect.left + window.scrollX;
+		const startY = rect.top + window.scrollY;
+
+		flyingImg.style.left = `${startX}px`;
+		flyingImg.style.top = `${startY}px`;
+
+		const cnv = $('canvas')[0];
+		const canvasRect = cnv.getBoundingClientRect();
+		const endX = canvasRect.left + targetCanvasX;
+		const endY = canvasRect.top + targetCanvasY;
+
+		requestAnimationFrame(() => {
+			flyingImg.style.left = `${endX}px`;
+			flyingImg.style.top = `${endY}px`;
+			flyingImg.style.transform = 'scale(0.3)';
+			flyingImg.style.opacity = '0.5';
+		});
+
+		setTimeout(() => {
+			flyingImg.remove();
+		}, 1000);
+	
+	};
+
   </script>
+
 </head>
 <body>
 	<a href="<%=constants.MAIN_SITE_URL %>" target="sandoria_main" class="homeBtn"><img src="/images/svg/home.svg" width="16px" height="16px"/></a>
