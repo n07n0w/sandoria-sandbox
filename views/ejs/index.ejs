@@ -78,6 +78,7 @@
 	  var sandboxBorderLeftWidth = <%=sandboxBorderLeftWidth %>;
 	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
 	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
+	  var clientMode = <%=clientMode %>;
 
 
 	  var maxImageWidth  = <%=maxImageWidth %>;
@@ -178,8 +179,13 @@
       return jsonData;
     };
 
+	const handleImageSelect = function(jsonObject, notify = false) {
+		if (clientMode) {
+			imageSelect(jsonObject, notify);
+		}
+	}
+
 	const imageSelect = function (jsonObject, notify = false) {
-//		let img = document.querySelector(`img.category_image[src='${jsonObject.imgSource}']`);
 		let img = document.querySelector(`img.category_image[imgid='${jsonObject.imageId}']`);
 		let stageMiddleX = stage.width() >> 1;
 		let stageMiddleY = stage.height() >> 1;
@@ -492,7 +498,8 @@
 				y: newImageY,
 				width: imgWidth,
 				height: imgHeight,
-				draggable: true,
+//				draggable: true,
+				draggable: clientMode ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
@@ -522,7 +529,8 @@
 				y: y,
 				width: imgWidth,
 				height: imgHeight,
-				draggable: true,
+//				draggable: true,
+				draggable: clientMode ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
@@ -761,6 +769,8 @@
 
 		transformer = new Konva.Transformer({
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+			resizeEnabled: (clientMode) ? true : false,
+			rotateEnabled: (clientMode) ? true : false,
 			borderStroke: '#244A65',
 			anchorStroke: '#244A65',
 			boundBoxFunc: (oldBox, newBox) => {
@@ -785,48 +795,52 @@
 		});
 
 		transformer.on('transform', function(evt) {
-			if (notifyViewer) {
-				var event = transformEvent(evt);
-				notifyTransform(event);
+			if (clientMode) {
+				if (notifyViewer) {
+					var event = transformEvent(evt);
+					notifyTransform(event);
+				}
 			}
 		});
 		transformer.on('dragmove', function(evt) {
-			const boxes = transformer.nodes().map((node) => node.getClientRect());
+			if (clientMode) {
+				const boxes = transformer.nodes().map((node) => node.getClientRect());
 
-			// Get the total bounding box of all shapes
-			const box = getTotalBox(boxes);
+				// Get the total bounding box of all shapes
+				const box = getTotalBox(boxes);
 
-			// Keep shapes within stage boundaries
-			transformer.nodes().forEach((node) => {
-				const absPos = node.getAbsolutePosition();
+				// Keep shapes within stage boundaries
+				transformer.nodes().forEach((node) => {
+					const absPos = node.getAbsolutePosition();
 
-				// Calculate node position relative to group bounding box
-				const offsetX = box.x - absPos.x;
-				const offsetY = box.y - absPos.y;
+					// Calculate node position relative to group bounding box
+					const offsetX = box.x - absPos.x;
+					const offsetY = box.y - absPos.y;
 
-				// Adjust position if outside boundaries
-				const newAbsPos = {
-					...absPos
-				};
+					// Adjust position if outside boundaries
+					const newAbsPos = {
+						...absPos
+					};
 
-				if (box.x < sandboxBorderLeftWidth) {
-					newAbsPos.x = -offsetX + sandboxBorderLeftWidth;
+					if (box.x < sandboxBorderLeftWidth) {
+						newAbsPos.x = -offsetX + sandboxBorderLeftWidth;
+					}
+					if (box.y < sandboxBorderTopHeight) {
+						newAbsPos.y = -offsetY + sandboxBorderTopHeight;
+					}
+					if (box.x + box.width > stage.width() - sandboxBorderRightWidth) {
+						newAbsPos.x = stage.width() - box.width - offsetX - sandboxBorderRightWidth;
+					}
+					if (box.y + box.height > stage.height() - sandboxBorderBottomHeight) {
+						newAbsPos.y = stage.height() - box.height - offsetY - sandboxBorderBottomHeight;
+					}
+
+					node.setAbsolutePosition(newAbsPos);
+				});
+				if (notifyViewer) {
+					var dragEvent = shapeDragEvent(evt);
+					notifyShapeDrag(dragEvent);
 				}
-				if (box.y < sandboxBorderTopHeight) {
-					newAbsPos.y = -offsetY + sandboxBorderTopHeight;
-				}
-				if (box.x + box.width > stage.width() - sandboxBorderRightWidth) {
-					newAbsPos.x = stage.width() - box.width - offsetX - sandboxBorderRightWidth;
-				}
-				if (box.y + box.height > stage.height() - sandboxBorderBottomHeight) {
-					newAbsPos.y = stage.height() - box.height - offsetY - sandboxBorderBottomHeight;
-				}
-
-				node.setAbsolutePosition(newAbsPos);
-			});
-			if (notifyViewer) {
-				var dragEvent = shapeDragEvent(evt);
-				notifyShapeDrag(dragEvent);
 			}
 		});
 
@@ -1676,7 +1690,7 @@
 						for (const [imageIndex, image] of category.images.entries()) {
 					%>
 							<span class="imageCell">
-								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="imageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
 							</span>
 					<%  } %>
 					</div>
