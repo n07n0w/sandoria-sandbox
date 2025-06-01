@@ -79,6 +79,7 @@
 	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
 	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
 	  var clientMode = <%=clientMode %>;
+	  const ratio = 8;
 
 
 	  var maxImageWidth  = <%=maxImageWidth %>;
@@ -352,11 +353,16 @@
     };
 
     const shapeDrag = function(jsonData) {
+		const stageWidth = stage.width();
+		const stageHeight = stage.height();
+		
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
           return node.getType() === 'Shape' && node._id == nd._id;
         });
-        node?.setAttrs({x: nd.x, y: nd.y});
+		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
+//        node?.setAttrs({x: nd.x, y: nd.y});
+        node?.setAttrs({x: nodeAbsCoordinates.x, y: nodeAbsCoordinates.y});
       });
     };
 
@@ -373,12 +379,16 @@
       var ri = evt.target;
       var jsonData = {};
       jsonData['event']  = 'shapeDrag';
+		const stageWidth = stage.width();
+		const stageHeight = stage.height();
+
       var nodes = [];
       ri._nodes.forEach((node) => {
+		let relativeCoordinates = toRelative(node.attrs.x, node.attrs.y, stageWidth, stageHeight);
         nodes.push({
           _id: node._id,
-          x: node.attrs.x,
-          y: node.attrs.y})
+          x: relativeCoordinates.x,
+          y: relativeCoordinates.y})
       });
       jsonData['nodes'] = nodes;
       jsonData['notify'] = false;
@@ -404,6 +414,10 @@
       var transformNode = sandboxLayer.findOne(node => {
         return node.getType() === 'Group' && node._id == transform._id;
       });
+		const ch = stage.height();
+		const cw = stage.width();
+		const transformAbsoluteCoords = toAbsolute(transform.x, transform.y, cw, ch);
+
       transformNode?.setAttrs({
         offsetX:  transform.offsetX,
         offsetY:  transform.offsetY,
@@ -412,27 +426,38 @@
         scaleY:   transform.scaleY,
         skewX:    transform.skewX,
         skewY:    transform.skewY,
-        x:        transform.x,
-        y:        transform.y,
+//        x:        transform.x,
+        x:        transformAbsoluteCoords.x,
+//        y:        transform.y,
+        y:        transformAbsoluteCoords.y,
       });
 
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
           return node.getType() === 'Shape' && node._id == nd._id;
         });
+		const nodeAbsoluteCoords = toAbsolute(nd.x, nd.y, cw, ch);
+
         node?.setAttrs({
           rotation: nd.rotation,
           scaleX: nd.scaleX,
           scaleY: nd.scaleY,
           skewX:  nd.skewX,
           skewY:  nd.skewY,
-          x:      nd.x,
-          y:      nd.y});
+//          x:      nd.x,
+          x:      nodeAbsoluteCoords.x,
+//          y:      nd.y});
+          y:      nodeAbsoluteCoords.y});
       });
     };
 
     const transformEvent = function (evt) {
       var ri = evt.currentTarget;
+
+		const ch = stage.height();
+		const cw = stage.width();
+		
+		const transformRlativeCoords = toRelative(ri.attrs.x, ri.attrs.y, cw, ch);
 
       var transform = {
         _id: ri._id,
@@ -443,14 +468,17 @@
         scaleY:   ri.attrs.scaleY,
         skewX:    ri.attrs.skewX,
         skewY:    ri.attrs.skewY,
-        x:        ri.attrs.x,
-        y:        ri.attrs.y,
+//        x:        ri.attrs.x,
+        x:        transformRlativeCoords.x,
+//        y:        ri.attrs.y,
+        y:        transformRlativeCoords.y,
       };
 
       var jsonData = {};
       jsonData['event']  = 'transform';
       var nodes = [];
       ri._nodes.forEach((node) => {
+		const nodeRlativeCoords = toRelative(node.attrs.x, node.attrs.y, cw, ch);
         nodes.push({
           _id: node._id,
           rotation: node.attrs.rotation,
@@ -458,8 +486,10 @@
           scaleY: node.attrs.scaleY,
           skewX: node.attrs.skewX,
           skewY: node.attrs.skewY,
-          x:     node.attrs.x,
-          y:     node.attrs.y})
+//          x:     node.attrs.x,
+          x:     nodeRlativeCoords.x,
+//          y:     node.attrs.y})
+          y:     nodeRlativeCoords.y})
       });
       jsonData['nodes'] = nodes;
 	  jsonData['transform'] = transform;
@@ -485,20 +515,24 @@
 	function loadImage(imgSource, categoryId, imageId) {
 		image = new Image();
 		image.src = imgSource;
+		const ch = stage.height();
+		const cw = stage.width();
+		let stageMiddleX = stage.width() >> 1;
+		let stageMiddleY = stage.height() >> 1;
+
 		image.onload = function() {
 			var [imgWidth, imgHeight] = calcScaledImageWidthHeight(image);
-			let stageMiddleX = stage.width() >> 1;
-			let stageMiddleY = stage.height() >> 1;
+			const ih = ch / ratio;	// Image Scaled Height
+			const iw = imgWidth * ih / imgHeight;	// Image Scaled Width
 			
-			let newImageX = stageMiddleX - (imgWidth >> 1);
-			let newImageY = stageMiddleY - (imgHeight >> 1);
+			let newImageX = stageMiddleX - (iw >> 1);
+			let newImageY = stageMiddleY - (ih >> 1);
 			var pic = new Konva.Image({
 				image: image,
 				x: newImageX,
 				y: newImageY,
-				width: imgWidth,
-				height: imgHeight,
-//				draggable: true,
+				width: iw,
+				height: ih,
 				draggable: clientMode ? true : false,
 				name: 'catpic',
 			});
@@ -514,29 +548,32 @@
 	}
 
 	function loadPositionedImage(imgSource, categoryId, imageId, x, y) {
+		const ch = stage.height();
+		const cw = stage.width();
+		const absoluteCoordinates = toAbsolute(x, y, cw, ch);
+
 		image = new Image();
 		image.src = imgSource;
 		image.onload = function() {
 			var [imgWidth, imgHeight] = calcScaledImageWidthHeight(image);
-//			let stageMiddleX = stage.width() >> 1;
-//			let stageMiddleY = stage.height() >> 1;;
-			
-//			let newImageX = stageMiddleX - (imgWidth >> 1);
-//			let newImageY = stageMiddleY - (imgHeight >> 1);
+			const ih = ch / ratio;	// Image Scaled Height
+			const iw = imgWidth * ih / imgHeight;	// Image Scaled Width
+
 			var pic = new Konva.Image({
 				image: image,
-				x: x,
-				y: y,
-				width: imgWidth,
-				height: imgHeight,
-//				draggable: true,
+//				x: x,
+				x: absoluteCoordinates.x,
+//				y: y,
+				y: absoluteCoordinates.y,
+				width: iw,
+				height: ih,
 				draggable: clientMode ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
-			pic.offsetX(imgWidth >> 1);
-			pic.offsetY(imgHeight >> 1);
+			pic.offsetX(iw >> 1);
+			pic.offsetY(ih >> 1);
 
 			sandboxLayer.add(pic);
 			transformer.remove();
@@ -706,6 +743,19 @@
 		};
 	}
 
+	const toRelative = (x, y, width, height) => {
+		return {
+			x: x / width,
+			y: y / width};
+	};
+
+	const toAbsolute = (rx, ry, width, height) => {
+		return {
+			x: rx * width,
+			y: ry * width};
+	};
+
+
 	function initStage() {
 		let containerElement = $('#container');
 		let selectionRectangle = new Konva.Rect({
@@ -734,7 +784,10 @@
 			const imageURL = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
 			const catIdAttr = e.dataTransfer.getData('catId');
 			const imgIdAttr = e.dataTransfer.getData('imgId');
-			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, e.layerX, e.layerY), notifyViewer);
+			const relativeCoordinates = toRelative(e.layerX, e.layerY, stage.width(), stage.height());
+			
+//			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, e.layerX, e.layerY), notifyViewer);
+			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, relativeCoordinates.x, relativeCoordinates.y), notifyViewer);
 /*
 			const img = new window.Image();
 			img.src = imageURL;
