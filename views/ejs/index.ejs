@@ -651,6 +651,26 @@
 		}
 	}
 
+	const scaleAllSceneImagesOnCanvasResize = (oldW, oldH, newW, newH) => {
+		if (0 < oldW && 0 < oldH) {
+			var nodes = sandboxLayer.find(node => {
+				return 'Image' === node.className;
+			});
+			nodes.forEach(function (node, index, arr) {
+				const coordinates = scale(node.x(), node.y(), oldW, oldH, newW, newH);
+				const box = scale(node.width(), node.height(), oldW, oldH, newW, newH);
+				const offset = scale(node.offsetX(), node.offsetY(), oldW, oldH, newW, newH);
+
+				node.x(coordinates.x);
+				node.y(coordinates.y);
+				node.width(box.x);
+				node.height(box.y);
+				node.offsetX(offset.x);
+				node.offsetY(offset.y);
+			});
+		}
+	};
+
       function levelUp() {
           transformer.nodes().forEach(function (currentValue, index, arr) {
               currentValue.moveUp();
@@ -755,6 +775,11 @@
 			y: ry * width};
 	};
 
+	const scale = (x, y, oldW, oldH, newW, newH) => {
+		return {
+			x: x * newW / oldW,
+			y: y * newH / oldH};
+	};
 
 	function initStage() {
 		let containerElement = $('#container');
@@ -1028,7 +1053,10 @@
 
 	}
 
-	const recalcSandboxSizes = function() {
+	var oldSandboxWidth  = -1;
+	var oldSandboxHeight = -1;
+	
+	const recalcSandboxSizes = function(evt) {
 		let screenWidth = window.innerWidth;
 		let screenHeight = window.innerHeight;
 		const sizeRelations = 7/5;
@@ -1073,6 +1101,7 @@
 		slider.css('top', ((categoryImageHeight >> 1) - (topCategoriesHeight >> 1) ) + 'px');
 
 		if (typeof stage !== 'undefined') {
+			scaleAllSceneImagesOnCanvasResize(oldSandboxWidth, oldSandboxHeight, sandboxWidth, sandboxHeight);
 			stage.width(sandboxWidth);
 			stage.height(sandboxHeight);
 			if (typeof background !== 'undefined') {
@@ -1084,6 +1113,8 @@
 
 			stage.draw();
 		}
+		oldSandboxWidth  = sandboxWidth;
+		oldSandboxHeight = sandboxHeight;
 	};
 
 	window.addEventListener('resize', recalcSandboxSizes, true);
