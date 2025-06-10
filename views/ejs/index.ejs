@@ -220,7 +220,8 @@
       var node = sandboxLayer.findOne(node => {
         return node.getType() === 'Shape' && node._id == jsonData.shape._id;
       });
-      node.fire('click');
+//      node.fire('click');
+	  transformer.nodes([node]);
     };
 
     const shapeClickEvent = function (shape) {
@@ -367,11 +368,16 @@
     };
 
     const meDrag = function(jsonData) {
+		const stageWidth = stage.width();
+		const stageHeight = stage.height();
+
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
           return node.getType() === 'Shape' && node._id == nd._id;
         });
-        node?.setAttrs({x: nd.x, y: nd.y});
+		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
+//        node?.setAttrs({x: nd.x, y: nd.y});
+        node?.setAttrs({x: nodeAbsCoordinates.x, y: nodeAbsCoordinates.y});
       });
     };
 
@@ -926,6 +932,7 @@
 		sandboxLayer.add(selectionRectangle);
 
 		sandboxLayer.on('click', function(evt) {
+			console.log(evt);
 			var shape = evt.target;
 			var group = evt.currentTarget;
 			if (notifyViewer) {
@@ -933,13 +940,14 @@
 				notifyShapeClick(clickEvent);
 			}
 		});
+/*
 		sandboxLayer.on('dragmove', function(evt) {
 			if (notifyViewer) {
 				var event = meDragEvent(evt);
 				notifyMeDrag(event);
 			}
 		});
-
+*/
 		stage.add(backgroundLayer, sandboxLayer);
 
 		backgroundImage = new Image();
