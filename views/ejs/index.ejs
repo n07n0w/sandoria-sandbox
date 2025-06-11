@@ -402,14 +402,18 @@
     };
 
     const meDragEvent = function (evt) {
+		const stageWidth = stage.width();
+		const stageHeight = stage.height();
+
       var me = evt.target;
+	  let relativeCoordinates = toRelative(me.attrs.x, me.attrs.y, stageWidth, stageHeight);
       var jsonData = {};
       jsonData['event']  = 'meDrag';
       var nodes = [];
       nodes.push({
         _id: me._id,
-        x: me.attrs.x,
-        y: me.attrs.y});
+        x: relativeCoordinates.x,
+        y: relativeCoordinates.y});
       jsonData['nodes'] = nodes;
       jsonData['notify'] = false;
       return jsonData;
@@ -940,14 +944,50 @@
 				notifyShapeClick(clickEvent);
 			}
 		});
-/*
+
 		sandboxLayer.on('dragmove', function(evt) {
-			if (notifyViewer) {
-				var event = meDragEvent(evt);
-				notifyMeDrag(event);
+			if (clientMode) {
+				let node = evt.target;
+				const boxes = [node.getClientRect()];
+
+				// Get the total bounding box of all shapes
+				const box = getTotalBox(boxes);
+
+				// Keep shapes within stage boundaries
+//				transformer.nodes().forEach((node) => {
+					const absPos = node.getAbsolutePosition();
+
+					// Calculate node position relative to group bounding box
+					const offsetX = box.x - absPos.x;
+					const offsetY = box.y - absPos.y;
+
+					// Adjust position if outside boundaries
+					const newAbsPos = {
+						...absPos
+					};
+
+					if (box.x < sandboxBorderLeftWidth) {
+						newAbsPos.x = -offsetX + sandboxBorderLeftWidth;
+					}
+					if (box.y < sandboxBorderTopHeight) {
+						newAbsPos.y = -offsetY + sandboxBorderTopHeight;
+					}
+					if (box.x + box.width > stage.width() - sandboxBorderRightWidth) {
+						newAbsPos.x = stage.width() - box.width - offsetX - sandboxBorderRightWidth;
+					}
+					if (box.y + box.height > stage.height() - sandboxBorderBottomHeight) {
+						newAbsPos.y = stage.height() - box.height - offsetY - sandboxBorderBottomHeight;
+					}
+
+					node.setAbsolutePosition(newAbsPos);
+//				});
+				if (notifyViewer) {
+					var event = meDragEvent(evt);
+					notifyMeDrag(event);
+				}
 			}
 		});
-*/
+
 		stage.add(backgroundLayer, sandboxLayer);
 
 		backgroundImage = new Image();
