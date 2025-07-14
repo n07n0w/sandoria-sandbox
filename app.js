@@ -1,5 +1,8 @@
+require('./console-logger');
 var createError = require('http-errors');
 var express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const initializeDatabase = require('./init-db');
@@ -17,6 +20,9 @@ console.log('Database URL:', process.env.JAWSDB_MARIA_URL ? 'Set' : 'Not set');
 
 // Create express app
 var app = express();
+
+//const server = http.createServer(app);
+//const wss = new WebSocket.Server({ server }); // WebSocket на тому ж сервері
 
 app.locals.constants = constants;
 app.locals.peerserverhost = constants.PEER_SERVER_HOST;
@@ -98,5 +104,49 @@ async function initializeApp() {
     }
 }
 
+const clients = new Map(); // clientId → WebSocket
+
+async function initWebSocket(server) {
+    var wss = new WebSocket.Server({ server }); // WebSocket на тому ж сервері
+    console.log('WebSocket:', wss);
+
+    wss.on('connection', ws => {
+        console.log('New client connected');
+        let clientId = null;
+
+        ws.on('message', (message) => {
+            const data = JSON.parse(message.toString());
+            console.log('New message', data);
+
+            // 1. Перше повідомлення від клієнта: реєстрація ID
+            if (data.type === 'register') {
+                clientId = data.clientId;
+                clients.set(clientId, ws);
+                console.log(`🟢 Client registered: ${clientId}`);
+                return;
+            }
+
+            // 2. Інші типи — signaling (offer/answer/ice)
+            const targetSocket = clients.get(data.targetId);
+            if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                targetSocket.send(JSON.stringify({
+                    type: data.type,
+                    sdp: data.sdp,
+                    candidate: data.candidate,
+                    fromId: clientId
+                }));
+            }
+        });
+
+        ws.on('close', () => {
+            if (clientId) {
+                clients.delete(clientId);
+                console.log(`🔴 Client disconnected: ${clientId}`);
+            }
+        });
+    });
+}
+
+
 // Export both the app and the initialization function
-module.exports = { app, initializeApp };
+module.exports = { app, initializeApp, initWebSocket };

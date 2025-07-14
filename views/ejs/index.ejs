@@ -37,7 +37,6 @@
 */%>
 
 
-  <script src="/javascripts/peerjs.min.js"></script>
 
 <style>
 .ui-dialog-titlebar {
@@ -56,6 +55,9 @@
 	<script src="/javascripts/jquery.slidein.js"></script>
 	<% } %>
 
+
+	<script src="/javascripts/p2pConnectionGlobal.js"></script>
+	
   <script type="text/javascript">
       const leftSideWidth = 208;	// ширина левой части не мняется!
       var sandboxBackground = "";
@@ -109,9 +111,10 @@
       myConn?.send(ev);
     };
 
-    const notifyImageSelect = function (jsonData) {
-      sendEvent(jsonData);
-    };
+	const notifyImageSelect = (jsonData) => {
+		saveKonvaState();
+		sendEvent(jsonData);
+	};
 
     const notifyShapeClick = function (jsonData) {
       sendEvent(jsonData);
@@ -821,38 +824,7 @@
 			const imgIdAttr = e.dataTransfer.getData('imgId');
 			const relativeCoordinates = toRelative(e.layerX, e.layerY, stage.width(), stage.height());
 			
-//			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, e.layerX, e.layerY), notifyViewer);
 			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, relativeCoordinates.x, relativeCoordinates.y), notifyViewer);
-/*
-			const img = new window.Image();
-			img.src = imageURL;
-
-			img.onload = function () {
-				var [imgWidth, imgHeight] = calcScaledImageWidthHeight(img);
-				const konvaImage = new Konva.Image({
-					image: img,
-//					x: pointerPosition.x,
-//					y: pointerPosition.y,
-					x: e.layerX,
-					y: e.layerY,
-					draggable: true,
-					width: imgWidth,
-					height: imgHeight,
-					name: 'catpic',
-				});
-//				pic.setAttr('category', categoryId);
-//				pic.setAttr('imgId', imageId);
-				konvaImage.offsetX(konvaImage.width() >> 1);
-				konvaImage.offsetY(konvaImage.height() >> 1);
-//				konvaImage.offsetX(konvaImage.width());
-
-				sandboxLayer.add(konvaImage);
-//				sandboxLayer.draw();
-				transformer.remove();
-				sandboxLayer.add(transformer);
-				transformer.nodes([konvaImage]);
-			};
-*/
 		});
 
 		transformer = new Konva.Transformer({
@@ -1289,13 +1261,46 @@
 			console.log('invited');
 			copyInliteLinkToClipboard(res);
 			showInvitePopup(res);
-			launchPeer(res.opponentSessionId);
+			saveP2PDataToLocalStorage(res.sessionId, res.opponentSessionId, false);
+			launchPeer(res.sessionId, res.opponentSessionId, false);
+//			launchPeer('1', '2', false);
 
 			inviteClientBtn.removeClass("pressed");
 			var anchor = inviteClientBtn.find('a')[0];
 			anchor.text = "Ссылка скопирована";
 			inviteClientBtn.off('click');
 		});
+	};
+
+	const saveP2PDataToLocalStorage = (clientId, targetId, initDataChannel) => {
+		const p2pSettings = {
+			clientId: clientId,
+			targetId: targetId,
+			initDataChannel: initDataChannel
+		};
+		console.log("saveP2PDataToLocalStorage", p2pSettings);
+		localStorage.setItem('p2psettings', JSON.stringify(p2pSettings));
+	};
+
+	const loadP2PDataFromLocalStorage = () => {
+		const p2pSettings = JSON.parse(localStorage.getItem('p2psettings'));
+		console.log("loadP2PDataFromLocalStorage", p2pSettings);
+		return p2pSettings;
+	};
+
+	const saveKonvaState = () => {
+		const data = stage.toJSON();
+		console.log("saveKonvaState", data);
+		localStorage.setItem('konvaAppState', JSON.stringify(data));
+	};
+
+	const loadKonvaState = () => {
+		const stored = localStorage.getItem('konvaAppState');
+		if (stored) {
+			let containerElement = $('#container')[0];
+//			stage.create(JSON.parse(stored), containerElement);
+			stage = Konva.Node.create(JSON.parse(stored), containerElement);
+		}
 	};
 
 	const onConnectionClosed = function() {
@@ -1307,37 +1312,68 @@
 	}
 
 	const onConnectionEstablished = function() {
+	<% if (!clientMode) { %>
 		var inviteClientBtn = $('#inviteClientBtn');
 		inviteClientBtn.addClass('closeSessionBtn');
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Завершить сессию";
 		inviteClientBtn.off('click').on('click', disconnectPeer);
+	<% } %>
 	}
 
 	const disconnectPeer = function(eventData) {
 		if (!eventData || !eventData.event) {
 			sendEvent(disconnectEvent());
 		}
-		myPeer?.destroy();
-		onConnectionClosed();
-		sessionStorage.clear();
+//		myPeer?.destroy();
+//		myConn?.close();
+//		onConnectionClosed();
+//		sessionStorage.clear();
 	}
 
-	const launchPeer = function(sessionId, opponentSessionId) {
-		console.log("launchPeer", sessionId, opponentSessionId);
-/*
-		if (sessionStorage.getItem("activeSession") === "true") {
-			console.log("Была перезагрузка страницы");
-			myPeer = sessionStorage.getItem("sessionPeer");
-			myConn = sessionStorage.getItem("sessionConnect");
+	function onMessage(data) {
+		console.log("✉️ Message:", data);
+		if (typeof data === 'object' && data.hasOwnProperty('event')) {
+			try {
+				eval(data.event)(data);
+			} catch (ex) {
+				console.log(ex);
+			}
 		}
+	}
 
-		if (myPeer && myConn) {
-			return true;
+	function onStatusChange(state) {
+		console.log("⚡ Status:", state);
+		if (state === 'connected') {
+			showStatus("✅ Подключено", "green");
+			updateConnectionState(true);
+			onConnectionEstablished();
+			selectFirstCategoryFromStart();
+		} else if (state === 'ws-closed') {
+		} else if (state === 'ws-reconnecting') {
+		} else if (state === 'disconnected') {
+			updateConnectionState(false);
+			showStatus("❌ Соединение потеряно", "red");
+		} else if (state === 'reconnecting') {
+			showStatus("🔄 Попытка повторного подключения...", "yellow");
 		}
-*/
+	}
+
+	const launchPeer = function(sessionId, opponentSessionId, isDataChannelInitiator = true) {
+		console.log("launchPeer", sessionId, opponentSessionId);
+//		const myConn = startP2PConnection(sessionId, opponentSessionId, onMessage, onStatusChange);
+		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+		myConn.send("Hi ${opponentSessionId}");
+
+		// Перевірити статус
+		if (myConn.isConnected()) {
+			myConn.send("Connected");
+		}
+	};
+
+	const launchPeerOld = function(sessionId, opponentSessionId) {
+		console.log("launchPeer", sessionId, opponentSessionId);
 		myPeer = new Peer(sessionId, {
-//		myPeer = new Peer(undefined, {
 			host: '<%=locals.peerserverhost %>',
 			port: <%=locals.peerserverport %>,
 			path: '<%=locals.peerserverpath %>',
@@ -1349,15 +1385,11 @@
 			updateConnectionState(false, true);
 			
 
-//			sessionStorage.setItem("activeSession", "true");
-//			sessionStorage.setItem("sessionPeer", myPeer);
-
 			if (typeof opponentSessionId !== 'undefined') {
 				console.log("Trying to connect to opponent session");
 				myConn = myPeer.connect(opponentSessionId);
 				myConn.on('open', function(){
 					console.log(myConn);
-//					sessionStorage.setItem("sessionConnect", myConn);
 					myConn.send('hi!');
 					updateConnectionState(true);
 					selectFirstCategoryFromStart();
@@ -1391,7 +1423,7 @@
 					reconnect_timer = setInterval(function() { 
 						if (connected===false && run_next===true) {
 							run_next = false;   // stop this bit rerunning before launchPeer has finished...
-							if (launchPeer(sessionId, opponentSessionId)===true) { 
+							if (launchPeer(sessionId, opponentSessionId, true)===true) { 
 								clearInterval(reconnect_timer); 
 							} else {
 								run_next == true;
@@ -1490,7 +1522,10 @@
 
     <% if (typeof sessionId !== 'undefined') { %>
 
-	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
+//	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
+	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
+//	loadKonvaState();
+//	launchPeer('2', '1', true);
 
     <% } %>
 
@@ -1585,9 +1620,6 @@
       dialog.dialog( "open" );
     });
 
-	closeInviteDialog = function() {
-		invitePopupDialog.dialog( "close" );
-	}
 	$("#slideToggle").click(function(){
 		$(this).toggleClass("slideUp");
 		$(this).toggleClass("slideDown");
@@ -1609,13 +1641,23 @@
 		categoryImagesSate ^= 1;
 	});
 	initStage();
+//	loadKonvaState();
 	recalcSandboxSizes();
 	$("#iterations").hide();
     <% if (!(typeof sessionId !== 'undefined')) { %>
 		selectFirstCategoryFromStart();
 	<% } %>
 	$('#inviteClientBtn').click(inviteClient);
+
+	var p2psettings = loadP2PDataFromLocalStorage();
+	if (p2psettings) {
+		launchPeer(p2psettings.clientId, p2psettings.targetId, p2psettings.initDataChannel);
+	}
   });
+
+	function closeInviteDialog() {
+		invitePopupDialog.dialog( "close" );
+	}
 
 /*
 	window.onbeforeunload = function (event) {
@@ -1631,7 +1673,7 @@
 			disconnectPeer();
 			sessionStorage.setItem("activeSession", "false");
 		}
-	}
+	};
 
 /*
 	window.addEventListener("beforeunload", (event) => {
@@ -1729,10 +1771,23 @@
 	
 	};
 
+	function showStatus(text, color) {
+		const el = document.getElementById("status");
+		if (!el) return;
+
+		el.textContent = `Статус: ${text}`;
+		el.style.backgroundColor = color || "gray";
+	}
+
   </script>
 
 </head>
 <body>
+
+<div id="status" style="padding: 8px; font-weight: bold; color: white; background: gray; width: fit-content; position: fixed">
+  Статус: неизвестный
+</div>
+
 	<a href="<%=constants.MAIN_SITE_URL %>" target="sandoria_main" class="homeBtn"><img src="/images/svg/home.svg" width="16px" height="16px"/></a>
 	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
 		<tr>
