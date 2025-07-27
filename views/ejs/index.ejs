@@ -56,10 +56,14 @@
 	<% } %>
 
 
+<%/*
 	<script src="/javascripts/p2pConnectionGlobal.js"></script>
+*/%>
+	<script src="/javascripts/p2pConnectionGlobalPromise.js"></script>
 	
   <script type="text/javascript">
       const leftSideWidth = 208;	// ширина левой части не мняется!
+	  var eventHistory = [];
       var sandboxBackground = "";
       var width = window.innerWidth;
       var height = window.innerHeight;
@@ -81,6 +85,7 @@
 	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
 	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
 	  var clientMode = <%=clientMode %>;
+	  var firstCategorySelected = false;
 	  const ratio = 8;
 
 
@@ -107,12 +112,32 @@
 	  var guest = false;
       <% } %>
 
-    const sendEvent = function (ev) {
-      myConn?.send(ev);
-    };
+	const sleep = (ms) => {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	};
+
+	const preProcessEvent = (ev) => {
+		if (!(ev.skipFromHistory || false) && !(ev.fromHistory || false)) {
+			if (0 > eventHistory.length && ev.historyCmpFn && ev.historyCmpFn(ev, eventHistory[eventHistory.length - 1])) {
+				eventHistory[eventHistory.length - 1] = ev;
+			} else {
+				eventHistory.push(ev);
+			}
+			saveKonvaState();
+		}
+		delete ev.skipFromHistory;
+		delete ev.fromHistory;
+		delete ev.historyCmpFn;
+		return ev;
+	};
+
+	const sendEvent = function (ev) {
+		ev = preProcessEvent(ev);
+		myConn?.send(ev);
+	};
 
 	const notifyImageSelect = (jsonData) => {
-		saveKonvaState();
+//		saveKonvaState();
 		sendEvent(jsonData);
 	};
 
@@ -219,19 +244,22 @@
 	  }
 	};
 
-    const shapeClick = function(jsonData) {
-      var node = sandboxLayer.findOne(node => {
-        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
-      });
+	const shapeClick = function(jsonData) {
+		var node = sandboxLayer.findOne(node => {
+//        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
+			return node.getType() === 'Shape' && node.getAttr('imgId') == jsonData.shape.img_id;
+		});
 //      node.fire('click');
-	  transformer.nodes([node]);
-    };
+		if (node)
+			transformer.nodes([node]);
+	};
 
     const shapeClickEvent = function (shape) {
       var jsonData = {};
       jsonData['event']  = 'shapeClick';
       var shapeObject = {};
       shapeObject['_id'] = shape._id;
+      shapeObject['img_id'] = shape.getAttr('imgId');
       jsonData['shape']  = shapeObject;
       jsonData['notify'] = false;
       return jsonData;
@@ -240,6 +268,7 @@
     const disconnectEvent = function () {
       var jsonData = {};
       jsonData['event']  = 'disconnectPeer';
+      jsonData['skipFromHistory']  = true;
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -338,6 +367,7 @@
     const removeAllEvent = function () {
       var jsonData = {};
       jsonData['event']  = 'removeAll';
+      jsonData['skipFromHistory']  = true;
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -362,7 +392,8 @@
 		
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -376,7 +407,8 @@
 
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -396,6 +428,7 @@
 		let relativeCoordinates = toRelative(node.attrs.x, node.attrs.y, stageWidth, stageHeight);
         nodes.push({
           _id: node._id,
+		  img_id: node.getAttr('imgId'),
           x: relativeCoordinates.x,
           y: relativeCoordinates.y})
       });
@@ -404,7 +437,12 @@
       return jsonData;
     };
 
+	const meDragEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'meDrag' && evt2.nodes[0]._id == evt1.nodes[0]._id);
+	};
+
     const meDragEvent = function (evt) {
+		console.log("meDragEvent", evt);
 		const stageWidth = stage.width();
 		const stageHeight = stage.height();
 
@@ -415,10 +453,12 @@
       var nodes = [];
       nodes.push({
         _id: me._id,
+		img_id: me.getAttr('imgId'),
         x: relativeCoordinates.x,
         y: relativeCoordinates.y});
       jsonData['nodes'] = nodes;
       jsonData['notify'] = false;
+      jsonData['historyCmpFn'] = meDragEventCmpFn;
       return jsonData;
     };
 
@@ -464,6 +504,10 @@
       });
     };
 
+	const transformEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'transform' && evt2.nodes[0]._id == evt1.nodes[0]._id);
+	};
+
     const transformEvent = function (evt) {
       var ri = evt.currentTarget;
 
@@ -507,6 +551,7 @@
       jsonData['nodes'] = nodes;
 	  jsonData['transform'] = transform;
       jsonData['notify'] = false;
+	  jsonData['historyCmpFn'] = transformEventCmpFn;
       return jsonData;
     };
 
@@ -595,13 +640,13 @@
 		}
 	}
 
-      function removeSelected() {
+      function removeSelected(data, notify = false) {
           transformer.nodes().forEach(function (currentValue, index, arr) {
               currentValue.destroy();
           });
           transformer.detach();
           sandboxLayer.draw();
-          if (notifyViewer) {
+          if (notify) {
             var event = removeSelectedEvent();
             notifyRemoveSelected(event);
           }
@@ -910,7 +955,7 @@
 		sandboxLayer.on('click', function(evt) {
 			console.log(evt);
 			var shape = evt.target;
-			var group = evt.currentTarget;
+//			var group = evt.currentTarget;
 			if (notifyViewer) {
 				var clickEvent = shapeClickEvent(shape);
 				notifyShapeClick(clickEvent);
@@ -1216,12 +1261,17 @@
       }
     };
 
+	const categorySelectEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'categorySelect' && evt2.categoryId == evt1.categoryId);
+	};
+
     const categorySelectEvent = function(categoryId, categoryName, notify) {
       var jsonData = {};
       jsonData['event'] = 'categorySelect';
       jsonData['categoryId'] = categoryId;
       jsonData['categoryName'] = categoryName;
       jsonData['notify'] = notify;
+	  jsonData['historyCmpFn'] = categorySelectEventCmpFn;
       return jsonData;
     };
 
@@ -1290,16 +1340,31 @@
 
 	const saveKonvaState = () => {
 		const data = stage.toJSON();
-		console.log("saveKonvaState", data);
-		localStorage.setItem('konvaAppState', JSON.stringify(data));
+//		console.log("saveKonvaState", data);
+		localStorage.setItem('konvaAppState', data);
+		const historyRecord = JSON.stringify(eventHistory);
+		localStorage.setItem('eventHistory', historyRecord);
+//		console.log(`History Record Size: ${historyRecord.length} bytes`);
 	};
 
-	const loadKonvaState = () => {
+	const loadKonvaStateOld = () => {
 		const stored = localStorage.getItem('konvaAppState');
 		if (stored) {
 			let containerElement = $('#container')[0];
 //			stage.create(JSON.parse(stored), containerElement);
 			stage = Konva.Node.create(JSON.parse(stored), containerElement);
+		}
+	};
+
+	const loadKonvaState = async function () {
+		const eventHistoryLS = localStorage.getItem('eventHistory');
+		eventHistory = JSON.parse(eventHistoryLS || '[]');
+		for (const event of eventHistory) {
+//		eventHistory.forEach(event => async {
+			event.fromHistory = true;
+			onMessage(event);
+			sendEvent(event);
+			await sleep(20);
 		}
 	};
 
@@ -1348,7 +1413,10 @@
 			showStatus("✅ Подключено", "green");
 			updateConnectionState(true);
 			onConnectionEstablished();
-			selectFirstCategoryFromStart();
+			if (!firstCategorySelected) {
+				selectFirstCategoryFromStart();
+				firstCategorySelected = true;
+			}
 		} else if (state === 'ws-closed') {
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
@@ -1359,101 +1427,24 @@
 		}
 	}
 
-	const launchPeer = function(sessionId, opponentSessionId, isDataChannelInitiator = true) {
+	const reLoadStateAfterReconnect = () => {
+		removeAll();
+		loadKonvaState();
+	};
+
+	const launchPeer = async function(sessionId, opponentSessionId, isDataChannelInitiator = true, onConnectionHandler) {
 		console.log("launchPeer", sessionId, opponentSessionId);
 //		const myConn = startP2PConnection(sessionId, opponentSessionId, onMessage, onStatusChange);
-		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
-		myConn.send("Hi ${opponentSessionId}");
+//		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+		myConn = await startP2PConnectionAsync(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+		if (onConnectionHandler) onConnectionHandler();
+		myConn.send(`Hi ${opponentSessionId}`);
 
 		// Перевірити статус
 		if (myConn.isConnected()) {
 			myConn.send("Connected");
 		}
 	};
-
-	const launchPeerOld = function(sessionId, opponentSessionId) {
-		console.log("launchPeer", sessionId, opponentSessionId);
-		myPeer = new Peer(sessionId, {
-			host: '<%=locals.peerserverhost %>',
-			port: <%=locals.peerserverport %>,
-			path: '<%=locals.peerserverpath %>',
-			secure: <%=locals.peerserversecure %>,
-		});
-
-		myPeer.on('open', function(id) {
-			console.log('My peer ID is: ' + id);
-			updateConnectionState(false, true);
-			
-
-			if (typeof opponentSessionId !== 'undefined') {
-				console.log("Trying to connect to opponent session");
-				myConn = myPeer.connect(opponentSessionId);
-				myConn.on('open', function(){
-					console.log(myConn);
-					myConn.send('hi!');
-					updateConnectionState(true);
-					selectFirstCategoryFromStart();
-				});
-				myConn.on('error', (err) => {
-					console.error('Ошибка соединения:', err);
-				});
-				myConn.on('data', function(data){
-					console.log("Connection data", data);
-					if (typeof data === 'object' && data.hasOwnProperty('event'))
-						try {
-							eval(data.event)(data);
-						} catch (ex) {
-							console.log(ex);
-						}
-				});
-				myConn.on('close', function() {
-					console.log("Connection closed");
-					updateConnectionState(false);
-					// if the clients connection closes set up a reconnect request loop - when the host takes back control
-					// the client will auto reconnect...
-					myPeer.destroy();   // destroy the link
-					connected = false;  // set the connected flag to false
-					conn = null;        // destroy the conn
-					myPeer = null;      // destroy the peer
-
-					// set a variable which means function calls to launchPeer will not overlap
-					var run_next = true;
-
-					// periodically attempt to reconnect
-					reconnect_timer = setInterval(function() { 
-						if (connected===false && run_next===true) {
-							run_next = false;   // stop this bit rerunning before launchPeer has finished...
-							if (launchPeer(sessionId, opponentSessionId, true)===true) { 
-								clearInterval(reconnect_timer); 
-							} else {
-								run_next == true;
-							}
-						}
-					}, 1000);
-				});
-			}
-		});
-
-		myPeer.on('connection', function(conn) {
-			onConnectionEstablished();
-			console.log(conn);
-			myConn = conn;
-			setTimeout(function() { 
-				disconnectPeer();
-			}, sessionConnectionTimeout);
-
-			conn?.on('data', function(data){
-				if (typeof data === 'object' && data.hasOwnProperty('event'))
-					try {
-						eval(data.event)(data);
-					} catch (ex) {
-						console.log(ex);
-					}
-			});
-		});
-
-		return true;
-	}; // END OF function launchPeer
 
 	const getElementWidth = function(element) {
 		let width = element.attr('width');
@@ -1523,8 +1514,7 @@
     <% if (typeof sessionId !== 'undefined') { %>
 
 //	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
-	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
-//	loadKonvaState();
+	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true, reLoadStateAfterReconnect);
 //	launchPeer('2', '1', true);
 
     <% } %>
@@ -1811,7 +1801,7 @@
 					<p class="control_line" onclick="skewSelected()">
 						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>Отразить
 					</p>
-					<p class="control_line" onclick="removeSelected()" hotkey="Delete">
+					<p class="control_line" onclick="removeSelected(null, true)" hotkey="Delete">
 						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
 					</p>
 					<p class="control_line" onclick="removeAllConfirmation()">
@@ -1877,7 +1867,7 @@
 						for (const [imageIndex, image] of category.images.entries()) {
 					%>
 							<span class="imageCell">
-								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="eager" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
 							</span>
 					<%  } %>
 					</div>
