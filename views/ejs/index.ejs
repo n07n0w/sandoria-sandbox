@@ -49,6 +49,23 @@
 	line-height: 120%;
 	margin: 0;
 }
+#progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.7); /* напівпрозорий чорний фон */
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2em;
+	z-index: 9999; /* поверх усього */
+	font-family: sans-serif;
+	pointer-events: none; /* щоб не заважало клікам (опційно) */
+}
+
 </style>
 
 	<% if (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined') { %>
@@ -1369,11 +1386,13 @@
 	};
 
 	const onConnectionClosed = function() {
+	<% if (!clientMode) { %>
 		var inviteClientBtn = $('#inviteClientBtn');
 		inviteClientBtn.removeClass('closeSessionBtn');
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Пригласить клиента";
 		inviteClientBtn.off('click').on('click', inviteClient);
+	<% } %>
 	}
 
 	const onConnectionEstablished = function() {
@@ -1391,9 +1410,10 @@
 			sendEvent(disconnectEvent());
 		}
 //		myPeer?.destroy();
-//		myConn?.close();
-//		onConnectionClosed();
-//		sessionStorage.clear();
+		myConn?.close();
+		onConnectionClosed();
+		sessionStorage.clear();
+		localStorage.clear();
 	}
 
 	function onMessage(data) {
@@ -1498,6 +1518,52 @@
 		if (hotkeyElement) {
 			hotkeyElement.click();
 		}
+	};
+
+	const loadSandboxWithProgress = async () => {
+		const images = Array.from(document.querySelectorAll('img[data-src]'));
+		const total = images.length;
+		let loaded = 0;
+
+		const updateProgress = () => {
+			const percent = Math.round((loaded / total) * 100);
+			document.getElementById('progress-value').textContent = percent;
+		};
+
+		const loadImage = (img) => {
+			return new Promise((resolve, reject) => {
+				const tempImg = new Image();
+				tempImg.onload = () => {
+					img.src = tempImg.src;
+					++loaded;
+					updateProgress();
+					resolve();
+				};
+				tempImg.onerror = reject;
+				tempImg.src = img.getAttribute('data-src');
+			});
+		};
+
+		const cores = navigator.hardwareConcurrency || 4; // fallback на 4, if brawser not support
+		const MAX_PARALLEL = cores;
+		console.log(`Logic code count: ${MAX_PARALLEL}`);
+
+		const queue = images.slice();
+		const workers = new Array(MAX_PARALLEL).fill(null).map(async () => {
+			while (queue.length > 0) {
+				const img = queue.shift();
+				try {
+					await loadImage(img);
+				} catch (e) {
+					console.error('Image load error', img.getAttribute('data-src'));
+				}
+			}
+		});
+
+		await Promise.all(workers);
+
+		console.log("All images loaded");
+		document.getElementById('progress').style.display = 'none';
 	};
 
   $( function() {
@@ -1638,6 +1704,8 @@
 		selectFirstCategoryFromStart();
 	<% } %>
 	$('#inviteClientBtn').click(inviteClient);
+
+	loadSandboxWithProgress();
 
 	var p2psettings = loadP2PDataFromLocalStorage();
 	if (p2psettings) {
@@ -1859,7 +1927,7 @@
 						for (let category of categories.values()) {
 					%>
 					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>" icon="<%= category.icon %>" inverticon="<%= category.invert_icon %>">
-						<img src="<%= category.icon %>"/>
+						<img data-src="<%= category.icon %>"/>
 					</span>
 					<div id="images_<%= category.id %>" class="images_hidden">
 					<%
@@ -1867,7 +1935,7 @@
 						for (const [imageIndex, image] of category.images.entries()) {
 					%>
 							<span class="imageCell">
-								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="eager" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+								<img class="category_image" data-src="<%= image.image %>" title="<%= image.title %>" loading="eager" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
 							</span>
 					<%  } %>
 					</div>
@@ -1891,6 +1959,8 @@
 			</td>
 		</td>
 	</table>
+
+<div id="progress">Загружено: <span id="progress-value">0</span>%</div>
 
 <div id="invite-dialog">
 	<div class="halign_center mtop20 mbottom20">
