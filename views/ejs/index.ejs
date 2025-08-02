@@ -1381,7 +1381,7 @@
 			event.fromHistory = true;
 			onMessage(event);
 			sendEvent(event);
-			await sleep(20);
+			await sleep(30);
 		}
 	};
 
@@ -1433,7 +1433,8 @@
 			showStatus("✅ Подключено", "green");
 			updateConnectionState(true);
 			onConnectionEstablished();
-			if (!firstCategorySelected) {
+			const eventHistoryLS = localStorage.getItem('eventHistory')
+			if (!firstCategorySelected && !eventHistoryLS) {
 				selectFirstCategoryFromStart();
 				firstCategorySelected = true;
 			}
@@ -1743,7 +1744,7 @@
 */
 
 	window.addEventListener("unload", () => {
-		unloadProcessor();
+//		unloadProcessor();
 		return null;
 	});
 
