@@ -213,6 +213,18 @@
       return jsonData;
     };
 
+    const restoreStateEvent = function(stageJson) {
+      var jsonData = {};
+      jsonData['event']  = 'restoreState';
+	  jsonData['stage']  = stageJson;
+      jsonData['notify'] = false;
+      return jsonData;
+    };
+
+	const restoreState = function (jsonObject, notify = false) {
+		stageFromJson(jsonObject.stage);
+	}
+
     const positionedImageSelectEvent = function(imgSource, categoryId, imageId, x, y) {
       var jsonData = {};
       jsonData['event']      = 'positionedImageSelect';
@@ -604,6 +616,7 @@
 			let newImageY = stageMiddleY - (ih >> 1);
 			var pic = new Konva.Image({
 				image: image,
+				src: image.src,
 				x: newImageX,
 				y: newImageY,
 				width: iw,
@@ -636,6 +649,7 @@
 
 			var pic = new Konva.Image({
 				image: image,
+				src: image.src,
 //				x: x,
 				x: absoluteCoordinates.x,
 //				y: y,
@@ -1032,6 +1046,9 @@
 			backgroundImage.height = stage.height();
 
 			background = new Konva.Image({
+				src: backgroundImage.src,
+				imgWidth: backgroundImage.width,
+				imgHeight: backgroundImage.height,
 				x: 0,
 				y: 0,
 				width: stage.width(),
@@ -1359,21 +1376,58 @@
 		const data = stage.toJSON();
 //		console.log("saveKonvaState", data);
 		localStorage.setItem('konvaAppState', data);
-		const historyRecord = JSON.stringify(eventHistory);
-		localStorage.setItem('eventHistory', historyRecord);
+//		const historyRecord = JSON.stringify(eventHistory);
+//		localStorage.setItem('eventHistory', historyRecord);
 //		console.log(`History Record Size: ${historyRecord.length} bytes`);
 	};
 
-	const loadKonvaStateOld = () => {
-		const stored = localStorage.getItem('konvaAppState');
-		if (stored) {
+	const stageFromJson = async (stageJson) => {
+		if (stageJson) {
 			let containerElement = $('#container')[0];
-//			stage.create(JSON.parse(stored), containerElement);
-			stage = Konva.Node.create(JSON.parse(stored), containerElement);
+			stage = Konva.Node.create(JSON.parse(stageJson), containerElement);
+
+			stage.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+				const imgWidth  = imageNode.getAttr('imgWidth'); // Retrieve the saved image width
+				const imgHeight = imageNode.getAttr('imgHeight'); // Retrieve the saved image height
+				if (imgWidth) {
+					image.width = imgWidth;
+				}
+				if (imgHeight) {
+					image.height = imgHeight;
+				}
+			});
 		}
 	};
 
-	const loadKonvaState = async function () {
+	const loadKonvaState = async () => {
+		const stored = localStorage.getItem('konvaAppState');
+		await stageFromJson(stored);
+/*
+		if (stored) {
+			let containerElement = $('#container')[0];
+			stage = Konva.Node.create(JSON.parse(stored), containerElement);
+
+			stage.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+			});
+		}
+*/
+	};
+
+	const loadKonvaStateNew = async function () {
 		const eventHistoryLS = localStorage.getItem('eventHistory');
 		eventHistory = JSON.parse(eventHistoryLS || '[]');
 		for (const event of eventHistory) {
@@ -1427,17 +1481,27 @@
 		}
 	}
 
-	function onStatusChange(state) {
+	const restoreOpponentStage = async () => {
+		const event = restoreStateEvent(stage.toJSON());
+		sendEvent(event);
+	};
+
+	async function onStatusChange(state) {
 		console.log("⚡ Status:", state);
 		if (state === 'connected') {
 			showStatus("✅ Подключено", "green");
 			updateConnectionState(true);
 			onConnectionEstablished();
+		<%if (clientMode) { %>
+//			await loadKonvaState();
+			await reLoadStateAfterReconnect();
+			await restoreOpponentStage();
 			const eventHistoryLS = localStorage.getItem('eventHistory')
 			if (!firstCategorySelected && !eventHistoryLS) {
 				selectFirstCategoryFromStart();
 				firstCategorySelected = true;
 			}
+		<% } %>
 		} else if (state === 'ws-closed') {
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
@@ -1581,7 +1645,8 @@
     <% if (typeof sessionId !== 'undefined') { %>
 
 //	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
-	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true, reLoadStateAfterReconnect);
+//	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true, reLoadStateAfterReconnect);
+	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
 //	launchPeer('2', '1', true);
 
     <% } %>
