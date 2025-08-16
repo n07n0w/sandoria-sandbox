@@ -218,11 +218,13 @@
       jsonData['event']  = 'restoreState';
 	  jsonData['stage']  = stageJson;
       jsonData['notify'] = false;
+	  jsonData['skipFromHistory']  = true;
       return jsonData;
     };
 
 	const restoreState = function (jsonObject, notify = false) {
 		stageFromJson(jsonObject.stage);
+//		loadKonvaState();
 	}
 
     const positionedImageSelectEvent = function(imgSource, categoryId, imageId, x, y) {
@@ -740,6 +742,27 @@
 		}
 	}
 
+	const scaleAllSceneImagesOnLayer = (layer, oldW, oldH, newW, newH) => {
+		if (0 < oldW && 0 < oldH) {
+			var nodes = layer.find(node => {
+				return 'Image' === node.className;
+			});
+			nodes.forEach(function (node, index, arr) {
+				const coordinates = scale(node.x(), node.y(), oldW, oldH, newW, newH);
+				const box = scale(node.width(), node.height(), oldW, oldH, newW, newH);
+				const offset = scale(node.offsetX(), node.offsetY(), oldW, oldH, newW, newH);
+
+				node.x(coordinates.x);
+				node.y(coordinates.y);
+				node.width(box.x);
+				node.height(box.y);
+				node.offsetX(offset.x);
+				node.offsetY(offset.y);
+			});
+		}
+	};
+
+/*
 	const scaleAllSceneImagesOnCanvasResize = (oldW, oldH, newW, newH) => {
 		if (0 < oldW && 0 < oldH) {
 			var nodes = sandboxLayer.find(node => {
@@ -758,6 +781,10 @@
 				node.offsetY(offset.y);
 			});
 		}
+	};
+*/
+	const scaleAllSceneImagesOnCanvasResize = (oldW, oldH, newW, newH) => {
+		scaleAllSceneImagesOnLayer(sandboxLayer, oldW, oldH, newW, newH);
 	};
 
       function levelUp() {
@@ -882,8 +909,8 @@
 			width: containerElement.width(),
 			height: containerElement.height(),
 		});
-		sandboxLayer = new Konva.Layer();
-		backgroundLayer = new Konva.Layer();
+		sandboxLayer = new Konva.Layer({name: 'sandboxLayer', id: 'sandboxLayer'});
+		backgroundLayer = new Konva.Layer({name: 'backgroundLayer', id: 'backgroundLayer'});
 
 		const container = stage.container();
 
@@ -1046,6 +1073,8 @@
 			backgroundImage.height = stage.height();
 
 			background = new Konva.Image({
+				name: 'backgroundImg',
+				id: 'backgroundImg',
 				src: backgroundImage.src,
 				imgWidth: backgroundImage.width,
 				imgHeight: backgroundImage.height,
@@ -1374,7 +1403,7 @@
 
 	const saveKonvaState = () => {
 		const data = stage.toJSON();
-//		console.log("saveKonvaState", data);
+		console.log("saveKonvaState", data);
 		localStorage.setItem('konvaAppState', data);
 //		const historyRecord = JSON.stringify(eventHistory);
 //		localStorage.setItem('eventHistory', historyRecord);
@@ -1383,10 +1412,32 @@
 
 	const stageFromJson = async (stageJson) => {
 		if (stageJson) {
-			let containerElement = $('#container')[0];
-			stage = Konva.Node.create(JSON.parse(stageJson), containerElement);
+//			let containerElement = $('#container')[0];
+			let containerElement = $('#containerHidden')[0];
+			const originalStage = stage;
+			const originalSandboxWidth = originalStage.width();
+			const originalSandboxHeight = originalStage.height();
+//			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
+			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
+			const sandboxLayerReload = stageReload.findOne('#sandboxLayer');
+			const backgroundLayerReload = stageReload.findOne('#backgroundLayer');
+			background = backgroundLayerReload.findOne('#backgroundImg');
 
-			stage.find('Image').forEach((imageNode) => {
+//			scaleAllSceneImagesOnLayer(sandboxLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
+//			scaleAllSceneImagesOnLayer(backgroundLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
+//			stage.width(originalSandboxWidth);
+//			stage.height(originalSandboxHeight);
+/*
+			if (typeof background !== 'undefined') {
+				backgroundImage.width = originalSandboxWidth;
+				backgroundImage.height = originalSandboxHeight;
+				background.width(originalSandboxWidth);
+				background.height(originalSandboxHeight);
+			}
+*/
+
+//			stage.find('Image').forEach((imageNode) => {
+			sandboxLayerReload.find('Image').forEach((imageNode) => {
 				const src = imageNode.getAttr('src'); // Retrieve the saved source
 				const image = new Image();
 				image.onload = () => {
@@ -1402,7 +1453,28 @@
 				if (imgHeight) {
 					image.height = imgHeight;
 				}
+
+				sandboxLayer.add(imageNode);
+				transformer.remove();
+				sandboxLayer.add(transformer);
+				transformer.nodes([imageNode]);
 			});
+
+			backgroundLayerReload.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+				image.width = originalSandboxWidth;
+				image.height = originalSandboxHeight;
+				imageNode.width(originalSandboxWidth);
+				imageNode.height(originalSandboxHeight);
+				backgroundImage = image;
+			});
+
 		}
 	};
 
@@ -1475,6 +1547,7 @@
 		if (typeof data === 'object' && data.hasOwnProperty('event')) {
 			try {
 				eval(data.event)(data);
+//				saveKonvaState();
 			} catch (ex) {
 				console.log(ex);
 			}
@@ -1505,6 +1578,7 @@
 		} else if (state === 'ws-closed') {
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
+			saveKonvaState();
 			updateConnectionState(false);
 			showStatus("❌ Соединение потеряно", "red");
 		} else if (state === 'reconnecting') {
@@ -1967,6 +2041,7 @@
 			</td>
 			<td id="sandbox">
 				<div id="container"></div>
+				<div id="containerHidden" style="display: none;"></div>
 			<% if (!clientMode) { %>
 				<div id="iterationsHolder">
 					<span id="slideToggle" class="slideUp"></span>
