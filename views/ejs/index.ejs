@@ -518,7 +518,8 @@
 
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+		  return node.getType() === 'Shape' && node.getAttr('imgId') == nd.img_id;
         });
 		const nodeAbsoluteCoords = toAbsolute(nd.x, nd.y, cw, ch);
 
@@ -569,6 +570,7 @@
 		const nodeRlativeCoords = toRelative(node.attrs.x, node.attrs.y, cw, ch);
         nodes.push({
           _id: node._id,
+		  img_id: node.attrs.imgId,
           rotation: node.attrs.rotation,
           scaleX: node.attrs.scaleX,
           scaleY: node.attrs.scaleY,
