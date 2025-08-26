@@ -5,7 +5,8 @@
     let closedManually = false;
     const pendingMessages = [];
 
-    const log = msg => console.log(`[${clientId}] ${msg}`);
+//    const log = msg => console.log(`[${clientId}] ${msg}`);
+	const log = msg => console.trace(`[${clientId}] ${msg}`);
 
     function sendMessage(data) {
       const text = typeof data === "string" ? data : JSON.stringify(data);
@@ -57,8 +58,12 @@
       };
     }
 
-    function setupPeerConnection() {
-      if (peerConnection) peerConnection.close();
+	function setupPeerConnection() {
+		log('setupPeerConnection()');
+		if (peerConnection) {
+			log('peerConnection.close()');
+			peerConnection.close();
+		}
 
       peerConnection = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
@@ -120,6 +125,7 @@
     }
 
     function close() {
+	log('close()');
       closedManually = true;
       if (onStatusChange) onStatusChange("closed");
       if (dataChannel) dataChannel.close();
