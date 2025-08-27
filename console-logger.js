@@ -8,6 +8,7 @@ const logDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
 const logFile = fs.createWriteStream(path.join(logDir, 'app.log'), { flags: 'a' });
+const traceFile = fs.createWriteStream(path.join(logDir, 'trace.log'), { flags: 'a' });
 
 // Масив методів, які хочемо дублювати
 ['log', 'error', 'warn', 'info'].forEach(method => {
@@ -18,5 +19,16 @@ const logFile = fs.createWriteStream(path.join(logDir, 'app.log'), { flags: 'a' 
     const timestamp = new Date().toISOString();
     const message = args.map(arg => util.format(arg)).join(' ');
     logFile.write(`[${timestamp}] [${method.toUpperCase()}] ${message}\n`);
+  };
+});
+
+['trace'].forEach(method => {
+  const original = console[method];
+  console[method] = function (...args) {
+    original.apply(console, args); // Вивід у stdout
+
+    const timestamp = new Date().toISOString();
+    const message = args.map(arg => util.format(arg)).join(' ');
+    traceFile.write(`[${timestamp}] [${method.toUpperCase()}] ${message}\n`);
   };
 });

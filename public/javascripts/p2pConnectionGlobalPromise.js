@@ -6,7 +6,25 @@
     const pendingMessages = [];
 
 //    const log = msg => console.log(`[${clientId}] ${msg}`);
-	const log = msg => console.trace(`[${clientId}] ${msg}`);
+//	const log = msg => console.trace(`[${clientId}] ${msg}`);
+	const log = (msg) => {
+		try {
+			const logMessage = `[${clientId}] ${msg}`;
+			console.trace(logMessage);
+			// Some code that might lead to an error or where you want a trace
+			throw new Error(logMessage);
+		} catch (e) {
+			const stackTrace = e.stack;
+//			navigator.sendBeacon('/log-trace', JSON.stringify({ trace: stackTrace, message: e.message}));
+			fetch('/log-trace', { // Replace '/log-trace' with your server endpoint
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ trace: stackTrace, message: e.message }),
+			});
+		}
+	};
 
     function sendMessage(data) {
       const text = typeof data === "string" ? data : JSON.stringify(data);

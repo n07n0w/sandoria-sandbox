@@ -35,7 +35,17 @@ const handleGetIndex = async (req, res) => {
 	});
 }
 
+const handleLogTrace = async (req, res) => {
+	const logEntry = req.body;
+	console.info(logEntry);
+//	const logMessage = `[${logEntry.timestamp}] Type: ${logEntry.type}, Message: ${logEntry.message}\nStack: ${logEntry.trace}\n\n`;
+	console.trace(logEntry);
+	res.status(200).send('Trace logged successfully');
+}
+
 /* GET home page. */
 router.get('/', handleGetIndex);
+
+router.post('/log-trace', handleLogTrace);
 
 module.exports = router;
