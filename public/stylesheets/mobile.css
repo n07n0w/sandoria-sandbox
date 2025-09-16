@@ -1,0 +1,142 @@
+﻿@media screen and (orientation: portrait) {
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    #rotate-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: #1e1e1e;
+      color: #fff;
+      text-align: center;
+      z-index: 9999;
+      padding: 5vw;
+      box-sizing: border-box;
+    }
+
+    .icon {
+      width: 40vw;       /* адаптивний розмір */
+      max-width: 300px;  /* обмеження */
+      margin-bottom: 4vh;
+    }
+
+    .text-title {
+      font-size: 6vw;
+/*      max-font-size: 28px;*/
+      font-weight: bold;
+      color: #e6c49c;
+      margin-bottom: 2vh;
+      text-align: center;
+    }
+
+    .text-sub {
+      font-size: 4vw;
+/*      max-font-size: 18px;*/
+      color: #fff;
+      line-height: 1.4em;
+      text-align: center;
+    }
+}
+
+@media screen and (orientation: landscape) {
+  #rotate-overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  #status {
+	display: none;
+  }
+  .control_line {
+	margin: 7px;
+  }
+  .control_panel {
+	padding-top: 0;
+	width: auto;
+  }
+  .control_line .label{
+	display: none;
+  }
+  .control_panel .icon {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+  .logo {
+	width: 32px;
+	margin-left: 7px !important;
+  }
+  .logo img {
+	width: 32px;
+	height: 32px;
+  }
+  .logo h2, .logo .slogan {
+	display: none;
+  }
+  .left_side_menu div {
+	margin: 0;
+  }
+  .inviteBtn {
+	width: 32px;
+	height: 32px;
+	margin-left: 7px !important;
+  }
+  .inviteBtn span {
+	display: none;
+  }
+  .inviteBtn .icon {
+	display: block;
+  }
+  .homeBtn {
+	display: none;
+  }
+  .left_side_menu {
+	width: 48px;
+  }
+  .h40 {
+	height: 12px;
+  }
+  .rsidecontent {
+/*	width: 166px;*/
+	width: 184px;
+  }
+  .topCategory {
+	width: 22px;
+	height: 22px;
+	display: flex;
+	align-items: center;
+  }
+  .topCategory img {
+	width: 17px;
+	height: 13px;
+  }
+  .imageCell {
+	width: 46px;
+	height: 60px;
+  }
+  #top_categories {
+    gap: 6px 6px;
+  } 
+  .lbottompanel {
+	left: 0;
+  }
+  .category_image {
+	max-width: 46px;
+	max-height: 60px;
+  }
+  #connectionStatusSection {
+	display: none;
+  }
+}

@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
 <link rel="stylesheet" href="/stylesheets/jquery.slidein.css">
 <link rel="stylesheet" href="/stylesheets/sandbox.css">
+<link rel="stylesheet" href="/stylesheets/mobile.css">
 
 
   <script src="/javascripts/jquery-3.7.1.js"></script>
@@ -79,7 +80,7 @@
 	<script src="/javascripts/p2pConnectionGlobalPromise.js"></script>
 	
   <script type="text/javascript">
-      const leftSideWidth = 208;	// ширина левой части не мняется!
+//      const leftSideWidth = 208;	// ширина левой части не мняется!
 	  var eventHistory = [];
       var sandboxBackground = "";
       var width = window.innerWidth;
@@ -209,6 +210,7 @@
       jsonData['imgSource']  = imgSource;
       jsonData['categoryId'] = categoryId;
 	  jsonData['imageId']    = imageId;
+	  jsonData['uuid']       = crypto.randomUUID();
       jsonData['notify']     = false;
       return jsonData;
     };
@@ -259,7 +261,7 @@
 		}
 
 		setTimeout(() => {
-			loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+			loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId, jsonObject.uuid);
 		}, 1100);
 //		loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
 		if (notify) {
@@ -278,7 +280,8 @@
 	const shapeClick = function(jsonData) {
 		var node = sandboxLayer.findOne(node => {
 //        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
-			return node.getType() === 'Shape' && node.getAttr('imgId') == jsonData.shape.img_id;
+////			return node.getType() === 'Shape' && node.getAttr('imgId') == jsonData.shape.img_id;
+			return node.getType() === 'Shape' && node.getAttr('uuid') == jsonData.shape.uuid;
 		});
 //      node.fire('click');
 		if (node)
@@ -291,6 +294,7 @@
       var shapeObject = {};
       shapeObject['_id'] = shape._id;
       shapeObject['img_id'] = shape.getAttr('imgId');
+      shapeObject['uuid'] = shape.getAttr('uuid');
       jsonData['shape']  = shapeObject;
       jsonData['notify'] = false;
       return jsonData;
@@ -424,7 +428,8 @@
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
 //          return node.getType() === 'Shape' && node._id == nd._id;
-		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') === nd.uuid;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -439,7 +444,8 @@
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
 //          return node.getType() === 'Shape' && node._id == nd._id;
-		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') === nd.uuid;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -460,6 +466,7 @@
         nodes.push({
           _id: node._id,
 		  img_id: node.getAttr('imgId'),
+		  uuid: node.getAttr('uuid'),
           x: relativeCoordinates.x,
           y: relativeCoordinates.y})
       });
@@ -485,6 +492,7 @@
       nodes.push({
         _id: me._id,
 		img_id: me.getAttr('imgId'),
+		uuid: me.getAttr('uuid'),
         x: relativeCoordinates.x,
         y: relativeCoordinates.y});
       jsonData['nodes'] = nodes;
@@ -496,7 +504,8 @@
     const transform = function(jsonData) {
       var transform = jsonData['transform'];
       var transformNode = sandboxLayer.findOne(node => {
-        return node.getType() === 'Group' && node._id == transform._id;
+//        return node.getType() === 'Group' && node._id == transform._id;
+          return node.getType() === 'Shape' && node.attrs.uuid == transform.uuid;
       });
 		const ch = stage.height();
 		const cw = stage.width();
@@ -519,7 +528,8 @@
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
 //          return node.getType() === 'Shape' && node._id == nd._id;
-		  return node.getType() === 'Shape' && node.getAttr('imgId') == nd.img_id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') == nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') == nd.uuid;
         });
 		const nodeAbsoluteCoords = toAbsolute(nd.x, nd.y, cw, ch);
 
@@ -542,6 +552,7 @@
 
     const transformEvent = function (evt) {
       var ri = evt.currentTarget;
+      var target = evt.target;
 
 		const ch = stage.height();
 		const cw = stage.width();
@@ -550,6 +561,7 @@
 
       var transform = {
         _id: ri._id,
+		uuid: target.attrs.uuid,
         offsetX:  ri.attrs.offsetX,
         offsetY:  ri.attrs.offsetY,
         rotation: ri.attrs.rotation,
@@ -571,6 +583,7 @@
         nodes.push({
           _id: node._id,
 		  img_id: node.attrs.imgId,
+		  uuid: node.attrs.uuid,
           rotation: node.attrs.rotation,
           scaleX: node.attrs.scaleX,
           scaleY: node.attrs.scaleY,
@@ -603,7 +616,7 @@
         return [width, height];
       }
 
-	function loadImage(imgSource, categoryId, imageId) {
+	function loadImage(imgSource, categoryId, imageId, uuid) {
 		image = new Image();
 		image.src = imgSource;
 		const ch = stage.height();
@@ -630,6 +643,7 @@
 			});
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
+			pic.setAttr('uuid',  uuid);
 			pic.offsetX(pic.width() >> 1);
 
 			sandboxLayer.add(pic);
@@ -898,6 +912,20 @@
 			x: x * newW / oldW,
 			y: y * newH / oldH};
 	};
+
+	function getCssRuleProperty(selector, property) {
+		for (const sheet of document.styleSheets) {
+			try {
+				for (const rule of sheet.cssRules) {
+					if (rule.selectorText === selector) {
+						return rule.style.getPropertyValue(property);
+					}
+				}
+			} catch (e) {
+			}
+		}
+		return null;
+	}
 
 	function initStage() {
 		let containerElement = $('#container');
@@ -1194,6 +1222,7 @@
 		let rSideContentHeight = $('.rsidecontent').height();
 		let minRsideWidth = rSideContentWidth + 10;
 
+		const leftSideWidth = $('.left_side_menu').width();
 		let sandboxWidth = screenWidth - leftSideWidth - minRsideWidth;
 		categoryImageMaxPanelWidth = screenWidth - leftSideWidth;
 		let sandboxHeight = sandboxWidth / sizeRelations;
@@ -1201,8 +1230,12 @@
 			sandboxHeight = screenHeight;
 			sandboxWidth = sandboxHeight * sizeRelations;
 		}
-		let rightSideWidth = screenWidth - leftSideWidth - sandboxWidth;
-		categoryImageMinPanelWidth = rightSideWidth - 2;
+//		let rightSideWidth = screenWidth - leftSideWidth - sandboxWidth;
+		const columnGap = getCssRuleProperty('.images_visible', 'column-gap');
+//		let rightSideWidth = 3 * $('.imageCell').width() + 2 * parseFloat($('.images_visible').css('column-gap'));
+		let rightSideWidth = 3 * $('.imageCell').width() + 2 * parseFloat(columnGap);
+//		categoryImageMinPanelWidth = rightSideWidth - 2;
+		categoryImageMinPanelWidth = rightSideWidth + 10;
 
 		let element = document.getElementById('sandbox');
 		element.width  = sandboxWidth + 'px';
@@ -1224,7 +1257,8 @@
 		element = document.getElementById('categoryImages');
 		let categoryImageHeight = screenHeight - rSideContentHeight;
 		element.style.height = categoryImageHeight + 'px';
-		element.style.width = (rSideContentWidth + 10) + 'px';
+//		element.style.width = (rSideContentWidth + 10) + 'px';
+		element.style.width = categoryImageMinPanelWidth + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -1829,11 +1863,13 @@
 		$(this).toggleClass("slideRight");
 		if (0 == categoryImagesSate) {
 			$("#categoryImages").animate({width: categoryImageMaxPanelWidth + 'px'}, "fast");
-			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+//			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMaxPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").addClass('shadow');
 		} else {
 			$("#categoryImages").animate({width: categoryImageMinPanelWidth + 'px'}, "fast");
-			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+//			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMinPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").removeClass('shadow');
 		}
 		categoryImagesSate ^= 1;
@@ -1999,39 +2035,53 @@
 				</div>
 				<div class="control_panel">
 					<p class="control_line" onclick="levelDown()">
-						<span class="icon"><img src="/images/svg/control_back.svg"></span>На задний план
+						<span class="icon"><img src="/images/svg/control_back.svg"></span>
+						<span class="label">На задний план</span>
 					</p>
 
 					<p class="control_line" onclick="levelUp()">
-						<span class="icon"><img src="/images/svg/control_forward.svg"></span>На передний план
+						<span class="icon"><img src="/images/svg/control_forward.svg"></span>
+						<span class="label">На передний план</span>
 					</p>
 					<p class="control_line" onclick="copySelected()">
-						<span class="icon"><img src="/images/svg/control_copy.svg"></span>Копировать
+						<span class="icon"><img src="/images/svg/control_copy.svg"></span>
+						<span class="label">Копировать</span>
 					</p>
 					<p class="control_line" onclick="skewSelected()">
-						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>Отразить
+						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>
+						<span class="label">Отразить</span>
 					</p>
 					<p class="control_line" onclick="removeSelected(null, true)" hotkey="Delete">
-						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
+						<span class="icon"><img src="/images/svg/control_delete.svg"></span>
+						<span class="label">Удалить</span>
 					</p>
 					<p class="control_line" onclick="removeAllConfirmation()">
-						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>Очистить все
+						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>
+						<span class="label">Очистить все</span>
 					</p>
 				</div>
 
 			<% if (!clientMode) { %>
+<!-- -->
+			<div class="lbottompanel">
+<!-- -->
 				<div class="spaces h40">&nbsp;</div>
 				<div class="inviteBtn btn1" id="inviteClientBtn">
+					<img class="icon" src="/images/svg/inviteClient.svg" title="Пригласить клиента" />
 					<span>
 						<p><a href="#">Пригласить клиента</a></p>
 					</span>
 				</div>
 				<div class="spaces h40">&nbsp;</div>
 				<div class="inviteBtn btn2" id="takeScreenshotBtn" onclick="saveStateToImage()">
+					<img class="icon" src="/images/svg/make_screenshot.svg" title="Сделать снимок" />
 					<span>
 						<p><a href="#">Сделать снимок</a></p>
 					</span>
 				</div>
+<!-- -->
+			</div>
+<!-- -->
 			<% } else { %>
 				<!-- CONNECTION STATUS SECTION START -->
 				<span id="connectionStatusSection">
@@ -2177,6 +2227,16 @@
   </div>
 </div> 
 </div>
+
+  <div id="rotate-overlay">
+    <img src="/images/svg/screen_rotate.svg" alt="Rotate device" class="icon">
+
+    <div class="text-title">Поверните устройство</div>
+    <div class="text-sub">
+      Песочница работает только<br>
+      в альбомной ориентации
+    </div>
+  </div>
 
 </body>
 </html>
