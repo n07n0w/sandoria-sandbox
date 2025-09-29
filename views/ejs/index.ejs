@@ -511,7 +511,7 @@
 		const cw = stage.width();
 		const transformAbsoluteCoords = toAbsolute(transform.x, transform.y, cw, ch);
 
-      transformNode?.setAttrs({
+        transformNode?.setAttrs({
         offsetX:  transform.offsetX,
         offsetY:  transform.offsetY,
         rotation: transform.rotation,
@@ -552,8 +552,7 @@
 
     const transformEvent = function (evt) {
       var ri = evt.currentTarget;
-      var target = evt.target;
-
+//      var target = evt.target;
 		const ch = stage.height();
 		const cw = stage.width();
 		
@@ -561,7 +560,8 @@
 
       var transform = {
         _id: ri._id,
-		uuid: target.attrs.uuid,
+//		uuid: target.attrs.uuid,
+		uuid:     ri.attrs.uuid,
         offsetX:  ri.attrs.offsetX,
         offsetY:  ri.attrs.offsetY,
         rotation: ri.attrs.rotation,
@@ -915,7 +915,7 @@
 			y: y * newH / oldH};
 	};
 
-	function getCssRuleProperty(selector, property) {
+	function getCssRulePropertyOld(selector, property) {
 		for (const sheet of document.styleSheets) {
 			try {
 				for (const rule of sheet.cssRules) {
@@ -928,6 +928,123 @@
 		}
 		return null;
 	}
+
+	function getCssRulePropertyOld1(selector, property) {
+		for (const sheet of document.styleSheets) {
+			try {
+				for (const rule of sheet.cssRules) {
+					// если это обычное правило
+					if (rule.selectorText === selector) {
+						return rule.style.getPropertyValue(property);
+					}
+
+					// если это @media
+					if (rule.media && window.matchMedia(rule.media.mediaText).matches) {
+						for (const subRule of rule.cssRules) {
+							if (subRule.selectorText === selector) {
+								return subRule.style.getPropertyValue(property);
+							}
+						}
+					}
+				}
+			} catch (e) {
+				// доступ до сторонніх стилів може кидати SecurityError
+			}
+		}
+		return null;
+	}
+
+
+	function getCssRuleProperty(selector, property) {
+		let lastNormal = null;
+		let lastImportant = null;
+
+		for (const sheet of document.styleSheets) {
+			let rules;
+			try {
+				// можуть кидати SecurityError для зовнішніх стилів — в такому випадку пропускаємо
+				rules = sheet.cssRules;
+			} catch (e) {
+				continue;
+			}
+			// не робимо "if (!rules) continue" — замість цього просто передамо в обробник
+			processRules(rules, true);
+		}
+
+		function normalizeSelectorText(sel) {
+			// прибираємо псевдо-класи/елементи (простий варіант) і trim
+			return sel.replace(/::?[\w-]+(?:\([^\)]*\))?/g, '').trim();
+		}
+
+		function selectorMatches(ruleSelectorText, targetSelector) {
+			if (!ruleSelectorText) return false;
+			const parts = ruleSelectorText.split(',').map(s => s.trim());
+			for (const p of parts) {
+				if (p === targetSelector) return true; // точна співпадіння
+				if (normalizeSelectorText(p) === targetSelector) return true; // наприклад ".rsideMin:hover" -> ".rsideMin"
+			}
+			return false;
+		}
+
+		function processRules(rules, applicable) {
+			if (!rules) return; // нічого робити
+			for (const rule of rules) {
+				// @media
+				if (rule.type === CSSRule.MEDIA_RULE) {
+					const mediaText = rule.media && rule.media.mediaText || rule.conditionText || '';
+					const matches = !!(mediaText && window.matchMedia(mediaText).matches);
+					processRules(rule.cssRules, applicable && matches);
+					continue;
+				}
+
+				// @supports
+				if (rule.type === CSSRule.SUPPORTS_RULE) {
+					let supportsMatch = true;
+					if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function') {
+						try {
+							// conditionText інколи називається по-різному в різних браузерах
+							const cond = rule.conditionText || rule.cssText || '';
+							supportsMatch = cond ? CSS.supports(cond) : true;
+						} catch (e) {
+							supportsMatch = true;
+						}
+					}
+					processRules(rule.cssRules, applicable && supportsMatch);
+					continue;
+				}
+
+				// @import
+				if (rule.type === CSSRule.IMPORT_RULE) {
+					try {
+						const imported = rule.styleSheet || rule.styleSheet;
+						if (imported) processRules(imported.cssRules, applicable);
+					} catch (e) { /* пропускаємо */ }
+					continue;
+				}
+
+				// звичайне стилеве правило
+				if (rule.type === CSSRule.STYLE_RULE) {
+					if (!applicable) continue;
+					if (selectorMatches(rule.selectorText, selector)) {
+						const val = rule.style.getPropertyValue(property);
+						if (!val) continue;
+						const priority = rule.style.getPropertyPriority(property); // 'important' або ''
+						if (priority === 'important') lastImportant = val.trim();
+						else lastNormal = val.trim();
+					}
+					continue;
+				}
+
+				// інші групи правил (якщо є вкладені cssRules)
+				if (rule.cssRules) {
+					try { processRules(rule.cssRules, applicable); } catch (e) { /* ignore */ }
+				}
+			}
+		}
+
+		return lastImportant !== null ? lastImportant : lastNormal;
+	}
+
 
 	function initStage() {
 		let containerElement = $('#container');
@@ -1246,6 +1363,33 @@
 		const categoryColumnCountInWidth = Math.floor((rightSideWidth + w2) / (w1 + w2));
 		rightSideWidth = Math.max(rightSideWidth, categoryColumnCountInWidth * (w1 + w2) - w2);
 		rSideContentElement.width(rightSideWidth);
+
+console.log({
+	'sandboxWidth' : sandboxWidth,
+	'sandboxHeight' : sandboxHeight,
+	'screenWidth' : screenWidth,
+	'screenHeight' : screenHeight,
+	'leftSideWidth' : leftSideWidth,
+	'rightSideWidth' : rightSideWidth,
+	'rSideContentWidth' : rSideContentWidth,
+	'w1' : w1,
+	'w2' : w2,
+	'categoryColumnCountInWidth' : categoryColumnCountInWidth});
+
+		sandboxWidth = screenWidth - rightSideWidth - leftSideWidth;
+		sandboxHeight = sandboxWidth / sizeRelations;
+		if (sandboxHeight > screenHeight) {
+			sandboxHeight = screenHeight;
+			sandboxWidth = sandboxHeight * sizeRelations;
+		}
+
+console.log({
+	'sandboxWidth' : sandboxWidth,
+	'sandboxHeight' : sandboxHeight,
+	'screenWidth' : screenWidth,
+	'screenHeight' : screenHeight,
+	'leftSideWidth' : leftSideWidth,
+	'rightSideWidth' : rightSideWidth, });
 /*
 		const columnGap = getCssRuleProperty('.images_visible', 'column-gap');
 		let rightSideWidth = 3 * $('.imageCell').width() + 2 * parseFloat(columnGap);
@@ -1276,6 +1420,7 @@
 //		element.style.width = (rSideContentWidth + 10) + 'px';
 //		const categoryImagesStyleRightShift = parseFloat(getCssRuleProperty('#categoryImages', 'right'));
 		element.style.width = (categoryImageMinPanelWidth - categoryImagesStyleRightShift) + 'px';
+//		element.style.width = categoryImageMinPanelWidth + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");

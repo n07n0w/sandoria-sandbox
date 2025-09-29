@@ -139,4 +139,7 @@
   #connectionStatusSection {
 	display: none;
   }
+  .rsideMin {
+	width: 186px;
+  }
 }
