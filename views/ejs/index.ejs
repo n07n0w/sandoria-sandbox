@@ -104,6 +104,7 @@
 	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
 	  var clientMode = <%=clientMode %>;
 	  var firstCategorySelected = false;
+	  var canDoctorEditImages = true;
 	  const ratio = 8;
 
 
@@ -242,7 +243,7 @@
     };
 
 	const handleImageSelect = function(jsonObject, notify = false) {
-		if (clientMode) {
+		if (clientMode || canDoctorEditImages) {
 			imageSelect(jsonObject, notify);
 		}
 	}
@@ -638,7 +639,7 @@
 				y: newImageY,
 				width: iw,
 				height: ih,
-				draggable: clientMode ? true : false,
+				draggable: (clientMode || canDoctorEditImages) ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
@@ -674,7 +675,7 @@
 				y: absoluteCoordinates.y,
 				width: iw,
 				height: ih,
-				draggable: clientMode ? true : false,
+				draggable: (clientMode || canDoctorEditImages) ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
@@ -807,10 +808,10 @@
           transformer.nodes().forEach(function (currentValue, index, arr) {
 //              currentValue.moveUp();
               currentValue.moveToTop();
-              if (notifyViewer) {
+//              if (notifyViewer) {
                 var event = levelUpEvent();
                 notifyLevelUp(event);
-              }
+//              }
           });
       }
 
@@ -818,10 +819,10 @@
           transformer.nodes().forEach(function (currentNode, index, arr) {
 //              currentNode.moveDown();
               currentNode.moveToBottom();
-              if (notifyViewer) {
+//              if (notifyViewer) {
                 var event = levelDownEvent();
                 notifyLevelDown(event);
-              }
+//              }
           });
       }
 
@@ -1081,8 +1082,8 @@
 
 		transformer = new Konva.Transformer({
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-			resizeEnabled: (clientMode) ? true : false,
-			rotateEnabled: (clientMode) ? true : false,
+			resizeEnabled: (clientMode || canDoctorEditImages) ? true : false,
+			rotateEnabled: (clientMode || canDoctorEditImages) ? true : false,
 			borderStroke: '#244A65',
 			anchorStroke: '#244A65',
 			boundBoxFunc: (oldBox, newBox) => {
@@ -1107,15 +1108,15 @@
 		});
 
 		transformer.on('transform', function(evt) {
-			if (clientMode) {
-				if (notifyViewer) {
+			if (clientMode || canDoctorEditImages) {
+//				if (notifyViewer) {
 					var event = transformEvent(evt);
 					notifyTransform(event);
-				}
+//				}
 			}
 		});
 		transformer.on('dragmove', function(evt) {
-			if (clientMode) {
+			if (clientMode || canDoctorEditImages) {
 				const boxes = transformer.nodes().map((node) => node.getClientRect());
 
 				// Get the total bounding box of all shapes
@@ -1149,10 +1150,10 @@
 
 					node.setAbsolutePosition(newAbsPos);
 				});
-				if (notifyViewer) {
+//				if (notifyViewer) {
 					var dragEvent = shapeDragEvent(evt);
 					notifyShapeDrag(dragEvent);
-				}
+//				}
 			}
 		});
 
@@ -1170,7 +1171,7 @@
 		});
 
 		sandboxLayer.on('dragmove', function(evt) {
-			if (clientMode) {
+			if (clientMode || canDoctorEditImages) {
 				let node = evt.target;
 				const boxes = [node.getClientRect()];
 
@@ -1205,10 +1206,10 @@
 
 					node.setAbsolutePosition(newAbsPos);
 //				});
-				if (notifyViewer) {
+//				if (notifyViewer) {
 					var event = meDragEvent(evt);
 					notifyMeDrag(event);
-				}
+//				}
 			}
 		});
 
