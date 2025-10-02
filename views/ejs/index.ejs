@@ -760,6 +760,9 @@
 	}
 
 	const scaleAllSceneImagesOnLayer = (layer, oldW, oldH, newW, newH) => {
+		if (oldW == newW && oldH == newH) {
+			return;
+		}
 		if (0 < oldW && 0 < oldH) {
 			var nodes = layer.find(node => {
 				return 'Image' === node.className;
@@ -1999,7 +2002,8 @@ console.log({
 
 	invitePopupDialog = $( "#invite-dialog" ).dialog({
 		autoOpen: false,
-		height: 453,
+//		height: 453,
+		height: "auto",
 		width: 643,
 	});
 
@@ -2320,7 +2324,7 @@ console.log({
 
 <div id="invite-dialog">
 	<div class="halign_center mtop20 mbottom20">
-		<img src="/images/svg/InfoMan.svg" />
+		<img class="infoMan" src="/images/svg/InfoMan.svg" />
 	</div>
 	<div class="halign_center">
 		<p class="invitepbс">Ссылка на песочницу</p>
@@ -2331,12 +2335,13 @@ console.log({
 	</div>
 	<div class="spaces" style="height: 32px;">&nbsp;</div>
 	<div class="halign_center">
-		<div class="inviteBtn btn1 mauto" onclick="closeInviteDialog();">
+		<div class="dialogBtn btn1 mauto" onclick="closeInviteDialog();">
 			<span>
 				<p><a href="#">Закрыть</a></p>
 			</span>
 		</div>
 	</div>
+	<div class="spaces" style="height: 20px;">&nbsp;</div>
 </div>
 
 <div id="clearall-confirm-dialog" width="437" height="272" style="display: none">

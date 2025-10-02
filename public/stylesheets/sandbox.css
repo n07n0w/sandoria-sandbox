@@ -198,24 +198,24 @@ body {
 	display: flex;
 	justify-content: center;	
 }
-.inviteBtn {
+.inviteBtn, .dialogBtn {
     display: flex;
     width: 170px;
     justify-content: center;
     align-items: center;
     height: 60px;
 }
-.inviteBtn:hover {
+.inviteBtn:hover, .dialogBtn:hover {
     background-color: #091721;
 }
 
-.inviteBtn a {
+.inviteBtn a, .dialogBtn a {
 	text-decoration: none;
 }
-.inviteBtn p {
+.inviteBtn p, .dialogBtn p {
 	width: 94px;
 }
-.inviteBtn .icon {
+.inviteBtn .icon, .dialogBtn .icon {
 	display: none;
 }
 .btn1 {
