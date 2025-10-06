@@ -818,6 +818,50 @@
           });
       }
 
+	const updateTransformerInteractionMode = () => {
+		if (transformer) {
+			transformer.resizeEnabled(clientMode || canDoctorEditImages);
+			transformer.rotateEnabled(clientMode || canDoctorEditImages);
+		}
+		if (sandboxLayer) {
+			sandboxLayer.draggable(clientMode || canDoctorEditImages);
+			var nodes = sandboxLayer.find(node => {
+				return 'Image' === node.className;
+			});
+			nodes.forEach(function (currentNode, index, arr) {
+				currentNode.draggable(clientMode || canDoctorEditImages);
+			});
+
+		}
+	};
+
+	const setSwitchInteractionButtonImg = () => {
+		const iconImgSrc = (canDoctorEditImages) ? "/images/svg/interactionModeOn.svg" : "/images/svg/interactionModeOff.svg" ;
+		$('#interaction_mode > .icon > img').attr("src", iconImgSrc);
+	};
+
+	const toggleSwitchInteractionButton = () => {
+		$("#interaction_mode").toggleClass("on");
+		setSwitchInteractionButtonImg();
+	};
+	
+	const switchInteractionModeOff = () => {
+		canDoctorEditImages = false;
+	};
+	const switchInteractionModeOn = () => {
+		canDoctorEditImages = true;
+	};
+
+	const switchIneractionMode = () => {
+		if (canDoctorEditImages) {
+			switchInteractionModeOff();
+		} else {
+			switchInteractionModeOn();
+		}
+		toggleSwitchInteractionButton();
+		updateTransformerInteractionMode();
+	};
+
       function levelDown() {
           transformer.nodes().forEach(function (currentNode, index, arr) {
 //              currentNode.moveDown();
@@ -1174,6 +1218,7 @@
 		});
 
 		sandboxLayer.on('dragmove', function(evt) {
+			console.log(evt);
 			if (clientMode || canDoctorEditImages) {
 				let node = evt.target;
 				const boxes = [node.getClientRect()];
@@ -2044,6 +2089,8 @@ console.log({
 	initStage();
 //	loadKonvaState();
 	recalcSandboxSizes();
+	setSwitchInteractionButtonImg();
+	updateTransformerInteractionMode();
 	$("#iterations").hide();
     <% if (!(typeof sessionId !== 'undefined')) { %>
 		selectFirstCategoryFromStart();
@@ -2099,6 +2146,7 @@ console.log({
 	});
 
 	document.addEventListener('dragstart', function (e) {
+		console.log(e);
 		if (e.target.classList.contains('category_image')) {
 			e.dataTransfer.setData('text/uri-list', e.target.src);
 			e.dataTransfer.setData('catId', e.target.attributes.getNamedItem('catId').value);
@@ -2201,6 +2249,13 @@ console.log({
 					<span class="slogan" style="color: #244A65">Песочная терапия онлайн</span>
 				</div>
 				<div class="control_panel">
+				<% if (!clientMode) { %>
+					<p class="control_line" id="interaction_mode" onclick="switchIneractionMode()">
+						<span class="icon"><img src="/images/svg/interactionModeOff.svg"></span>
+						<span class="label">Взаимодействие</span>
+					</p>
+				<% } %>
+
 					<p class="control_line" onclick="levelDown()">
 						<span class="icon"><img src="/images/svg/control_back.svg"></span>
 						<span class="label">На задний план</span>
@@ -2340,8 +2395,8 @@ console.log({
 				<p><a href="#">Закрыть</a></p>
 			</span>
 		</div>
-	</div>
 	<div class="spaces" style="height: 20px;">&nbsp;</div>
+	</div>
 </div>
 
 <div id="clearall-confirm-dialog" width="437" height="272" style="display: none">
