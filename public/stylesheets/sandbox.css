@@ -502,3 +502,6 @@ body {
 	bottom: 20px;
         left: 19px;
 }
+.control_line.on .label {
+	color: #244A65;
+}
