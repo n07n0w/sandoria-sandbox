@@ -78,7 +78,30 @@
 	<script src="/javascripts/p2pConnectionGlobal.js"></script>
 */%>
 	<script src="/javascripts/p2pConnectionGlobalPromise.js"></script>
-	
+	<script>
+	// Fallback stub: ensure startP2PConnectionAsync exists even if p2pConnectionGlobalPromise.js fails to load
+	(function(){
+		if (typeof window !== 'undefined') {
+			if (typeof window.startP2PConnectionAsync !== 'function') {
+				console.warn('[P2P] startP2PConnectionAsync missing – installing temporary stub. Check that /javascripts/p2pConnectionGlobalPromise.js loads successfully (network errors, 404, or JS errors may have prevented execution).');
+				window.startP2PConnectionAsync = async function stubStartP2PConnectionAsync(clientId, targetId, isInitiatorOfDataChannel, onMessageCallback, onStatusChange) {
+					console.warn('[P2P] Using stub startP2PConnectionAsync. Implemented script not loaded yet. Arguments:', { clientId, targetId, isInitiatorOfDataChannel });
+					if (typeof onStatusChange === 'function') {
+						try { onStatusChange('stub'); } catch(_) {}
+					}
+					return {
+						send: () => console.warn('[P2P][stub] send() called – no real connection established'),
+						isConnected: () => false,
+						close: () => console.warn('[P2P][stub] close() called – nothing to close')
+					};
+				};
+			} else {
+				// Optional diagnostics to confirm real implementation present
+				console.log('[P2P] startP2PConnectionAsync available (real implementation).');
+			}
+		}
+	})();
+	</script>
   <script type="text/javascript">
 //      const leftSideWidth = 208;	// ширина левой части не мняется!
 	  var eventHistory = [];
@@ -2464,3 +2487,4 @@ console.log({
 
 </body>
 </html>
+

@@ -47,6 +47,27 @@ const oneHour = 3_600_000 // 3600000msec => 1hour
 app.use(cookieParser());
 app.use(express.static('public', { maxAge: oneHour }));
 
+// Explicit route for stylesheets images to ensure jQuery UI icons are served
+app.use('/stylesheets/images', express.static(path.join(__dirname, 'public/stylesheets/images'), {
+    maxAge: oneHour,
+    etag: true,
+    lastModified: true
+}));
+
+// Additional fallback for direct image requests
+app.get('/stylesheets/images/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const imagePath = path.join(__dirname, 'public/stylesheets/images', filename);
+
+    // Check if file exists and serve it
+    res.sendFile(imagePath, (err) => {
+        if (err) {
+            console.error(`Image not found: ${imagePath}`);
+            res.status(404).send('Image not found');
+        }
+    });
+});
+
 // Configure session store based on environment
 let sessionStore;
 if (process.env.NODE_ENV === 'production') {
