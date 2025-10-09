@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
 <link rel="stylesheet" href="/stylesheets/jquery.slidein.css">
 <link rel="stylesheet" href="/stylesheets/sandbox.css">
+<link rel="stylesheet" href="/stylesheets/mobile.css">
 
 
   <script src="/javascripts/jquery-3.7.1.js"></script>
@@ -37,7 +38,6 @@
 */%>
 
 
-  <script src="/javascripts/peerjs.min.js"></script>
 
 <style>
 .ui-dialog-titlebar {
@@ -50,14 +50,38 @@
 	line-height: 120%;
 	margin: 0;
 }
+#progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.7); /* напівпрозорий чорний фон */
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2em;
+	z-index: 9999; /* поверх усього */
+	font-family: sans-serif;
+	pointer-events: none; /* щоб не заважало клікам (опційно) */
+}
+
 </style>
 
 	<% if (typeof sessionId !== 'undefined' && typeof opponentSessionId === 'undefined') { %>
 	<script src="/javascripts/jquery.slidein.js"></script>
 	<% } %>
 
+
+<%/*
+	<script src="/javascripts/p2pConnectionGlobal.js"></script>
+*/%>
+	<script src="/javascripts/p2pConnectionGlobalPromise.js"></script>
+	
   <script type="text/javascript">
-      const leftSideWidth = 208;	// ширина левой части не мняется!
+//      const leftSideWidth = 208;	// ширина левой части не мняется!
+	  var eventHistory = [];
       var sandboxBackground = "";
       var width = window.innerWidth;
       var height = window.innerHeight;
@@ -79,6 +103,8 @@
 	  var sandboxBorderRightWidth = <%=sandboxBorderRightWidth %>;
 	  var sessionConnectionTimeout = <%=sessionConnectionTimeout %>;
 	  var clientMode = <%=clientMode %>;
+	  var firstCategorySelected = false;
+	  var canDoctorEditImages = true;
 	  const ratio = 8;
 
 
@@ -105,13 +131,34 @@
 	  var guest = false;
       <% } %>
 
-    const sendEvent = function (ev) {
-      myConn?.send(ev);
-    };
+	const sleep = (ms) => {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	};
 
-    const notifyImageSelect = function (jsonData) {
-      sendEvent(jsonData);
-    };
+	const preProcessEvent = (ev) => {
+		if (!(ev.skipFromHistory || false) && !(ev.fromHistory || false)) {
+			if (0 > eventHistory.length && ev.historyCmpFn && ev.historyCmpFn(ev, eventHistory[eventHistory.length - 1])) {
+				eventHistory[eventHistory.length - 1] = ev;
+			} else {
+				eventHistory.push(ev);
+			}
+			saveKonvaState();
+		}
+		delete ev.skipFromHistory;
+		delete ev.fromHistory;
+		delete ev.historyCmpFn;
+		return ev;
+	};
+
+	const sendEvent = function (ev) {
+		ev = preProcessEvent(ev);
+		myConn?.send(ev);
+	};
+
+	const notifyImageSelect = (jsonData) => {
+//		saveKonvaState();
+		sendEvent(jsonData);
+	};
 
     const notifyShapeClick = function (jsonData) {
       sendEvent(jsonData);
@@ -164,9 +211,24 @@
       jsonData['imgSource']  = imgSource;
       jsonData['categoryId'] = categoryId;
 	  jsonData['imageId']    = imageId;
+	  jsonData['uuid']       = crypto.randomUUID();
       jsonData['notify']     = false;
       return jsonData;
     };
+
+    const restoreStateEvent = function(stageJson) {
+      var jsonData = {};
+      jsonData['event']  = 'restoreState';
+	  jsonData['stage']  = stageJson;
+      jsonData['notify'] = false;
+	  jsonData['skipFromHistory']  = true;
+      return jsonData;
+    };
+
+	const restoreState = function (jsonObject, notify = false) {
+		stageFromJson(jsonObject.stage);
+//		loadKonvaState();
+	}
 
     const positionedImageSelectEvent = function(imgSource, categoryId, imageId, x, y) {
       var jsonData = {};
@@ -181,7 +243,7 @@
     };
 
 	const handleImageSelect = function(jsonObject, notify = false) {
-		if (clientMode) {
+		if (clientMode || canDoctorEditImages) {
 			imageSelect(jsonObject, notify);
 		}
 	}
@@ -200,7 +262,7 @@
 		}
 
 		setTimeout(() => {
-			loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
+			loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId, jsonObject.uuid);
 		}, 1100);
 //		loadImage(jsonObject.imgSource, jsonObject.categoryId, jsonObject.imageId);
 		if (notify) {
@@ -216,19 +278,24 @@
 	  }
 	};
 
-    const shapeClick = function(jsonData) {
-      var node = sandboxLayer.findOne(node => {
-        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
-      });
+	const shapeClick = function(jsonData) {
+		var node = sandboxLayer.findOne(node => {
+//        return node.getType() === 'Shape' && node._id == jsonData.shape._id;
+////			return node.getType() === 'Shape' && node.getAttr('imgId') == jsonData.shape.img_id;
+			return node.getType() === 'Shape' && node.getAttr('uuid') == jsonData.shape.uuid;
+		});
 //      node.fire('click');
-	  transformer.nodes([node]);
-    };
+		if (node)
+			transformer.nodes([node]);
+	};
 
     const shapeClickEvent = function (shape) {
       var jsonData = {};
       jsonData['event']  = 'shapeClick';
       var shapeObject = {};
       shapeObject['_id'] = shape._id;
+      shapeObject['img_id'] = shape.getAttr('imgId');
+      shapeObject['uuid'] = shape.getAttr('uuid');
       jsonData['shape']  = shapeObject;
       jsonData['notify'] = false;
       return jsonData;
@@ -237,6 +304,7 @@
     const disconnectEvent = function () {
       var jsonData = {};
       jsonData['event']  = 'disconnectPeer';
+      jsonData['skipFromHistory']  = true;
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -335,6 +403,7 @@
     const removeAllEvent = function () {
       var jsonData = {};
       jsonData['event']  = 'removeAll';
+      jsonData['skipFromHistory']  = true;
       jsonData['notify'] = false;
       return jsonData;
     };
@@ -359,7 +428,9 @@
 		
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') === nd.uuid;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -373,7 +444,9 @@
 
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') === nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') === nd.uuid;
         });
 		const nodeAbsCoordinates = toAbsolute(nd.x, nd.y, stageWidth, stageHeight);
 //        node?.setAttrs({x: nd.x, y: nd.y});
@@ -393,6 +466,8 @@
 		let relativeCoordinates = toRelative(node.attrs.x, node.attrs.y, stageWidth, stageHeight);
         nodes.push({
           _id: node._id,
+		  img_id: node.getAttr('imgId'),
+		  uuid: node.getAttr('uuid'),
           x: relativeCoordinates.x,
           y: relativeCoordinates.y})
       });
@@ -401,7 +476,12 @@
       return jsonData;
     };
 
+	const meDragEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'meDrag' && evt2.nodes[0]._id == evt1.nodes[0]._id);
+	};
+
     const meDragEvent = function (evt) {
+		console.log("meDragEvent", evt);
 		const stageWidth = stage.width();
 		const stageHeight = stage.height();
 
@@ -412,23 +492,27 @@
       var nodes = [];
       nodes.push({
         _id: me._id,
+		img_id: me.getAttr('imgId'),
+		uuid: me.getAttr('uuid'),
         x: relativeCoordinates.x,
         y: relativeCoordinates.y});
       jsonData['nodes'] = nodes;
       jsonData['notify'] = false;
+      jsonData['historyCmpFn'] = meDragEventCmpFn;
       return jsonData;
     };
 
     const transform = function(jsonData) {
       var transform = jsonData['transform'];
       var transformNode = sandboxLayer.findOne(node => {
-        return node.getType() === 'Group' && node._id == transform._id;
+//        return node.getType() === 'Group' && node._id == transform._id;
+          return node.getType() === 'Shape' && node.attrs.uuid == transform.uuid;
       });
 		const ch = stage.height();
 		const cw = stage.width();
 		const transformAbsoluteCoords = toAbsolute(transform.x, transform.y, cw, ch);
 
-      transformNode?.setAttrs({
+        transformNode?.setAttrs({
         offsetX:  transform.offsetX,
         offsetY:  transform.offsetY,
         rotation: transform.rotation,
@@ -444,7 +528,9 @@
 
       jsonData['nodes'].forEach((nd) => {
         var node = sandboxLayer.findOne(node => {
-          return node.getType() === 'Shape' && node._id == nd._id;
+//          return node.getType() === 'Shape' && node._id == nd._id;
+////		  return node.getType() === 'Shape' && node.getAttr('imgId') == nd.img_id;
+		  return node.getType() === 'Shape' && node.getAttr('uuid') == nd.uuid;
         });
 		const nodeAbsoluteCoords = toAbsolute(nd.x, nd.y, cw, ch);
 
@@ -461,9 +547,13 @@
       });
     };
 
+	const transformEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'transform' && evt2.nodes[0]._id == evt1.nodes[0]._id);
+	};
+
     const transformEvent = function (evt) {
       var ri = evt.currentTarget;
-
+//      var target = evt.target;
 		const ch = stage.height();
 		const cw = stage.width();
 		
@@ -471,6 +561,8 @@
 
       var transform = {
         _id: ri._id,
+//		uuid: target.attrs.uuid,
+		uuid:     ri.attrs.uuid,
         offsetX:  ri.attrs.offsetX,
         offsetY:  ri.attrs.offsetY,
         rotation: ri.attrs.rotation,
@@ -491,6 +583,8 @@
 		const nodeRlativeCoords = toRelative(node.attrs.x, node.attrs.y, cw, ch);
         nodes.push({
           _id: node._id,
+		  img_id: node.attrs.imgId,
+		  uuid: node.attrs.uuid,
           rotation: node.attrs.rotation,
           scaleX: node.attrs.scaleX,
           scaleY: node.attrs.scaleY,
@@ -504,6 +598,7 @@
       jsonData['nodes'] = nodes;
 	  jsonData['transform'] = transform;
       jsonData['notify'] = false;
+	  jsonData['historyCmpFn'] = transformEventCmpFn;
       return jsonData;
     };
 
@@ -522,7 +617,7 @@
         return [width, height];
       }
 
-	function loadImage(imgSource, categoryId, imageId) {
+	function loadImage(imgSource, categoryId, imageId, uuid) {
 		image = new Image();
 		image.src = imgSource;
 		const ch = stage.height();
@@ -539,15 +634,17 @@
 			let newImageY = stageMiddleY - (ih >> 1);
 			var pic = new Konva.Image({
 				image: image,
+				src: image.src,
 				x: newImageX,
 				y: newImageY,
 				width: iw,
 				height: ih,
-				draggable: clientMode ? true : false,
+				draggable: (clientMode || canDoctorEditImages) ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
 			pic.setAttr('imgId', imageId);
+			pic.setAttr('uuid',  uuid);
 			pic.offsetX(pic.width() >> 1);
 
 			sandboxLayer.add(pic);
@@ -571,13 +668,14 @@
 
 			var pic = new Konva.Image({
 				image: image,
+				src: image.src,
 //				x: x,
 				x: absoluteCoordinates.x,
 //				y: y,
 				y: absoluteCoordinates.y,
 				width: iw,
 				height: ih,
-				draggable: clientMode ? true : false,
+				draggable: (clientMode || canDoctorEditImages) ? true : false,
 				name: 'catpic',
 			});
 			pic.setAttr('category', categoryId);
@@ -592,13 +690,13 @@
 		}
 	}
 
-      function removeSelected() {
+      function removeSelected(data, notify = false) {
           transformer.nodes().forEach(function (currentValue, index, arr) {
               currentValue.destroy();
           });
           transformer.detach();
           sandboxLayer.draw();
-          if (notifyViewer) {
+          if (notify) {
             var event = removeSelectedEvent();
             notifyRemoveSelected(event);
           }
@@ -661,6 +759,30 @@
 		}
 	}
 
+	const scaleAllSceneImagesOnLayer = (layer, oldW, oldH, newW, newH) => {
+		if (oldW == newW && oldH == newH) {
+			return;
+		}
+		if (0 < oldW && 0 < oldH) {
+			var nodes = layer.find(node => {
+				return 'Image' === node.className;
+			});
+			nodes.forEach(function (node, index, arr) {
+				const coordinates = scale(node.x(), node.y(), oldW, oldH, newW, newH);
+				const box = scale(node.width(), node.height(), oldW, oldH, newW, newH);
+				const offset = scale(node.offsetX(), node.offsetY(), oldW, oldH, newW, newH);
+
+				node.x(coordinates.x);
+				node.y(coordinates.y);
+				node.width(box.x);
+				node.height(box.y);
+				node.offsetX(offset.x);
+				node.offsetY(offset.y);
+			});
+		}
+	};
+
+/*
 	const scaleAllSceneImagesOnCanvasResize = (oldW, oldH, newW, newH) => {
 		if (0 < oldW && 0 < oldH) {
 			var nodes = sandboxLayer.find(node => {
@@ -680,24 +802,74 @@
 			});
 		}
 	};
+*/
+	const scaleAllSceneImagesOnCanvasResize = (oldW, oldH, newW, newH) => {
+		scaleAllSceneImagesOnLayer(sandboxLayer, oldW, oldH, newW, newH);
+	};
 
       function levelUp() {
           transformer.nodes().forEach(function (currentValue, index, arr) {
-              currentValue.moveUp();
-              if (notifyViewer) {
+//              currentValue.moveUp();
+              currentValue.moveToTop();
+//              if (notifyViewer) {
                 var event = levelUpEvent();
                 notifyLevelUp(event);
-              }
+//              }
           });
       }
 
+	const updateTransformerInteractionMode = () => {
+		if (transformer) {
+			transformer.resizeEnabled(clientMode || canDoctorEditImages);
+			transformer.rotateEnabled(clientMode || canDoctorEditImages);
+		}
+		if (sandboxLayer) {
+			sandboxLayer.draggable(clientMode || canDoctorEditImages);
+			var nodes = sandboxLayer.find(node => {
+				return 'Image' === node.className;
+			});
+			nodes.forEach(function (currentNode, index, arr) {
+				currentNode.draggable(clientMode || canDoctorEditImages);
+			});
+
+		}
+	};
+
+	const setSwitchInteractionButtonImg = () => {
+		const iconImgSrc = (canDoctorEditImages) ? "/images/svg/interactionModeOn.svg" : "/images/svg/interactionModeOff.svg" ;
+		$('#interaction_mode > .icon > img').attr("src", iconImgSrc);
+	};
+
+	const toggleSwitchInteractionButton = () => {
+		$("#interaction_mode").toggleClass("on", canDoctorEditImages);
+		setSwitchInteractionButtonImg();
+	};
+	
+	const switchInteractionModeOff = () => {
+		canDoctorEditImages = false;
+	};
+	const switchInteractionModeOn = () => {
+		canDoctorEditImages = true;
+	};
+
+	const switchIneractionMode = () => {
+		if (canDoctorEditImages) {
+			switchInteractionModeOff();
+		} else {
+			switchInteractionModeOn();
+		}
+		toggleSwitchInteractionButton();
+		updateTransformerInteractionMode();
+	};
+
       function levelDown() {
-          transformer.nodes().forEach(function (currentValue, index, arr) {
-              currentValue.moveDown();
-              if (notifyViewer) {
+          transformer.nodes().forEach(function (currentNode, index, arr) {
+//              currentNode.moveDown();
+              currentNode.moveToBottom();
+//              if (notifyViewer) {
                 var event = levelDownEvent();
                 notifyLevelDown(event);
-              }
+//              }
           });
       }
 
@@ -791,6 +963,137 @@
 			y: y * newH / oldH};
 	};
 
+	function getCssRulePropertyOld(selector, property) {
+		for (const sheet of document.styleSheets) {
+			try {
+				for (const rule of sheet.cssRules) {
+					if (rule.selectorText === selector) {
+						return rule.style.getPropertyValue(property);
+					}
+				}
+			} catch (e) {
+			}
+		}
+		return null;
+	}
+
+	function getCssRulePropertyOld1(selector, property) {
+		for (const sheet of document.styleSheets) {
+			try {
+				for (const rule of sheet.cssRules) {
+					// если это обычное правило
+					if (rule.selectorText === selector) {
+						return rule.style.getPropertyValue(property);
+					}
+
+					// если это @media
+					if (rule.media && window.matchMedia(rule.media.mediaText).matches) {
+						for (const subRule of rule.cssRules) {
+							if (subRule.selectorText === selector) {
+								return subRule.style.getPropertyValue(property);
+							}
+						}
+					}
+				}
+			} catch (e) {
+				// доступ до сторонніх стилів може кидати SecurityError
+			}
+		}
+		return null;
+	}
+
+
+	function getCssRuleProperty(selector, property) {
+		let lastNormal = null;
+		let lastImportant = null;
+
+		for (const sheet of document.styleSheets) {
+			let rules;
+			try {
+				// можуть кидати SecurityError для зовнішніх стилів — в такому випадку пропускаємо
+				rules = sheet.cssRules;
+			} catch (e) {
+				continue;
+			}
+			// не робимо "if (!rules) continue" — замість цього просто передамо в обробник
+			processRules(rules, true);
+		}
+
+		function normalizeSelectorText(sel) {
+			// прибираємо псевдо-класи/елементи (простий варіант) і trim
+			return sel.replace(/::?[\w-]+(?:\([^\)]*\))?/g, '').trim();
+		}
+
+		function selectorMatches(ruleSelectorText, targetSelector) {
+			if (!ruleSelectorText) return false;
+			const parts = ruleSelectorText.split(',').map(s => s.trim());
+			for (const p of parts) {
+				if (p === targetSelector) return true; // точна співпадіння
+				if (normalizeSelectorText(p) === targetSelector) return true; // наприклад ".rsideMin:hover" -> ".rsideMin"
+			}
+			return false;
+		}
+
+		function processRules(rules, applicable) {
+			if (!rules) return; // нічого робити
+			for (const rule of rules) {
+				// @media
+				if (rule.type === CSSRule.MEDIA_RULE) {
+					const mediaText = rule.media && rule.media.mediaText || rule.conditionText || '';
+					const matches = !!(mediaText && window.matchMedia(mediaText).matches);
+					processRules(rule.cssRules, applicable && matches);
+					continue;
+				}
+
+				// @supports
+				if (rule.type === CSSRule.SUPPORTS_RULE) {
+					let supportsMatch = true;
+					if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function') {
+						try {
+							// conditionText інколи називається по-різному в різних браузерах
+							const cond = rule.conditionText || rule.cssText || '';
+							supportsMatch = cond ? CSS.supports(cond) : true;
+						} catch (e) {
+							supportsMatch = true;
+						}
+					}
+					processRules(rule.cssRules, applicable && supportsMatch);
+					continue;
+				}
+
+				// @import
+				if (rule.type === CSSRule.IMPORT_RULE) {
+					try {
+						const imported = rule.styleSheet || rule.styleSheet;
+						if (imported) processRules(imported.cssRules, applicable);
+					} catch (e) { /* пропускаємо */ }
+					continue;
+				}
+
+				// звичайне стилеве правило
+				if (rule.type === CSSRule.STYLE_RULE) {
+					if (!applicable) continue;
+					if (selectorMatches(rule.selectorText, selector)) {
+						const val = rule.style.getPropertyValue(property);
+						if (!val) continue;
+						const priority = rule.style.getPropertyPriority(property); // 'important' або ''
+						if (priority === 'important') lastImportant = val.trim();
+						else lastNormal = val.trim();
+					}
+					continue;
+				}
+
+				// інші групи правил (якщо є вкладені cssRules)
+				if (rule.cssRules) {
+					try { processRules(rule.cssRules, applicable); } catch (e) { /* ignore */ }
+				}
+			}
+		}
+
+		return lastImportant !== null ? lastImportant : lastNormal;
+	}
+
+
 	function initStage() {
 		let containerElement = $('#container');
 		let selectionRectangle = new Konva.Rect({
@@ -803,8 +1106,8 @@
 			width: containerElement.width(),
 			height: containerElement.height(),
 		});
-		sandboxLayer = new Konva.Layer();
-		backgroundLayer = new Konva.Layer();
+		sandboxLayer = new Konva.Layer({name: 'sandboxLayer', id: 'sandboxLayer'});
+		backgroundLayer = new Konva.Layer({name: 'backgroundLayer', id: 'backgroundLayer'});
 
 		const container = stage.container();
 
@@ -821,44 +1124,13 @@
 			const imgIdAttr = e.dataTransfer.getData('imgId');
 			const relativeCoordinates = toRelative(e.layerX, e.layerY, stage.width(), stage.height());
 			
-//			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, e.layerX, e.layerY), notifyViewer);
 			positionedImageSelect(positionedImageSelectEvent(imageURL, catIdAttr, imgIdAttr, relativeCoordinates.x, relativeCoordinates.y), notifyViewer);
-/*
-			const img = new window.Image();
-			img.src = imageURL;
-
-			img.onload = function () {
-				var [imgWidth, imgHeight] = calcScaledImageWidthHeight(img);
-				const konvaImage = new Konva.Image({
-					image: img,
-//					x: pointerPosition.x,
-//					y: pointerPosition.y,
-					x: e.layerX,
-					y: e.layerY,
-					draggable: true,
-					width: imgWidth,
-					height: imgHeight,
-					name: 'catpic',
-				});
-//				pic.setAttr('category', categoryId);
-//				pic.setAttr('imgId', imageId);
-				konvaImage.offsetX(konvaImage.width() >> 1);
-				konvaImage.offsetY(konvaImage.height() >> 1);
-//				konvaImage.offsetX(konvaImage.width());
-
-				sandboxLayer.add(konvaImage);
-//				sandboxLayer.draw();
-				transformer.remove();
-				sandboxLayer.add(transformer);
-				transformer.nodes([konvaImage]);
-			};
-*/
 		});
 
 		transformer = new Konva.Transformer({
 			enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-			resizeEnabled: (clientMode) ? true : false,
-			rotateEnabled: (clientMode) ? true : false,
+			resizeEnabled: (clientMode || canDoctorEditImages) ? true : false,
+			rotateEnabled: (clientMode || canDoctorEditImages) ? true : false,
 			borderStroke: '#244A65',
 			anchorStroke: '#244A65',
 			boundBoxFunc: (oldBox, newBox) => {
@@ -883,15 +1155,15 @@
 		});
 
 		transformer.on('transform', function(evt) {
-			if (clientMode) {
-				if (notifyViewer) {
+			if (clientMode || canDoctorEditImages) {
+//				if (notifyViewer) {
 					var event = transformEvent(evt);
 					notifyTransform(event);
-				}
+//				}
 			}
 		});
 		transformer.on('dragmove', function(evt) {
-			if (clientMode) {
+			if (clientMode || canDoctorEditImages) {
 				const boxes = transformer.nodes().map((node) => node.getClientRect());
 
 				// Get the total bounding box of all shapes
@@ -925,10 +1197,10 @@
 
 					node.setAbsolutePosition(newAbsPos);
 				});
-				if (notifyViewer) {
+//				if (notifyViewer) {
 					var dragEvent = shapeDragEvent(evt);
 					notifyShapeDrag(dragEvent);
-				}
+//				}
 			}
 		});
 
@@ -938,7 +1210,7 @@
 		sandboxLayer.on('click', function(evt) {
 			console.log(evt);
 			var shape = evt.target;
-			var group = evt.currentTarget;
+//			var group = evt.currentTarget;
 			if (notifyViewer) {
 				var clickEvent = shapeClickEvent(shape);
 				notifyShapeClick(clickEvent);
@@ -946,7 +1218,8 @@
 		});
 
 		sandboxLayer.on('dragmove', function(evt) {
-			if (clientMode) {
+			console.log(evt);
+			if (clientMode || canDoctorEditImages) {
 				let node = evt.target;
 				const boxes = [node.getClientRect()];
 
@@ -981,10 +1254,10 @@
 
 					node.setAbsolutePosition(newAbsPos);
 //				});
-				if (notifyViewer) {
+//				if (notifyViewer) {
 					var event = meDragEvent(evt);
 					notifyMeDrag(event);
-				}
+//				}
 			}
 		});
 
@@ -998,6 +1271,11 @@
 			backgroundImage.height = stage.height();
 
 			background = new Konva.Image({
+				name: 'backgroundImg',
+				id: 'backgroundImg',
+				src: backgroundImage.src,
+				imgWidth: backgroundImage.width,
+				imgHeight: backgroundImage.height,
 				x: 0,
 				y: 0,
 				width: stage.width(),
@@ -1108,19 +1386,65 @@
 		let screenWidth = window.innerWidth;
 		let screenHeight = window.innerHeight;
 		const sizeRelations = 7/5;
-		let rSideContentWidth  = $('.rsidecontent').width();
-		let rSideContentHeight = $('.rsidecontent').height();
+		let rSideContentElement = $('.rsidecontent');
+//		let rSideContentWidth  = rSideContentElement.width();
+		let rSideContentWidth  = parseFloat(getCssRuleProperty('.rsideMin', 'width'));
+		let rSideContentHeight = rSideContentElement.height();
 		let minRsideWidth = rSideContentWidth + 10;
 
+		const leftSideWidth = $('.left_side_menu').width();
 		let sandboxWidth = screenWidth - leftSideWidth - minRsideWidth;
-		categoryImageMaxPanelWidth = screenWidth - leftSideWidth;
+		const categoryImagesStyleRightShift = parseFloat(getCssRuleProperty('#categoryImages', 'right'));
+		categoryImageMaxPanelWidth = screenWidth - leftSideWidth - categoryImagesStyleRightShift;
+
+		const columnGap = getCssRuleProperty('.images_visible', 'column-gap');
+		const w1 = $('.imageCell').width();
+		const w2 = parseFloat(columnGap);
+		let rightSideMinWidth = 3 * w1 + 2 * w2;
+
 		let sandboxHeight = sandboxWidth / sizeRelations;
 		if (sandboxHeight > screenHeight) {
 			sandboxHeight = screenHeight;
 			sandboxWidth = sandboxHeight * sizeRelations;
 		}
-		let rightSideWidth = screenWidth - leftSideWidth - sandboxWidth;
-		categoryImageMinPanelWidth = rightSideWidth - 2;
+
+		let rightSideWidth = (screenWidth - sandboxWidth - leftSideWidth);
+		const categoryColumnCountInWidth = Math.floor((rightSideWidth + w2) / (w1 + w2));
+		rightSideWidth = Math.max(rightSideWidth, categoryColumnCountInWidth * (w1 + w2) - w2);
+		rSideContentElement.width(rightSideWidth);
+
+console.log({
+	'sandboxWidth' : sandboxWidth,
+	'sandboxHeight' : sandboxHeight,
+	'screenWidth' : screenWidth,
+	'screenHeight' : screenHeight,
+	'leftSideWidth' : leftSideWidth,
+	'rightSideWidth' : rightSideWidth,
+	'rSideContentWidth' : rSideContentWidth,
+	'w1' : w1,
+	'w2' : w2,
+	'categoryColumnCountInWidth' : categoryColumnCountInWidth});
+
+		sandboxWidth = screenWidth - rightSideWidth - leftSideWidth;
+		sandboxHeight = sandboxWidth / sizeRelations;
+		if (sandboxHeight > screenHeight) {
+			sandboxHeight = screenHeight;
+			sandboxWidth = sandboxHeight * sizeRelations;
+		}
+
+console.log({
+	'sandboxWidth' : sandboxWidth,
+	'sandboxHeight' : sandboxHeight,
+	'screenWidth' : screenWidth,
+	'screenHeight' : screenHeight,
+	'leftSideWidth' : leftSideWidth,
+	'rightSideWidth' : rightSideWidth, });
+/*
+		const columnGap = getCssRuleProperty('.images_visible', 'column-gap');
+		let rightSideWidth = 3 * $('.imageCell').width() + 2 * parseFloat(columnGap);
+*/
+//		categoryImageMinPanelWidth = rightSideWidth + 10;
+		categoryImageMinPanelWidth = rightSideWidth - categoryImagesStyleRightShift;
 
 		let element = document.getElementById('sandbox');
 		element.width  = sandboxWidth + 'px';
@@ -1142,7 +1466,10 @@
 		element = document.getElementById('categoryImages');
 		let categoryImageHeight = screenHeight - rSideContentHeight;
 		element.style.height = categoryImageHeight + 'px';
-		element.style.width = (rSideContentWidth + 10) + 'px';
+//		element.style.width = (rSideContentWidth + 10) + 'px';
+//		const categoryImagesStyleRightShift = parseFloat(getCssRuleProperty('#categoryImages', 'right'));
+		element.style.width = (categoryImageMinPanelWidth - categoryImagesStyleRightShift) + 'px';
+//		element.style.width = categoryImageMinPanelWidth + 'px';
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -1244,12 +1571,17 @@
       }
     };
 
+	const categorySelectEventCmpFn = (evt1, evt2) => {
+		return (evt2.event == 'categorySelect' && evt2.categoryId == evt1.categoryId);
+	};
+
     const categorySelectEvent = function(categoryId, categoryName, notify) {
       var jsonData = {};
       jsonData['event'] = 'categorySelect';
       jsonData['categoryId'] = categoryId;
       jsonData['categoryName'] = categoryName;
       jsonData['notify'] = notify;
+	  jsonData['historyCmpFn'] = categorySelectEventCmpFn;
       return jsonData;
     };
 
@@ -1289,7 +1621,9 @@
 			console.log('invited');
 			copyInliteLinkToClipboard(res);
 			showInvitePopup(res);
-			launchPeer(res.opponentSessionId);
+			saveP2PDataToLocalStorage(res.sessionId, res.opponentSessionId, false);
+			launchPeer(res.sessionId, res.opponentSessionId, false);
+//			launchPeer('1', '2', false);
 
 			inviteClientBtn.removeClass("pressed");
 			var anchor = inviteClientBtn.find('a')[0];
@@ -1298,130 +1632,225 @@
 		});
 	};
 
+	const saveP2PDataToLocalStorage = (clientId, targetId, initDataChannel) => {
+		const p2pSettings = {
+			clientId: clientId,
+			targetId: targetId,
+			initDataChannel: initDataChannel
+		};
+		console.log("saveP2PDataToLocalStorage", p2pSettings);
+		localStorage.setItem('p2psettings', JSON.stringify(p2pSettings));
+	};
+
+	const loadP2PDataFromLocalStorage = () => {
+		const p2pSettings = JSON.parse(localStorage.getItem('p2psettings'));
+		console.log("loadP2PDataFromLocalStorage", p2pSettings);
+		return p2pSettings;
+	};
+
+	const saveKonvaState = () => {
+		const data = stage.toJSON();
+//		console.log("saveKonvaState", data);
+		localStorage.setItem('konvaAppState', data);
+//		const historyRecord = JSON.stringify(eventHistory);
+//		localStorage.setItem('eventHistory', historyRecord);
+//		console.log(`History Record Size: ${historyRecord.length} bytes`);
+	};
+
+	const stageFromJson = async (stageJson) => {
+		if (stageJson) {
+//			let containerElement = $('#container')[0];
+			let containerElement = $('#containerHidden')[0];
+			const originalStage = stage;
+			const originalSandboxWidth = originalStage.width();
+			const originalSandboxHeight = originalStage.height();
+//			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
+			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
+			const sandboxLayerReload = stageReload.findOne('#sandboxLayer');
+			const backgroundLayerReload = stageReload.findOne('#backgroundLayer');
+			background = backgroundLayerReload.findOne('#backgroundImg');
+
+//			scaleAllSceneImagesOnLayer(sandboxLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
+//			scaleAllSceneImagesOnLayer(backgroundLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
+//			stage.width(originalSandboxWidth);
+//			stage.height(originalSandboxHeight);
+/*
+			if (typeof background !== 'undefined') {
+				backgroundImage.width = originalSandboxWidth;
+				backgroundImage.height = originalSandboxHeight;
+				background.width(originalSandboxWidth);
+				background.height(originalSandboxHeight);
+			}
+*/
+
+//			stage.find('Image').forEach((imageNode) => {
+			sandboxLayerReload.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+				const imgWidth  = imageNode.getAttr('imgWidth'); // Retrieve the saved image width
+				const imgHeight = imageNode.getAttr('imgHeight'); // Retrieve the saved image height
+				if (imgWidth) {
+					image.width = imgWidth;
+				}
+				if (imgHeight) {
+					image.height = imgHeight;
+				}
+
+				sandboxLayer.add(imageNode);
+				transformer.remove();
+				sandboxLayer.add(transformer);
+				transformer.nodes([imageNode]);
+			});
+
+			backgroundLayerReload.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+				image.width = originalSandboxWidth;
+				image.height = originalSandboxHeight;
+				imageNode.width(originalSandboxWidth);
+				imageNode.height(originalSandboxHeight);
+				backgroundImage = image;
+			});
+
+		}
+	};
+
+	const loadKonvaState = async () => {
+		const stored = localStorage.getItem('konvaAppState');
+		await stageFromJson(stored);
+/*
+		if (stored) {
+			let containerElement = $('#container')[0];
+			stage = Konva.Node.create(JSON.parse(stored), containerElement);
+
+			stage.find('Image').forEach((imageNode) => {
+				const src = imageNode.getAttr('src'); // Retrieve the saved source
+				const image = new Image();
+				image.onload = () => {
+					imageNode.image(image);
+					imageNode.getLayer().batchDraw();
+				};
+				image.src = src; // Load the image from the source
+			});
+		}
+*/
+	};
+
+	const loadKonvaStateNew = async function () {
+		const eventHistoryLS = localStorage.getItem('eventHistory');
+		eventHistory = JSON.parse(eventHistoryLS || '[]');
+		for (const event of eventHistory) {
+//		eventHistory.forEach(event => async {
+			event.fromHistory = true;
+			onMessage(event);
+			sendEvent(event);
+			await sleep(30);
+		}
+	};
+
 	const onConnectionClosed = function() {
+	<% if (!clientMode) { %>
 		var inviteClientBtn = $('#inviteClientBtn');
 		inviteClientBtn.removeClass('closeSessionBtn');
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Пригласить клиента";
 		inviteClientBtn.off('click').on('click', inviteClient);
+	<% } %>
 	}
 
 	const onConnectionEstablished = function() {
+	<% if (!clientMode) { %>
 		var inviteClientBtn = $('#inviteClientBtn');
 		inviteClientBtn.addClass('closeSessionBtn');
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Завершить сессию";
 		inviteClientBtn.off('click').on('click', disconnectPeer);
+	<% } %>
 	}
 
 	const disconnectPeer = function(eventData) {
 		if (!eventData || !eventData.event) {
 			sendEvent(disconnectEvent());
 		}
-		myPeer?.destroy();
+//		myPeer?.destroy();
+		myConn?.close();
 		onConnectionClosed();
 		sessionStorage.clear();
+		localStorage.clear();
 	}
 
-	const launchPeer = function(sessionId, opponentSessionId) {
-		console.log("launchPeer", sessionId, opponentSessionId);
-/*
-		if (sessionStorage.getItem("activeSession") === "true") {
-			console.log("Была перезагрузка страницы");
-			myPeer = sessionStorage.getItem("sessionPeer");
-			myConn = sessionStorage.getItem("sessionConnect");
-		}
-
-		if (myPeer && myConn) {
-			return true;
-		}
-*/
-		myPeer = new Peer(sessionId, {
-//		myPeer = new Peer(undefined, {
-			host: '<%=locals.peerserverhost %>',
-			port: <%=locals.peerserverport %>,
-			path: '<%=locals.peerserverpath %>',
-			secure: <%=locals.peerserversecure %>,
-		});
-
-		myPeer.on('open', function(id) {
-			console.log('My peer ID is: ' + id);
-			updateConnectionState(false, true);
-			
-
-//			sessionStorage.setItem("activeSession", "true");
-//			sessionStorage.setItem("sessionPeer", myPeer);
-
-			if (typeof opponentSessionId !== 'undefined') {
-				console.log("Trying to connect to opponent session");
-				myConn = myPeer.connect(opponentSessionId);
-				myConn.on('open', function(){
-					console.log(myConn);
-//					sessionStorage.setItem("sessionConnect", myConn);
-					myConn.send('hi!');
-					updateConnectionState(true);
-					selectFirstCategoryFromStart();
-				});
-				myConn.on('error', (err) => {
-					console.error('Ошибка соединения:', err);
-				});
-				myConn.on('data', function(data){
-					console.log("Connection data", data);
-					if (typeof data === 'object' && data.hasOwnProperty('event'))
-						try {
-							eval(data.event)(data);
-						} catch (ex) {
-							console.log(ex);
-						}
-				});
-				myConn.on('close', function() {
-					console.log("Connection closed");
-					updateConnectionState(false);
-					// if the clients connection closes set up a reconnect request loop - when the host takes back control
-					// the client will auto reconnect...
-					myPeer.destroy();   // destroy the link
-					connected = false;  // set the connected flag to false
-					conn = null;        // destroy the conn
-					myPeer = null;      // destroy the peer
-
-					// set a variable which means function calls to launchPeer will not overlap
-					var run_next = true;
-
-					// periodically attempt to reconnect
-					reconnect_timer = setInterval(function() { 
-						if (connected===false && run_next===true) {
-							run_next = false;   // stop this bit rerunning before launchPeer has finished...
-							if (launchPeer(sessionId, opponentSessionId)===true) { 
-								clearInterval(reconnect_timer); 
-							} else {
-								run_next == true;
-							}
-						}
-					}, 1000);
-				});
+	function onMessage(data) {
+		console.log("✉️ Message:", data);
+		if (typeof data === 'object' && data.hasOwnProperty('event')) {
+			try {
+				eval(data.event)(data);
+//				saveKonvaState();
+			} catch (ex) {
+				console.log(ex);
 			}
-		});
+		}
+	}
 
-		myPeer.on('connection', function(conn) {
+	const restoreOpponentStage = async () => {
+		const event = restoreStateEvent(stage.toJSON());
+		sendEvent(event);
+	};
+
+	async function onStatusChange(state) {
+		console.log("⚡ Status:", state);
+		if (state === 'connected') {
+			showStatus("✅ Подключено", "green");
+			updateConnectionState(true);
 			onConnectionEstablished();
-			console.log(conn);
-			myConn = conn;
-			setTimeout(function() { 
-				disconnectPeer();
-			}, sessionConnectionTimeout);
+		<%if (clientMode) { %>
+//			await loadKonvaState();
+			await reLoadStateAfterReconnect();
+			await restoreOpponentStage();
+			const eventHistoryLS = localStorage.getItem('eventHistory')
+			if (!firstCategorySelected && !eventHistoryLS) {
+				selectFirstCategoryFromStart();
+				firstCategorySelected = true;
+			}
+		<% } %>
+		} else if (state === 'ws-closed') {
+		} else if (state === 'ws-reconnecting') {
+		} else if (state === 'disconnected') {
+			saveKonvaState();
+			updateConnectionState(false);
+			showStatus("❌ Соединение потеряно", "red");
+		} else if (state === 'reconnecting') {
+			showStatus("🔄 Попытка повторного подключения...", "yellow");
+		}
+	}
 
-			conn?.on('data', function(data){
-				if (typeof data === 'object' && data.hasOwnProperty('event'))
-					try {
-						eval(data.event)(data);
-					} catch (ex) {
-						console.log(ex);
-					}
-			});
-		});
+	const reLoadStateAfterReconnect = () => {
+		removeAll();
+		loadKonvaState();
+	};
 
-		return true;
-	}; // END OF function launchPeer
+	const launchPeer = async function(sessionId, opponentSessionId, isDataChannelInitiator = true, onConnectionHandler) {
+		console.log("launchPeer", sessionId, opponentSessionId);
+//		const myConn = startP2PConnection(sessionId, opponentSessionId, onMessage, onStatusChange);
+//		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+		myConn = await startP2PConnectionAsync(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+		if (onConnectionHandler) onConnectionHandler();
+		myConn.send(`Hi ${opponentSessionId}`);
+
+		// Перевірити статус
+		if (myConn.isConnected()) {
+			myConn.send("Connected");
+		}
+	};
 
 	const getElementWidth = function(element) {
 		let width = element.attr('width');
@@ -1477,6 +1906,52 @@
 		}
 	};
 
+	const loadSandboxWithProgress = async () => {
+		const images = Array.from(document.querySelectorAll('img[data-src]'));
+		const total = images.length;
+		let loaded = 0;
+
+		const updateProgress = () => {
+			const percent = Math.round((loaded / total) * 100);
+			document.getElementById('progress-value').textContent = percent;
+		};
+
+		const loadImage = (img) => {
+			return new Promise((resolve, reject) => {
+				const tempImg = new Image();
+				tempImg.onload = () => {
+					img.src = tempImg.src;
+					++loaded;
+					updateProgress();
+					resolve();
+				};
+				tempImg.onerror = reject;
+				tempImg.src = img.getAttribute('data-src');
+			});
+		};
+
+		const cores = navigator.hardwareConcurrency || 4; // fallback на 4, if brawser not support
+		const MAX_PARALLEL = cores;
+		console.log(`Logic code count: ${MAX_PARALLEL}`);
+
+		const queue = images.slice();
+		const workers = new Array(MAX_PARALLEL).fill(null).map(async () => {
+			while (queue.length > 0) {
+				const img = queue.shift();
+				try {
+					await loadImage(img);
+				} catch (e) {
+					console.error('Image load error', img.getAttribute('data-src'));
+				}
+			}
+		});
+
+		await Promise.all(workers);
+
+		console.log("All images loaded");
+		document.getElementById('progress').style.display = 'none';
+	};
+
   $( function() {
     var dialog, form,
  
@@ -1490,7 +1965,10 @@
 
     <% if (typeof sessionId !== 'undefined') { %>
 
-	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
+//	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
+//	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true, reLoadStateAfterReconnect);
+	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
+//	launchPeer('2', '1', true);
 
     <% } %>
 
@@ -1569,7 +2047,8 @@
 
 	invitePopupDialog = $( "#invite-dialog" ).dialog({
 		autoOpen: false,
-		height: 453,
+//		height: 453,
+		height: "auto",
 		width: 643,
 	});
 
@@ -1585,9 +2064,6 @@
       dialog.dialog( "open" );
     });
 
-	closeInviteDialog = function() {
-		invitePopupDialog.dialog( "close" );
-	}
 	$("#slideToggle").click(function(){
 		$(this).toggleClass("slideUp");
 		$(this).toggleClass("slideDown");
@@ -1599,23 +2075,40 @@
 		$(this).toggleClass("slideRight");
 		if (0 == categoryImagesSate) {
 			$("#categoryImages").animate({width: categoryImageMaxPanelWidth + 'px'}, "fast");
-			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+//			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMaxPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").addClass('shadow');
 		} else {
 			$("#categoryImages").animate({width: categoryImageMinPanelWidth + 'px'}, "fast");
-			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+//			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
+			$(".images_visible").animate({width: (categoryImageMinPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").removeClass('shadow');
 		}
 		categoryImagesSate ^= 1;
 	});
 	initStage();
+//	loadKonvaState();
 	recalcSandboxSizes();
+	toggleSwitchInteractionButton();
+	setSwitchInteractionButtonImg();
+	updateTransformerInteractionMode();
 	$("#iterations").hide();
     <% if (!(typeof sessionId !== 'undefined')) { %>
 		selectFirstCategoryFromStart();
 	<% } %>
 	$('#inviteClientBtn').click(inviteClient);
+
+	loadSandboxWithProgress();
+
+	var p2psettings = loadP2PDataFromLocalStorage();
+	if (p2psettings) {
+		launchPeer(p2psettings.clientId, p2psettings.targetId, p2psettings.initDataChannel);
+	}
   });
+
+	function closeInviteDialog() {
+		invitePopupDialog.dialog( "close" );
+	}
 
 /*
 	window.onbeforeunload = function (event) {
@@ -1631,7 +2124,7 @@
 			disconnectPeer();
 			sessionStorage.setItem("activeSession", "false");
 		}
-	}
+	};
 
 /*
 	window.addEventListener("beforeunload", (event) => {
@@ -1643,7 +2136,7 @@
 */
 
 	window.addEventListener("unload", () => {
-		unloadProcessor();
+//		unloadProcessor();
 		return null;
 	});
 
@@ -1654,6 +2147,7 @@
 	});
 
 	document.addEventListener('dragstart', function (e) {
+		console.log(e);
 		if (e.target.classList.contains('category_image')) {
 			e.dataTransfer.setData('text/uri-list', e.target.src);
 			e.dataTransfer.setData('catId', e.target.attributes.getNamedItem('catId').value);
@@ -1729,10 +2223,23 @@
 	
 	};
 
+	function showStatus(text, color) {
+		const el = document.getElementById("status");
+		if (!el) return;
+
+		el.textContent = `Статус: ${text}`;
+		el.style.backgroundColor = color || "gray";
+	}
+
   </script>
 
 </head>
 <body>
+
+<div id="status" style="padding: 8px; font-weight: bold; color: white; background: gray; width: fit-content; position: fixed">
+  Статус: неизвестный
+</div>
+
 	<a href="<%=constants.MAIN_SITE_URL %>" target="sandoria_main" class="homeBtn"><img src="/images/svg/home.svg" width="16px" height="16px"/></a>
 	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
 		<tr>
@@ -1743,40 +2250,61 @@
 					<span class="slogan" style="color: #244A65">Песочная терапия онлайн</span>
 				</div>
 				<div class="control_panel">
+				<% if (!clientMode) { %>
+					<p class="control_line" id="interaction_mode" onclick="switchIneractionMode()">
+						<span class="icon"><img src="/images/svg/interactionModeOff.svg"></span>
+						<span class="label">Взаимодействие</span>
+					</p>
+				<% } %>
+
 					<p class="control_line" onclick="levelDown()">
-						<span class="icon"><img src="/images/svg/control_back.svg"></span>На задний план
+						<span class="icon"><img src="/images/svg/control_back.svg"></span>
+						<span class="label">На задний план</span>
 					</p>
 
 					<p class="control_line" onclick="levelUp()">
-						<span class="icon"><img src="/images/svg/control_forward.svg"></span>На передний план
+						<span class="icon"><img src="/images/svg/control_forward.svg"></span>
+						<span class="label">На передний план</span>
 					</p>
 					<p class="control_line" onclick="copySelected()">
-						<span class="icon"><img src="/images/svg/control_copy.svg"></span>Копировать
+						<span class="icon"><img src="/images/svg/control_copy.svg"></span>
+						<span class="label">Копировать</span>
 					</p>
 					<p class="control_line" onclick="skewSelected()">
-						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>Отразить
+						<span class="icon"><img src="/images/svg/control_rotate.svg"></span>
+						<span class="label">Отразить</span>
 					</p>
-					<p class="control_line" onclick="removeSelected()" hotkey="Delete">
-						<span class="icon"><img src="/images/svg/control_delete.svg"></span>Удалить
+					<p class="control_line" onclick="removeSelected(null, true)" hotkey="Delete">
+						<span class="icon"><img src="/images/svg/control_delete.svg"></span>
+						<span class="label">Удалить</span>
 					</p>
 					<p class="control_line" onclick="removeAllConfirmation()">
-						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>Очистить все
+						<span class="icon"><img src="/images/svg/control_clear_all.svg"></span>
+						<span class="label">Очистить все</span>
 					</p>
 				</div>
 
 			<% if (!clientMode) { %>
+<!-- -->
+			<div class="lbottompanel">
+<!-- -->
 				<div class="spaces h40">&nbsp;</div>
 				<div class="inviteBtn btn1" id="inviteClientBtn">
+					<img class="icon" src="/images/svg/inviteClient.svg" title="Пригласить клиента" />
 					<span>
 						<p><a href="#">Пригласить клиента</a></p>
 					</span>
 				</div>
 				<div class="spaces h40">&nbsp;</div>
 				<div class="inviteBtn btn2" id="takeScreenshotBtn" onclick="saveStateToImage()">
+					<img class="icon" src="/images/svg/make_screenshot.svg" title="Сделать снимок" />
 					<span>
 						<p><a href="#">Сделать снимок</a></p>
 					</span>
 				</div>
+<!-- -->
+			</div>
+<!-- -->
 			<% } else { %>
 				<!-- CONNECTION STATUS SECTION START -->
 				<span id="connectionStatusSection">
@@ -1788,6 +2316,7 @@
 			</td>
 			<td id="sandbox">
 				<div id="container"></div>
+				<div id="containerHidden" style="display: none;"></div>
 			<% if (!clientMode) { %>
 				<div id="iterationsHolder">
 					<span id="slideToggle" class="slideUp"></span>
@@ -1814,7 +2343,7 @@
 						for (let category of categories.values()) {
 					%>
 					<span class="topCategory" cid="<%= category.id %>" cname="<%= category.title %>" icon="<%= category.icon %>" inverticon="<%= category.invert_icon %>">
-						<img src="<%= category.icon %>"/>
+						<img data-src="<%= category.icon %>"/>
 					</span>
 					<div id="images_<%= category.id %>" class="images_hidden">
 					<%
@@ -1822,7 +2351,7 @@
 						for (const [imageIndex, image] of category.images.entries()) {
 					%>
 							<span class="imageCell">
-								<img class="category_image" src="<%= image.image %>" title="<%= image.title %>" loading="lazy" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
+								<img class="category_image" data-src="<%= image.image %>" title="<%= image.title %>" loading="eager" catId="<%= category.id %>" imgId="<%= image.id %>" onclick="handleImageSelect(imageSelectEvent(this.src, '<%= category.id %>', '<%= image.id %>'), true)"/>
 							</span>
 					<%  } %>
 					</div>
@@ -1847,9 +2376,11 @@
 		</td>
 	</table>
 
+<div id="progress">Загружено: <span id="progress-value">0</span>%</div>
+
 <div id="invite-dialog">
 	<div class="halign_center mtop20 mbottom20">
-		<img src="/images/svg/InfoMan.svg" />
+		<img class="infoMan" src="/images/svg/InfoMan.svg" />
 	</div>
 	<div class="halign_center">
 		<p class="invitepbс">Ссылка на песочницу</p>
@@ -1860,11 +2391,12 @@
 	</div>
 	<div class="spaces" style="height: 32px;">&nbsp;</div>
 	<div class="halign_center">
-		<div class="inviteBtn btn1 mauto" onclick="closeInviteDialog();">
+		<div class="dialogBtn btn1 mauto" onclick="closeInviteDialog();">
 			<span>
 				<p><a href="#">Закрыть</a></p>
 			</span>
 		</div>
+	<div class="spaces" style="height: 20px;">&nbsp;</div>
 	</div>
 </div>
 
@@ -1919,6 +2451,16 @@
   </div>
 </div> 
 </div>
+
+  <div id="rotate-overlay">
+    <img src="/images/svg/screen_rotate.svg" alt="Rotate device" class="icon">
+
+    <div class="text-title">Поверните устройство</div>
+    <div class="text-sub">
+      Песочница работает только<br>
+      в альбомной ориентации
+    </div>
+  </div>
 
 </body>
 </html>

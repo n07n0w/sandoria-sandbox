@@ -23,9 +23,9 @@ const jawsConfig = parseJawsDBUrl();
 // Check if the host is AWS RDS
 const isAWSRDS = (host) => host && host.includes('.rds.amazonaws.com');
 
-module.exports = jawsConfig || {
+const config = jawsConfig || {
 	host: process.env.DB_HOST,
-	port: parseInt(process.env.DB_PORT, 10),
+	port: parseInt(process.env.DB_PORT, 10) || 3306,
 	user: process.env.DB_USER,
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_NAME,
@@ -36,3 +36,10 @@ module.exports = jawsConfig || {
 		rejectUnauthorized: false
 	} : false
 };
+
+// Validate required configuration
+if (!config.host || !config.user || !config.database) {
+	throw new Error('Missing required database configuration: host, user, and database are required');
+}
+
+module.exports = config;

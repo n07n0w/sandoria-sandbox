@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var { app, initializeApp } = require('../app');
+var { app, initializeApp, initWebSocket } = require('../app');
 var debug = require('debug')('mysandbox:server');
 var http = require('http');
 
@@ -44,7 +44,7 @@ async function startServer() {
     try {
         console.log('Initializing application...');
         await initializeApp();
-        
+	await initWebSocket(server);
         console.log('Starting HTTP server...');
         server.listen(port);
         server.on('error', onError);

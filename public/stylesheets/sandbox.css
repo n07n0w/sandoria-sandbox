@@ -80,7 +80,7 @@ body {
 /*	width: 348px;*/
 	width: fit-content;
 /*	margin: auto;*/
-	margin: 10px 20px;
+/*	margin: 10px 20px;*/
 }
 .images_hidden table {
 	width: 100%;
@@ -131,15 +131,19 @@ body {
 }
 
 #container {
-/*	border: 1px solid black;*/
 }
 #sandbox {
 	vertical-align: middle;
 }
 .rsidecontent {
-	width: 390px;
+/*	width: 390px;*/
 	margin: auto;
+/*	width: 100%;*/
 }
+.rsideMin {
+	width: 390px;
+}
+
 #category_label {
 	margin-top: 10px;
 }
@@ -148,8 +152,11 @@ body {
 	height: 37px;
 	border: 1px solid #6F899B33;
 	box-shadow: 0px 3px 3px #6F899B33;
-	display: inline-block;
-	margin-bottom: 10px;
+/*	display: inline-block;*/
+/*	margin-bottom: 10px;*/
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 .topCategory:hover {
 	box-shadow: none;
@@ -164,8 +171,8 @@ body {
 .topCategory img {
 	width: 30px;
 	height: 22px;
-	position: relative;
-	top: 8px;
+/*	position: relative;*/
+/*	top: 8px;*/
 }
 .category_delimiter {
 	width: 12px !important;
@@ -177,44 +184,39 @@ body {
 	color: #091721;
 }
 #categoryImages {
-/*	width: 348px;*/
-/*	margin: auto;*/
-/*	margin-top: 24px;*/
-/*	overflow: auto;*/
 	width: 100%;
 	height: 100%;
-/*	scrollbar-width: thin;*/
-/*	scrollbar-color: #858585 #F0F0F0;*/
 	position: absolute;
-	right: 0;
+/*	right: 0;*/
+	right: 10px;
 	background-color: #ffffff;
 }
 
 .imageCell {
 	width: 100px;
-/*	width: 80px;*/
 	height: 130px;
-/*	text-align: center;*/
 	display: flex;
-/*	align-items: flex-end;*/
 	justify-content: center;	
 }
-.inviteBtn {
+.inviteBtn, .dialogBtn {
     display: flex;
     width: 170px;
     justify-content: center;
     align-items: center;
     height: 60px;
 }
-.inviteBtn:hover {
+.inviteBtn:hover, .dialogBtn:hover {
     background-color: #091721;
 }
 
-.inviteBtn a {
+.inviteBtn a, .dialogBtn a {
 	text-decoration: none;
 }
-.inviteBtn p {
+.inviteBtn p, .dialogBtn p {
 	width: 94px;
+}
+.inviteBtn .icon, .dialogBtn .icon {
+	display: none;
 }
 .btn1 {
 	background-color: #244A65;
@@ -303,7 +305,8 @@ body {
 #categoryImagesHolder {
 	position: relative;
 	overflow: auto;
-	width: 100%;
+/*	width: 100%;*/
+        width: fit-content;
 	height: 100%;
 	scrollbar-width: thin;
 	scrollbar-color: #858585 #F0F0F0;
@@ -318,10 +321,6 @@ body {
 	height: 37px;
 }
 #iterations {
-/*	display: none;*/
-/*	position: absolute;*/
-/*	border: 1px solid black;*/
-/*	height: var(--screenshot-height);*/
 	overflow-x: auto;
 	background-color: #ffffff;
 	display: flex;
@@ -337,13 +336,10 @@ body {
 	width: 39px;
 	height: 17px;
 	position: relative;
-/*	bottom: 5px;*/
 	display: block;
 	left: 200px;
 }
 #slideToggle img {
-/*	width: 100%;*/
-/*	height: 100%;*/
 	object-fit: contain;
 }
 
@@ -359,31 +355,23 @@ body {
 	bottom: -20px;
 }
 .slideLeft {
-/*	background-image: url("/images/svg/slideLeft.svg");*/
 	background-image: url("/images/svg/expandArrowLeft.svg");
 	background-size: 17px 37px;
-/*	filter: drop-shadow(2px 1px 1px #6F899B);*/
 	filter: drop-shadow(2px 1px 1px #6F899B55);
-/*	filter: drop-shadow(2px 1px 1px rgba(#6F, #89, #9B, 0.4));*/
 }
 .slideLeft:hover {
-/*	background-image: url("/images/svg/slideLeftHover.svg");*/
 	background-image: url("/images/svg/expandArrowLeftHover.svg");
 	filter: none;
 	background-size: 17px 37px;
 }
 
 .slideRight {
-/*	background-image: url("/images/svg/slideRight.svg");*/
 	background-image: url("/images/svg/expandArrowLeft.svg");
 	transform: rotate(180deg);
 	background-size: 17px 37px;
-/*	filter: drop-shadow(-2px 1px 1px #6F899B);*/
 	filter: drop-shadow(-2px 1px 1px #6F899B55);
-/*	filter: drop-shadow(-2px 1px 1px rgba(#6F, #89, #9B, 0.4));*/
 }
 .slideRight:hover {
-/*	background-image: url("/images/svg/slideRight.svg");*/
 	background-image: url("/images/svg/expandArrowLeftHover.svg");
 	transform: rotate(180deg);
 	background-size: 17px 37px;
@@ -391,8 +379,6 @@ body {
 }
 
 .screenshot {
-/*	width: 84px;*/
-/*	height: 60px;*/
         width: var(--screenshot-width);
         width: var(--screenshot-height);
 }
@@ -507,4 +493,15 @@ body {
 	pointer-events: none;
 	transition: all 1s ease-in-out;
 	z-index: 9999;
+}
+.left_side_menu {
+	width: 208px;
+}
+.lbottompanel {
+	position: absolute;
+	bottom: 20px;
+        left: 19px;
+}
+.control_line.on .label {
+	color: #244A65;
 }
