@@ -46,9 +46,24 @@ const handleGetIndex = async (req, res, next) => {
 
 const handleLogTrace = async (req, res) => {
 	const logEntry = req.body;
-	console.info(logEntry);
-//	const logMessage = `[${logEntry.timestamp}] Type: ${logEntry.type}, Message: ${logEntry.message}\nStack: ${logEntry.trace}\n\n`;
-	console.trace(logEntry);
+
+	// Only log if there's actual content
+	if (logEntry && Object.keys(logEntry).length > 0) {
+		console.info('Client trace:', logEntry);
+
+		// Log structured trace information
+		if (logEntry.message || logEntry.error || logEntry.stack) {
+			console.trace('Client trace details:', {
+				timestamp: logEntry.timestamp || new Date().toISOString(),
+				type: logEntry.type || 'unknown',
+				message: logEntry.message || 'No message',
+				stack: logEntry.stack || 'No stack trace'
+			});
+		}
+	} else {
+		console.warn('Empty trace log received from client');
+	}
+
 	res.status(200).send('Trace logged successfully');
 }
 

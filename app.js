@@ -4,6 +4,7 @@ var express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
 const initializeDatabase = require('./init-db');
 const constants = require('./constants');
@@ -45,14 +46,53 @@ const oneHour = 3_600_000 // 3600000msec => 1hour
 
 app.use(cookieParser());
 app.use(express.static('public', { maxAge: oneHour }));
+
+// Configure session store based on environment
+let sessionStore;
+if (process.env.NODE_ENV === 'production') {
+    // Use MySQL session store in production
+    const dbConfig = require('./dbConfig');
+    const sessionStoreOptions = {
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        charset: 'utf8mb4',
+        createDatabaseTable: true,
+        schema: {
+            tableName: 'sessions',
+            columnNames: {
+                session_id: 'session_id',
+                expires: 'expires',
+                data: 'data'
+            }
+        }
+    };
+
+    try {
+        sessionStore = new MySQLStore(sessionStoreOptions);
+        console.log('✅ MySQL session store configured for production');
+    } catch (err) {
+        console.warn('⚠️ Failed to create MySQL session store, falling back to memory store:', err.message);
+        sessionStore = undefined; // Will use default MemoryStore
+    }
+} else {
+    console.log('📝 Using memory store for development');
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'secret-key-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true',
-    maxAge: oneHour
-  }
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    name: 'sandoria.sid', // Custom session name
+    cookie: {
+        secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true',
+        httpOnly: true, // Prevent XSS attacks
+        maxAge: oneHour,
+        sameSite: 'strict' // CSRF protection
+    }
 }));
 
 // Don't set up routes until database is initialized
