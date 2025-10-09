@@ -5,8 +5,12 @@
     let closedManually = false;
     const pendingMessages = [];
 
-//    const log = msg => console.log(`[${clientId}] ${msg}`);
-//	const log = msg => console.trace(`[${clientId}] ${msg}`);
+    // Добавляем счетчики для контроля переподключений
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    let reconnectDelay = 3000;
+
+	// Simple, safe logger that doesn't create stack traces for normal operations
 	const log = (msg, ...args) => {
 		// Simple, safe logger that doesn't create stack traces for normal operations
 		const logMessage = `[${clientId}] ${msg}`;
@@ -150,7 +154,27 @@
 		}
 
       peerConnection = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+          // Бесплатные публичные TURN серверы
+          {
+            urls: "turn:numb.viagenie.ca",
+            credential: "muazkh",
+            username: "webrtc@live.com"
+          },
+          {
+            urls: "turn:192.158.29.39:3478?transport=udp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808"
+          },
+          {
+            urls: "turn:192.158.29.39:3478?transport=tcp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808"
+          }
+        ],
+        iceCandidatePoolSize: 10
       });
 
       peerConnection.onicecandidate = ({ candidate }) => {
@@ -163,6 +187,24 @@
         }
       };
 
+      // Добавляем диагностику ICE соединения
+      peerConnection.onicecandidateerror = (event) => {
+        log('❌ ICE candidate error:', event.errorText || 'Unknown ICE error');
+      };
+
+      peerConnection.oniceconnectionstatechange = () => {
+        const iceState = peerConnection.iceConnectionState;
+        log(`🧊 ICE connection state: ${iceState}`);
+
+        if (iceState === 'failed') {
+          log('❌ ICE connection failed - this usually means NAT/Firewall issues');
+        }
+      };
+
+      peerConnection.onicegatheringstatechange = () => {
+        log(`🔍 ICE gathering state: ${peerConnection.iceGatheringState}`);
+      };
+
       peerConnection.ondatachannel = (event) => {
         log("📥 Got data channel");
         setupDataChannel(event.channel);
@@ -172,13 +214,35 @@
         try {
           const state = peerConnection.connectionState;
           log("🔄 RTC state:", state);
+
           if (state === 'connected') {
+            // Сбрасываем счетчик при успешном подключении
+            reconnectAttempts = 0;
+            reconnectDelay = 3000;
             if (onStatusChange) onStatusChange('connected');
           } else if ((state === "disconnected" || state === "failed" || state === 'closed') && !closedManually) {
+            if (reconnectAttempts >= maxReconnectAttempts) {
+              log(`❌ Max reconnect attempts (${maxReconnectAttempts}) reached. Stopping.`);
+              if (onStatusChange) onStatusChange('connection-failed');
+              return;
+            }
+
+            reconnectAttempts++;
+            log(`🔄 Reconnection attempt ${reconnectAttempts}/${maxReconnectAttempts} in ${reconnectDelay}ms`);
+
             if (onStatusChange) onStatusChange("reconnecting");
+
             setTimeout(() => {
-              try { setupPeerConnection(); } catch (e) { log('Re-setup failed', e); }
-            }, 3000);
+              try {
+                setupPeerConnection();
+              } catch (e) {
+                log('Re-setup failed', e);
+                if (onStatusChange) onStatusChange('connection-failed');
+              }
+            }, reconnectDelay);
+
+            // Увеличиваем задержку для следующей попытки (экспоненциальная задержка)
+            reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
           }
         } catch (e) { log('onconnectionstatechange handler error', e); }
       };
