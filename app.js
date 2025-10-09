@@ -115,26 +115,43 @@ async function initWebSocket(server) {
         let clientId = null;
 
         ws.on('message', (message) => {
-            const data = JSON.parse(message.toString());
-            console.log('New message', data);
+            try {
+                const data = JSON.parse(message.toString());
+                console.log('New message', data);
 
-            // 1. Перше повідомлення від клієнта: реєстрація ID
-            if (data.type === 'register') {
-                clientId = data.clientId;
-                clients.set(clientId, ws);
-                console.log(`🟢 Client registered: ${clientId}`);
-                return;
-            }
+                // 1. Перше повідомлення від клієнта: реєстрація ID
+                if (data.type === 'register') {
+                    clientId = data.clientId;
+                    clients.set(clientId, ws);
+                    console.log(`🟢 Client registered: ${clientId}`);
+                    return;
+                }
 
-            // 2. Інші типи — signaling (offer/answer/ice)
-            const targetSocket = clients.get(data.targetId);
-            if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-                targetSocket.send(JSON.stringify({
-                    type: data.type,
-                    sdp: data.sdp,
-                    candidate: data.candidate,
-                    fromId: clientId
-                }));
+                // 2. Інші типи — signaling (offer/answer/ice)
+                if (!clientId) {
+                    console.warn('Received signaling message from unregistered client');
+                    return;
+                }
+
+                if (!data.targetId) {
+                    console.warn('Received signaling message without targetId');
+                    return;
+                }
+
+                const targetSocket = clients.get(data.targetId);
+                if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                    targetSocket.send(JSON.stringify({
+                        type: data.type,
+                        sdp: data.sdp,
+                        candidate: data.candidate,
+                        fromId: clientId
+                    }));
+                } else {
+                    console.warn(`Target client ${data.targetId} not found or not connected`);
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+                // Don't crash the connection, just log the error
             }
         });
 

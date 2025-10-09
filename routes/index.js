@@ -7,32 +7,41 @@ const CategoryRepository = require('../repository/categoryRepository').CategoryR
 var categoryRepository = new CategoryRepository();
 
 
-function getUser(location, area, rooms, maxNum) {
+async function getUser(location, area, rooms, maxNum) {
 	logger.info(["getLocationSimilars :: START", location, area, rooms, maxNum])
 	let connection = null;
 	try {
-		connection = pool.getConnection();
+		connection = await pool.getConnection();
+		// Define missing delta constants to prevent undefined variable errors
+		const areaDelta = 10; // Default area tolerance
+		const roomDelta = 1;  // Default room tolerance
 		let values = [location, area + areaDelta, area - areaDelta, rooms + roomDelta, rooms - roomDelta, maxNum];
 
 		var sql = "SELECT * FROM properties WHERE locationID = ? AND state='inactive' AND (constructedArea <= ? AND constructedArea >= ?) AND (roomNumber <= ? AND roomNumber >= ?) order by constructedArea, roomNumber desc LIMIT ?";
-		const [results, fields] = connection.query(sql, values);
+		const [results, fields] = await connection.query(sql, values);
 		logger.info(results);
 		connection.release();
 		return results;
 	} catch (error) {
 		logger.error('Error connecting to the MySQL server:', error);
+		if (connection) connection.release();
 		return null;
 	}
 }
 
-const handleGetIndex = async (req, res) => {
-	var user = req.session.user;
-	var categories = await categoryRepository.getCategories();
-	res.render('index', {
-		user: user,
-		categories: categories,
-		title: 'Express'
-	});
+const handleGetIndex = async (req, res, next) => {
+	try {
+		var user = req.session.user;
+		var categories = await categoryRepository.getCategories();
+		res.render('index', {
+			user: user,
+			categories: categories,
+			title: 'Express'
+		});
+	} catch (error) {
+		logger.error('Error in handleGetIndex:', error);
+		next(error); // Pass error to Express error handler
+	}
 }
 
 const handleLogTrace = async (req, res) => {
