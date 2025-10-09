@@ -107,6 +107,7 @@ async function initializeApp() {
 const clients = new Map(); // clientId → WebSocket
 
 async function initWebSocket(server) {
+    console.log('initWebSocket:', server);
     var wss = new WebSocket.Server({ server }); // WebSocket на тому ж сервері
     console.log('WebSocket:', wss);
 

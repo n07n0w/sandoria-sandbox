@@ -841,7 +841,7 @@
 	};
 
 	const toggleSwitchInteractionButton = () => {
-		$("#interaction_mode").toggleClass("on");
+		$("#interaction_mode").toggleClass("on", canDoctorEditImages);
 		setSwitchInteractionButtonImg();
 	};
 	
@@ -2089,6 +2089,7 @@ console.log({
 	initStage();
 //	loadKonvaState();
 	recalcSandboxSizes();
+	toggleSwitchInteractionButton();
 	setSwitchInteractionButtonImg();
 	updateTransformerInteractionMode();
 	$("#iterations").hide();
