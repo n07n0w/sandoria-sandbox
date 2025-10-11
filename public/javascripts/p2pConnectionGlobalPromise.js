@@ -33,7 +33,7 @@
               body: JSON.stringify({ message: String(msg), clientId, timestamp: Date.now(), level: 'error' })
             }).catch(() => {});
           }
-        } catch (_) {}
+        } catch {}
       }
     };
 
@@ -56,7 +56,7 @@
               } else {
                 safeDetails[k] = v;
               }
-            } catch (_) {
+            } catch {
               safeDetails[k] = '[unserializable]';
             }
           }
@@ -65,7 +65,7 @@
         }
         console.log({ ...base, ...safeDetails });
       } catch (e) {
-        try { console.warn({ timestamp: new Date().toISOString(), eventType: 'logSerializationError', correlationId, error: e && e.message }); } catch (_) {}
+        try { console.warn({ timestamp: new Date().toISOString(), eventType: 'logSerializationError', correlationId, error: e && e.message }); } catch {}
       }
     }
 
@@ -154,9 +154,9 @@
 
     function cleanupPeerConnection() {
       if (peerConnection) {
-        try { peerConnection.onicecandidate = null; } catch (_) {}
-        try { peerConnection.ondatachannel = null; } catch (_) {}
-        try { peerConnection.onconnectionstatechange = null; } catch (_) {}
+        try { peerConnection.onicecandidate = null; } catch (e) {}
+        try { peerConnection.ondatachannel = null; } catch (e) {}
+        try { peerConnection.onconnectionstatechange = null; } catch (e) {}
         try { peerConnection.close(); } catch (e) { log('Error closing peerConnection', e); safeStructLog('peerCloseError', { error: e && e.message }, null); }
       }
       peerConnection = null;

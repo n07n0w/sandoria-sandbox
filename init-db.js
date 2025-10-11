@@ -68,7 +68,7 @@ async function initializeDatabase() {
         const sqlFilePath = path.join(__dirname, 'DB', 'sandbox.sql');
         try {
             await fs.access(sqlFilePath);
-        } catch (err) {
+        } catch {
             console.log('SQL file not found, skipping database initialization');
             return;
         }

@@ -17,7 +17,7 @@ async function getSandboxesByOwner(owner) {
 	try {
 		let values = [owner];
 		var sql = "SELECT * FROM sandboxes WHERE ownerid = ?";
-		const [results, fields] = await pool.execute(sql, values);
+		const [results] = await pool.execute(sql, values);
 		logger.info(results);
 		logger.info(["getSandboxesByOwner :: END", owner])
 		return results;
@@ -32,7 +32,7 @@ async function getSandboxByUuid(uuid) {
 	try {
 		let values = [uuid];
 		var sql = "SELECT * FROM sandboxes WHERE uuid = ?";
-		const [results, fields] = await pool.execute(sql, values);
+		const [results] = await pool.execute(sql, values);
 		logger.info(results);
 		logger.info(["getSandboxByUuid :: END", uuid])
 		return results[0];

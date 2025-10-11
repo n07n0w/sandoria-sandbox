@@ -12,6 +12,8 @@ const baseUrl = constants.BASE_URL;
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 
 console.log('Starting application...');
@@ -115,6 +117,25 @@ app.use(session({
         sameSite: 'strict' // CSRF protection
     }
 }));
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use(globalLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  message: { message: 'Too many login attempts, please try again later.' }
+});
+app.use('/auth', authLimiter);
 
 // Don't set up routes until database is initialized
 let routesInitialized = false;
@@ -268,4 +289,4 @@ async function initWebSocket(server) {
 
 
 // Export both the app and the initialization function
-module.exports = { app, initializeApp, initWebSocket };
+module.exports = app;

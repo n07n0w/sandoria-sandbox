@@ -30,9 +30,9 @@
   }
 
   // LOG ADDED: reconnection counters
-  let reconnectAttempts = 0; // LOG ADDED
-  const maxReconnectAttempts = 5; // LOG ADDED
-  let reconnectDelay = 3000; // LOG ADDED
+  let _reconnectAttempts = 0; // unused currently
+  const _maxReconnectAttempts = 5; // unused currently
+  let _reconnectDelay = 3000; // unused currently
 
   function sendMessage(msg) {
     const text = typeof msg === "string" ? msg : JSON.stringify(msg);
@@ -150,7 +150,7 @@
       log(`🔄 Peer connection state: ${state}`);
 
       if (state === 'connected') {
-        reconnectAttempts = 0; reconnectDelay = 3000; // LOG ADDED: reset counters
+        _reconnectAttempts = 0; _reconnectDelay = 3000; // LOG ADDED: reset counters
         safeStructLog('connectionStable', {}, null); // LOG ADDED
       }
 

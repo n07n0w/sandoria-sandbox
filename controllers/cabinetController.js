@@ -2,7 +2,6 @@ const pool = require('../dbConnection');
 const logger = require('../logger');
 
 const { 
-  v1: uuidv1,
   v4: uuidv4,
 } = require('uuid');
 
@@ -10,9 +9,8 @@ const {
 async function insertNewSandbox(name, owner, sessionuuid) {
 	logger.info(["insertNewSandbox :: START", name, owner, sessionuuid]);
 	try {
-		let values = [name, owner, sessionuuid];
-		var sql = "INSERT INTO sandboxes (`name`, `ownerId`, `sessionUuid`) VALUES (?, ?, ?)";
-		const [results, fields] = await pool.execute(sql, values);
+		const sql = "INSERT INTO sandboxes (`name`, `ownerId`, `sessionUuid`) VALUES (?, ?, ?)";
+		const [results] = await pool.execute(sql, [name, owner, sessionuuid]);
 		logger.info(results);
 		logger.info(["insertNewSandbox :: END", name, owner, sessionuuid]);
 		return results;

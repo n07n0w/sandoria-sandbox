@@ -38,13 +38,17 @@ module.exports = [
       'security/detect-possible-timing-attacks': 'warn',
       'security/detect-pseudoRandomBytes': 'warn',
       'security/detect-unsafe-regex': 'warn',
-      'no-unused-vars': ['warn', { args: 'none', ignoreRestSiblings: true }],
+      'no-unused-vars': ['warn', { args: 'none', ignoreRestSiblings: true, varsIgnorePattern: '^_' }],
       'no-console': 'off',
       'no-empty': ['warn', { allowEmptyCatch: true }]
     }
   },
   {
     files: [ 'public/javascripts/p2pConnection.js' ],
+    languageOptions: { sourceType: 'module' }
+  },
+  {
+    files: [ 'public/p2pConnection.js' ],
     languageOptions: { sourceType: 'module' }
   },
   {

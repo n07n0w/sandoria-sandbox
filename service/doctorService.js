@@ -1,7 +1,7 @@
 ﻿const pool = require('../dbConnection');
 var logger = require('morgan');
 
-async function getDoctorPatients(doctorId) {
+async function _getDoctorPatients(doctorId) {
 	logger.info(["getDoctorPatients :: START", doctorId])
 	let connection = null;
 	try {
@@ -9,7 +9,7 @@ async function getDoctorPatients(doctorId) {
 		let values = [doctorId];
 
 		var sql = "SELECT p.* FROM doctors_patients dp INNER JOIN patient p ON dp.patient_id = p.id WHERE dp.doctor_id = ?";
-		const [results, fields] = await connection.query(sql, values);
+		const [results] = await connection.query(sql, values);
 		logger.info(results);
 		connection.release();
 		return results;
@@ -18,3 +18,5 @@ async function getDoctorPatients(doctorId) {
 		return null;
 	}
 }
+
+module.exports = { _getDoctorPatients };

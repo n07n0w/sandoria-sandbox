@@ -38,8 +38,11 @@ jobs:
         run: |
           npx eslint . --ext .js,.cjs,.mjs || (echo 'ESLint found issues (errors only cause failure). Fix or run npm run lint:fix' && exit 1)
 
+      - name: Run tests
+        run: npm test
+
       - name: Run security audit (production, high severity and above)
-        run: npm audit --omit=dev --audit-level=high || true
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Show outdated (informational)
         run: npm outdated || true
