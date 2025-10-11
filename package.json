@@ -8,7 +8,10 @@
   "scripts": {
     "start": "node ./bin/www",
     "db:init": "node init-db.js",
-    "audit:fix": "npm audit fix"
+    "audit:fix": "npm audit fix",
+    "lint": "eslint . --ext .js,.cjs,.mjs",
+    "lint:fix": "eslint . --ext .js,.cjs,.mjs --fix",
+    "audit": "npm audit --audit-level=high"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -31,5 +34,11 @@
     "pug": "^3.0.3",
     "uuid": "^11.0.3",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "eslint-plugin-security": "^3.0.0",
+    "@eslint/js": "^9.0.0",
+    "globals": "^15.11.0"
   }
 }

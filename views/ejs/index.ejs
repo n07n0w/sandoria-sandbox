@@ -1608,11 +1608,33 @@ console.log({
       return jsonData;
     };
 
-	const selectFirstCategoryFromStart = function() {
-		// Надо найти первую катерогию в списке, взять ее ID ("cid" аттрибут) и выбрать ее
-		let allCategories = $(".topCategory");
-		if (typeof allCategories !== 'undefined') {
-			categorySelect(categorySelectEvent(allCategories[0].attributes['cid'].value, allCategories[0].attributes['cname'].value), true);
+	const selectFirstCategoryFromStart = function(attempt = 0) {
+		// Найти первую категорию; если их ещё нет (dynamic load) — сделать несколько повторных попыток
+		const allCategories = $(".topCategory");
+		if (!allCategories || allCategories.length === 0) {
+			if (attempt < 10) { // retry up to 10 times (1s total) in case of delayed render
+				setTimeout(() => selectFirstCategoryFromStart(attempt + 1), 100);
+			} else {
+				console.warn('[category] No .topCategory elements found after retries');
+			}
+			return;
+		}
+		const firstEl = allCategories[0];
+		if (!firstEl) {
+			console.warn('[category] First category element undefined');
+			return;
+		}
+		const $first = $(firstEl);
+		const cid = $first.attr('cid');
+		const cname = $first.attr('cname') || '';
+		if (!cid) {
+			console.warn('[category] First category missing cid attribute', firstEl);
+			return;
+		}
+		try {
+			categorySelect(categorySelectEvent(cid, cname), true);
+		} catch (e) {
+			console.error('[category] Failed to auto-select first category', e);
 		}
 	};
 
