@@ -292,7 +292,7 @@
       dataChannel.onmessage = (e) => {
         safeStructLog('dataChannelMessage', { length: e && e.data && e.data.length }, null);
         if (onMessageCallback) {
-          try { onMessageCallback(JSON.parse(e.data)); } catch (err) { onMessageCallback(e.data); }
+          try { onMessageCallback(JSON.parse(e.data)); } catch (_) { onMessageCallback(e.data); }
         }
       };
       dataChannel.onclose = () => {

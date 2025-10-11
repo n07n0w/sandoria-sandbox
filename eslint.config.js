@@ -55,5 +55,9 @@ module.exports = [
     files: [ 'public/javascripts/jquery.slidein.js' ],
     languageOptions: { globals: { '$': 'readonly', jQuery: 'readonly' } },
     rules: { 'no-undef': 'off' }
+  },
+  {
+    files: [ 'tests/**/*.js' ],
+    languageOptions: { globals: { describe: 'readonly', it: 'readonly', expect: 'readonly', beforeAll: 'readonly', afterAll: 'readonly' } }
   }
 ];

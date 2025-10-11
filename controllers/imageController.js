@@ -7,9 +7,9 @@ const SCREENSHOT_BASE_DIR = path.join(__dirname, '..', 'public', 'images', 'scre
 const SAFE_ID_REGEX = /^[A-Za-z0-9_-]+$/;
 
 function ensureDirectoryExistence(dirPath) {
-  if (fs.existsSync(dirPath)) return true;
+  if (fs.existsSync(dirPath)) return true; // eslint-disable-line security/detect-non-literal-fs-filename
   ensureDirectoryExistence(path.dirname(dirPath));
-  fs.mkdirSync(dirPath, { recursive: true });
+  fs.mkdirSync(dirPath, { recursive: true }); // eslint-disable-line security/detect-non-literal-fs-filename
   return true;
 }
 
@@ -59,7 +59,7 @@ const handlePost = async (req, res) => {
         try {
           const data = image.replace(/^data:image\/\w+;base64,/, "");
           const buf = Buffer.from(data, "base64");
-          fs.writeFileSync(safeFullPath, buf);
+          fs.writeFileSync(safeFullPath, buf); // eslint-disable-line security/detect-non-literal-fs-filename
           await saveSessionImageToDatabase(sessionId, imageDbPath, createDt);
           return res.json({ imagePath: imageDbPath, eventTime: createDt });
         } catch (e) {

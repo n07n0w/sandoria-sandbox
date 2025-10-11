@@ -39,8 +39,8 @@
     if (dataChannel && dataChannel.readyState === "open") {
       try {
         dataChannel.send(text);
-      } catch(e) {
-        safeStructLog('dataChannelSendError', { error: e && e.message }, 'Message queued'); // LOG ADDED
+      } catch { // removed e
+        safeStructLog('dataChannelSendError', { error: 'sendFailed' }, 'Message queued'); // LOG ADDED
         pendingMessages.push(msg);
       }
     } else {
@@ -97,9 +97,7 @@
           await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
           safeStructLog('remoteIceCandidateAdded', { candidate: data.candidate && data.candidate.candidate }, null); // LOG ADDED
         }
-      } catch(e) {
-        safeStructLog('wsMessageError', { error: e && e.message }, 'Check signaling payload'); // LOG ADDED
-      }
+      } catch { safeStructLog('wsMessageError', { error: 'parse' }, 'Check signaling payload'); }
     };
   }
 
@@ -118,9 +116,7 @@
         try {
           ws.send(JSON.stringify({ type: "ice", candidate, targetId }));
           safeStructLog('localIceCandidateSent', { candidate: candidate && candidate.candidate }, null); // LOG ADDED
-        } catch(e) {
-          safeStructLog('localIceCandidateSendError', { error: e && e.message }, 'Check WS connection'); // LOG ADDED
-        }
+        } catch { safeStructLog('localIceCandidateSendError', { error: 'iceSend' }, 'Check WS connection'); }
       }
     };
 
@@ -176,7 +172,7 @@
           ws.send(JSON.stringify({ type: "offer", sdp: peerConnection.localDescription, targetId }));
           safeStructLog('offerSent', {}, null); // LOG ADDED
         })
-        .catch(e => { safeStructLog('offerError', { error: e && e.message }, 'Check local description'); }); // LOG ADDED
+        .catch(() => { safeStructLog('offerError', { error: 'offerFailed' }, 'Check local description'); }); // LOG ADDED
     }
   }
 

@@ -1,7 +1,6 @@
 require('./console-logger');
 var createError = require('http-errors');
 var express = require('express');
-const http = require('http');
 const WebSocket = require('ws');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
@@ -289,4 +288,4 @@ async function initWebSocket(server) {
 
 
 // Export both the app and the initialization function
-module.exports = app;
+module.exports = { app, initializeApp, initWebSocket };
