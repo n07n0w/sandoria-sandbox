@@ -2,18 +2,17 @@
 const logger = require('../logger');
 
 const { 
-  v1: uuidv1,
   v4: uuidv4,
 } = require('uuid');
 
-SandboxRepository = function() {
+const SandboxRepository = function() {
 
 	this.insertNewSandboxWithSessionUuid = async function (name, owner, sessionuuid) {
 		logger.info(["insertNewSandboxWithSessionUuid :: START", name, owner, sessionuuid]);
 		try {
 			let values = [name, owner, sessionuuid];
 			var sql = "INSERT INTO sandboxes (`name`, `ownerId`, `sessionUuid`) VALUES (?, ?, ?)";
-			const [results, fields] = await pool.execute(sql, values);
+			const [results] = await pool.execute(sql, values);
 			logger.info(results);
 			logger.info(["insertNewSandboxWithSessionUuid :: END", name, owner, sessionuuid]);
 			return results;
@@ -35,7 +34,7 @@ SandboxRepository = function() {
 		try {
 			let values = [uuid];
 			var sql = "SELECT * FROM sandboxes WHERE uuid = ?";
-			const [results, fields] = await pool.execute(sql, values);
+			const [results] = await pool.execute(sql, values);
 			logger.info(results);
 			logger.info(["getSandboxByUuid :: END", uuid])
 			return results[0];
@@ -50,7 +49,7 @@ SandboxRepository = function() {
 		try {
 			let values = [sessionUuid];
 			var sql = "SELECT * FROM sandboxes WHERE sessionUuid = ?";
-			const [results, fields] = await pool.execute(sql, values);
+			const [results] = await pool.execute(sql, values);
 			logger.info(results);
 			logger.info(["getSandboxBySessionUuid :: END", sessionUuid])
 			return results[0];
@@ -65,7 +64,7 @@ SandboxRepository = function() {
 		try {
 			let values = [id];
 			var sql = "SELECT * FROM sandboxes WHERE id = ?";
-			const [results, fields] = await pool.execute(sql, values);
+			const [results] = await pool.execute(sql, values);
 			logger.info(results);
 			logger.info(["getSandboxById :: END", id])
 			return results[0];

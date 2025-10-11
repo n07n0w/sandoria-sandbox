@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
-const pool = require('../dbConnection');
-const logger = require('../logger');
+const _pool = require('../dbConnection');
+const _logger = require('../logger');
 const constants = require('../constants');
 
 const CategoryRepository = require('../repository/categoryRepository').CategoryRepository;
@@ -11,7 +11,7 @@ var categoryRepository = new CategoryRepository();
 const SandboxRepository = require('../repository/sandboxRepository').SandboxRepository;
 var sandboxRepository = new SandboxRepository();
 
-const configurationDB = {
+const _configurationDB = {
     configuration: require('../model/configuration.json')
 }
 

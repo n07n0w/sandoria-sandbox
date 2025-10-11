@@ -1,0 +1,53 @@
+logs/
+DB/
+public/fonts/
+public/images/
+public/javascripts/peerjs.min.js
+public/javascripts/jquery-3.7.1.js
+public/javascripts/jquery-ui.js
+public/javascripts/konva.js
+public/javascripts/konva.min.js
+/**
+ * ESLint configuration for the project.
+ * Includes security plugin and sensible defaults for Node + Browser (client assets) code.
+ */
+module.exports = {
+  root: true,
+  env: {
+    node: true,
+    browser: true,
+    es2023: true
+  },
+  parserOptions: {
+    ecmaVersion: 2023,
+    sourceType: 'module'
+  },
+  plugins: ['security'],
+  extends: [
+    'eslint:recommended',
+    'plugin:security/recommended'
+  ],
+  ignorePatterns: [
+    'logs/**',
+    'DB/**',
+    'public/fonts/**',
+    'public/images/**',
+    'public/javascripts/peerjs.min.js',
+    'public/javascripts/jquery-*.js',
+    'public/javascripts/konva*.js'
+  ],
+  rules: {
+    // Stylistic / low-noise tweaks
+    'no-unused-vars': ['warn', { args: 'none', ignoreRestSiblings: true }],
+    'no-console': 'off',
+    'security/detect-object-injection': 'off' // Too noisy for typical data objects; enable later if needed
+  },
+  overrides: [
+    {
+      files: ['**/test-*.js', 'test/**'],
+      env: { mocha: true },
+      rules: { 'no-unused-expressions': 'off' }
+    }
+  ]
+};
+

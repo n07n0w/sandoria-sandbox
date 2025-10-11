@@ -1,7 +1,7 @@
 ﻿const pool = require('../dbConnection');
 const logger = require('../logger');
 
-CategoryRepository = function() {
+const CategoryRepository = function() {
 	this.categories;
 
 	this.getCategories = async function () {
@@ -11,7 +11,7 @@ CategoryRepository = function() {
 			var categories = new Map();
 			try {
 				var sql = "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryimage ci ON ci.categoryId = c.id";
-				const [results, fields] = await pool.execute(sql);
+				const [results /*, fields*/] = await pool.execute(sql);
 				if (!results || results.length === 0) {
 					logger.info(["No categories found in database, using empty map"])
 					this.categories = new Map();

@@ -1,7 +1,7 @@
 ﻿(() => {
 const content = document.getElementById('categoryImages');
 const thumb = document.getElementById('scrollThumb');
-const track = document.getElementById('scrollTrack');
+const _track = document.getElementById('scrollTrack');
 
 function updateThumb() {
   const contentHeight = content.scrollHeight;

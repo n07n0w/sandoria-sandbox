@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: ["*"]
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Lint (ESLint + security plugin)
+        run: |
+          npx eslint . --ext .js,.cjs,.mjs || (echo 'ESLint found issues (errors only cause failure). Fix or run npm run lint:fix' && exit 1)
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run security audit (production, high severity and above)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Show outdated (informational)
+        run: npm outdated || true
+
+      - name: Archive logs (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs
+          path: logs/*.log
+          if-no-files-found: ignore

@@ -7,7 +7,7 @@ const CategoryRepository = require('../repository/categoryRepository').CategoryR
 var categoryRepository = new CategoryRepository();
 
 
-async function getUser(location, area, rooms, maxNum) {
+async function _getUser(location, area, rooms, maxNum) {
 	logger.info(["getLocationSimilars :: START", location, area, rooms, maxNum])
 	let connection = null;
 	try {
@@ -18,7 +18,7 @@ async function getUser(location, area, rooms, maxNum) {
 		let values = [location, area + areaDelta, area - areaDelta, rooms + roomDelta, rooms - roomDelta, maxNum];
 
 		var sql = "SELECT * FROM properties WHERE locationID = ? AND state='inactive' AND (constructedArea <= ? AND constructedArea >= ?) AND (roomNumber <= ? AND roomNumber >= ?) order by constructedArea, roomNumber desc LIMIT ?";
-		const [results, fields] = await connection.query(sql, values);
+		const [results] = await connection.query(sql, values);
 		logger.info(results);
 		connection.release();
 		return results;
