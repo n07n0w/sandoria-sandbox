@@ -1,8 +1,10 @@
 name: Dockerfile Lint
 
 on:
+  push:
+    branches: [ main, master, '**' ]
   pull_request:
-    branches: [ * ]
+    branches: [ main, master, '**' ]
 
 jobs:
   hadolint:
