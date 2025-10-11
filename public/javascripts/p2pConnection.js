@@ -25,7 +25,7 @@
       }
       console.log({ ...base, ...safe });
     } catch(e) {
-      try { console.warn({ timestamp: new Date().toISOString(), eventType: 'logSerializationError', correlationId, error: e && e.message }); } catch(_) {}
+      try { console.warn({ timestamp: new Date().toISOString(), eventType: 'logSerializationError', correlationId, error: e && e.message }); } catch {/* ignore */}
     }
   }
 

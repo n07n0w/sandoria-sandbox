@@ -154,9 +154,9 @@
 
     function cleanupPeerConnection() {
       if (peerConnection) {
-        try { peerConnection.onicecandidate = null; } catch (e) {}
-        try { peerConnection.ondatachannel = null; } catch (e) {}
-        try { peerConnection.onconnectionstatechange = null; } catch (e) {}
+        try { peerConnection.onicecandidate = null; } catch {}
+        try { peerConnection.ondatachannel = null; } catch {}
+        try { peerConnection.onconnectionstatechange = null; } catch {}
         try { peerConnection.close(); } catch (e) { log('Error closing peerConnection', e); safeStructLog('peerCloseError', { error: e && e.message }, null); }
       }
       peerConnection = null;
@@ -292,7 +292,7 @@
       dataChannel.onmessage = (e) => {
         safeStructLog('dataChannelMessage', { length: e && e.data && e.data.length }, null);
         if (onMessageCallback) {
-          try { onMessageCallback(JSON.parse(e.data)); } catch (_) { onMessageCallback(e.data); }
+          try { onMessageCallback(JSON.parse(e.data)); } catch { onMessageCallback(e.data); }
         }
       };
       dataChannel.onclose = () => {
