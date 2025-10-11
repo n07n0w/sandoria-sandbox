@@ -19,4 +19,3 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: always
-
