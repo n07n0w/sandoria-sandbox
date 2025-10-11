@@ -1,7 +1,9 @@
 name: Dependency Review
 
 on:
-  push:
+  pull_request:
+    branches: [ "*" ]
+  pull_request_target:
     branches: [ "*" ]
 
 permissions:
