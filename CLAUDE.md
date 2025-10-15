@@ -207,3 +207,126 @@ const [results, fields] = await pool.execute(sql, values);
 - Console logging via custom console-logger.js (loaded first in app.js)
 - Pino logger available via logger.js (with pino-pretty for development)
 - Morgan middleware logs HTTP requests in 'dev' format
+
+## Deployment
+
+### GitHub Actions CI/CD
+
+The repository includes automated deployment to EC2 via GitHub Actions (`.github/workflows/deploy.yml`).
+
+**Required GitHub Secrets**:
+- `EC2_HOST`: Your EC2 instance public IP or hostname
+- `EC2_USER`: SSH username (typically `ubuntu` for Ubuntu servers)
+- `EC2_PASSWORD`: SSH password for the user
+
+**Deployment Trigger**:
+- Automatic: Push to `master` or `main` branch
+- Manual: Use "Actions" tab → "Deploy to EC2" → "Run workflow"
+
+**What the Pipeline Does**:
+1. Checks out the code
+2. Connects to EC2 via SSH (using sshpass for password authentication)
+3. Installs system dependencies (Node.js 18, Git, MySQL, PM2)
+4. Clones/updates the repository on the server
+5. Installs npm dependencies
+6. Creates `.env` file if missing
+7. Initializes the database
+8. Starts/restarts the application using PM2
+9. Sets up PM2 to run on system startup
+
+**Post-Deployment**:
+- Application runs via PM2 process manager (process name: `sandoria-sandbox`)
+- Access at: `http://<EC2_PUBLIC_IP>:3000`
+- Logs available via: `pm2 logs sandoria-sandbox`
+
+### Manual Deployment
+
+For manual deployment to a fresh Ubuntu server, use the `scripts/manual-deploy.sh` script:
+
+```bash
+# On your EC2 server:
+wget https://raw.githubusercontent.com/yourusername/sandoria-sandbox/master/scripts/manual-deploy.sh
+chmod +x manual-deploy.sh
+./manual-deploy.sh
+```
+
+Or SSH into your server and run:
+```bash
+curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/master/scripts/manual-deploy.sh | bash
+```
+
+**Manual Setup Steps**:
+1. Update repository URL in `scripts/manual-deploy.sh`
+2. Script will install all dependencies (Node.js, MySQL, PM2)
+3. Clone the repository to `~/sandoria-sandbox`
+4. Create `.env` file (you'll need to edit with your DB credentials)
+5. Initialize database
+6. Start application with PM2
+
+### Server Requirements
+
+**Minimum Specs**:
+- Ubuntu 18.04+ or similar Debian-based Linux
+- 1GB RAM (2GB recommended)
+- 10GB disk space
+- Open ports: 22 (SSH), 3000 (Application)
+
+**Installed Software** (via deployment scripts):
+- Node.js 18.x
+- MySQL Server 5.7+
+- PM2 (process manager)
+- Git
+
+### Database Setup on Server
+
+After deployment, you may need to configure MySQL:
+
+```bash
+# Secure MySQL installation
+sudo mysql_secure_installation
+
+# Create database and user (if not using root)
+sudo mysql
+CREATE DATABASE sandbox;
+CREATE USER 'sandboxuser'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON sandbox.* TO 'sandboxuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+# Update .env file with credentials
+nano ~/sandoria-sandbox/.env
+```
+
+### PM2 Management Commands
+
+```bash
+pm2 status                    # Check application status
+pm2 logs sandoria-sandbox     # View real-time logs
+pm2 restart sandoria-sandbox  # Restart application
+pm2 stop sandoria-sandbox     # Stop application
+pm2 start sandoria-sandbox    # Start application
+pm2 monit                     # Monitor CPU/memory usage
+pm2 save                      # Save PM2 process list
+```
+
+### Troubleshooting Deployment
+
+**Database connection errors**:
+- Check `.env` file has correct DB credentials
+- Verify MySQL is running: `sudo systemctl status mysql`
+- Test connection: `mysql -u root -p sandbox`
+
+**Port already in use**:
+- Check if app is already running: `pm2 status`
+- Kill existing process: `pm2 delete sandoria-sandbox`
+- Check for other processes: `sudo lsof -i :3000`
+
+**Application won't start**:
+- Check logs: `pm2 logs sandoria-sandbox --lines 100`
+- Verify Node.js version: `node --version` (should be 18.x)
+- Check file permissions in app directory
+
+**Can't access application**:
+- Verify EC2 security group allows inbound traffic on port 3000
+- Check firewall: `sudo ufw status`
+- Verify app is running: `pm2 status`
