@@ -229,10 +229,11 @@ The repository includes automated deployment to EC2 via GitHub Actions (`.github
 3. Installs system dependencies (Node.js 18, Git, MySQL, PM2)
 4. Clones/updates the repository on the server
 5. Installs npm dependencies
-6. Creates `.env` file if missing
-7. Initializes the database
-8. Starts/restarts the application using PM2
-9. Sets up PM2 to run on system startup
+6. **Creates MySQL database and user automatically** with secure credentials
+7. **Imports database backup from `DB/timeweb.sandbox.sql`** (or fallback to `DB/sandbox.sql`)
+8. Creates `.env` file with auto-generated database credentials
+9. Starts/restarts the application using PM2
+10. Sets up PM2 to run on system startup
 
 **Post-Deployment**:
 - Application runs via PM2 process manager (process name: `sandoria-sandbox`)
@@ -259,9 +260,10 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/maste
 1. Update repository URL in `scripts/manual-deploy.sh`
 2. Script will install all dependencies (Node.js, MySQL, PM2)
 3. Clone the repository to `~/sandoria-sandbox`
-4. Create `.env` file (you'll need to edit with your DB credentials)
-5. Initialize database
-6. Start application with PM2
+4. **Automatically creates MySQL database `sandbox` and user `sandboxuser`** with secure password
+5. **Imports database from `DB/timeweb.sandbox.sql`** (primary) or `DB/sandbox.sql` (fallback)
+6. Creates `.env` file with auto-generated credentials (displayed at end of script)
+7. Start application with PM2
 
 ### Server Requirements
 
@@ -279,22 +281,28 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/maste
 
 ### Database Setup on Server
 
-After deployment, you may need to configure MySQL:
+**The deployment scripts handle database setup automatically:**
 
+1. **Installs MySQL Server** (if not present)
+2. **Creates database** `sandbox`
+3. **Creates user** `sandboxuser` with auto-generated secure password
+4. **Grants privileges** to the user on the database
+5. **Imports backup** from `DB/timeweb.sandbox.sql` (or `DB/sandbox.sql` as fallback)
+6. **Creates `.env`** file with the generated credentials
+
+**Important**: Make sure you have `DB/timeweb.sandbox.sql` in your repository - this is the primary database backup that will be imported.
+
+**Manual database access** (if needed):
 ```bash
-# Secure MySQL installation
-sudo mysql_secure_installation
+# View current database credentials
+cat ~/sandoria-sandbox/.env | grep DB_
 
-# Create database and user (if not using root)
-sudo mysql
-CREATE DATABASE sandbox;
-CREATE USER 'sandboxuser'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON sandbox.* TO 'sandboxuser'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
+# Access MySQL with the created user
+mysql -u sandboxuser -p sandbox
+# (password is in .env file)
 
-# Update .env file with credentials
-nano ~/sandoria-sandbox/.env
+# Or use root access
+sudo mysql sandbox
 ```
 
 ### PM2 Management Commands
@@ -312,9 +320,10 @@ pm2 save                      # Save PM2 process list
 ### Troubleshooting Deployment
 
 **Database connection errors**:
-- Check `.env` file has correct DB credentials
+- Check `.env` file has correct DB credentials: `cat ~/sandoria-sandbox/.env | grep DB_`
 - Verify MySQL is running: `sudo systemctl status mysql`
-- Test connection: `mysql -u root -p sandbox`
+- Test connection: `mysql -u sandboxuser -p sandbox` (password from .env)
+- Check if database was imported: `sudo mysql -e "USE sandbox; SHOW TABLES;"`
 
 **Port already in use**:
 - Check if app is already running: `pm2 status`

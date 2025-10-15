@@ -51,10 +51,9 @@ fi
 # Install MySQL if not present
 if ! command -v mysql &> /dev/null; then
     echo -e "${YELLOW}📦 Installing MySQL...${NC}"
-    sudo apt-get install -y mysql-server
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
     sudo systemctl start mysql
     sudo systemctl enable mysql
-    echo -e "${YELLOW}⚠️  Please run: sudo mysql_secure_installation${NC}"
 else
     echo -e "${GREEN}✓ MySQL already installed${NC}"
 fi
@@ -84,18 +83,47 @@ fi
 echo -e "${YELLOW}📦 Installing Node.js dependencies...${NC}"
 npm install --production
 
-# Setup environment file if it doesn't exist
-if [ ! -f .env ]; then
-    echo -e "${YELLOW}⚙️  Creating .env file...${NC}"
-    PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || echo "localhost")
+# Setup MySQL database and user
+echo -e "${YELLOW}🗄️  Setting up MySQL database...${NC}"
+DB_USER="sandboxuser"
+DB_PASSWORD="sandbox_secure_pass_$(date +%s)"
+DB_NAME="sandbox"
 
-    cat > .env << ENV_FILE
+# Create database and user
+echo -e "${YELLOW}Creating database and user...${NC}"
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};" 2>/dev/null || true
+sudo mysql -e "DROP USER IF EXISTS '${DB_USER}'@'localhost';" 2>/dev/null || true
+sudo mysql -e "CREATE USER '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+
+echo -e "${GREEN}✅ Database '${DB_NAME}' and user '${DB_USER}' created${NC}"
+
+# Import backup if exists
+if [ -f "$APP_DIR/DB/timeweb.sandbox.sql" ]; then
+    echo -e "${YELLOW}📥 Importing database backup from DB/timeweb.sandbox.sql...${NC}"
+    sudo mysql ${DB_NAME} < "$APP_DIR/DB/timeweb.sandbox.sql"
+    echo -e "${GREEN}✅ Database backup imported successfully${NC}"
+elif [ -f "$APP_DIR/DB/sandbox.sql" ]; then
+    echo -e "${YELLOW}📥 Importing database schema from DB/sandbox.sql...${NC}"
+    sudo mysql ${DB_NAME} < "$APP_DIR/DB/sandbox.sql"
+    echo -e "${GREEN}✅ Database schema imported successfully${NC}"
+else
+    echo -e "${RED}⚠️  No database backup found (DB/timeweb.sandbox.sql or DB/sandbox.sql)${NC}"
+    exit 1
+fi
+
+# Setup environment file
+echo -e "${YELLOW}⚙️  Creating .env file...${NC}"
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || echo "localhost")
+
+cat > .env << ENV_FILE
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_mysql_password_here
-DB_NAME=sandbox
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_NAME=${DB_NAME}
 
 # Application URLs
 BASE_URL=http://${PUBLIC_IP}:3000
@@ -112,20 +140,11 @@ PEER_SERVER_PATH=/
 PEER_SERVER_SECURE=false
 ENV_FILE
 
-    echo -e "${RED}⚠️  IMPORTANT: Please update .env file with your database credentials!${NC}"
-    echo -e "${YELLOW}   Edit: nano $APP_DIR/.env${NC}"
-    echo ""
-    read -p "Press Enter after updating .env file..."
-fi
-
-# Initialize database
-echo -e "${YELLOW}🗄️  Initializing database...${NC}"
-if npm run db:init; then
-    echo -e "${GREEN}✓ Database initialized successfully${NC}"
-else
-    echo -e "${RED}❌ Database initialization failed. Please check your DB credentials in .env${NC}"
-    exit 1
-fi
+echo -e "${GREEN}✅ Environment file created with database credentials${NC}"
+echo -e "${YELLOW}📝 Database credentials:${NC}"
+echo -e "   User: ${DB_USER}"
+echo -e "   Password: ${DB_PASSWORD}"
+echo -e "   Database: ${DB_NAME}"
 
 # Configure firewall if ufw is available
 if command -v ufw &> /dev/null; then
