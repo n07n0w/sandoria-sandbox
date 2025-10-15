@@ -18,9 +18,9 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          SSH_HOST: ${{ secrets.EC2_HOST }}
-          SSH_USER: ${{ secrets.EC2_USER }}
-          SSH_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+          SSH_HOST: ${{ secrets.SERVER }}
+          SSH_USER: ${{ secrets.USER }}
+          SSH_PASSWORD: ${{ secrets.PASSWORD }}
         run: |
           # Install sshpass for password authentication
           sudo apt-get update
