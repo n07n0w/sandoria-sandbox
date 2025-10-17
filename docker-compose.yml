@@ -23,8 +23,6 @@ services:
     build: .
     container_name: sandbox-app
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       DB_HOST: db
       DB_USER: sandboxuser
