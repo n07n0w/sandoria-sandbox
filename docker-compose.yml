@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   db:
     image: mariadb:10.4.17
@@ -19,6 +20,7 @@ services:
       interval: 5s
       retries: 10
       start_period: 10s
+
   app:
     build: .
     container_name: sandbox-app
@@ -46,8 +48,36 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/www:/var/www/certbot
     depends_on:
       - app
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: sandbox-certbot
+    restart: unless-stopped
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/www:/var/www/certbot
+    entrypoint: /bin/sh -c
+    command:
+      - |
+        mkdir -p /var/www/certbot && \
+        chmod -R 755 /var/www/certbot && \
+        certbot certonly \
+          --webroot \
+          -w /var/www/certbot \
+          -d box.sandoria.org \
+          --email n07n0w@gmail.com \
+          --agree-tos \
+          --non-interactive \
+          --rsa-key-size 4096 && \
+        while true; do
+          certbot renew --quiet --webroot -w /var/www/certbot;
+          sleep 20d;
+        done
+    depends_on:
+      - nginx
 
 volumes:
   mysql-data:
