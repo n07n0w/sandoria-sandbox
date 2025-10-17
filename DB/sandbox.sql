@@ -1,28 +1,28 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               10.4.17-MariaDB-log - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             12.6.0.6765
--- --------------------------------------------------------
+-- MariaDB dump 10.18  Distrib 10.4.17-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: sandbox
+-- ------------------------------------------------------
+-- Server version	10.4.17-MariaDB-1:10.4.17+maria~focal
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+--
+-- Table structure for table `categories`
+--
 
--- Dumping database structure for sandbox
-DROP DATABASE IF EXISTS `sandbox`;
-CREATE DATABASE IF NOT EXISTS `sandbox` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-USE `sandbox`;
-
--- Dumping structure for table sandbox.categories
 DROP TABLE IF EXISTS `categories`;
-CREATE TABLE IF NOT EXISTS `categories` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `categories` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(250) NOT NULL DEFAULT '',
   `icon` varchar(250) NOT NULL DEFAULT '',
@@ -30,28 +30,26 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `title` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Dumping data for table sandbox.categories: ~15 rows (approximately)
-REPLACE INTO `categories` (`id`, `name`, `icon`, `invert_icon`, `title`) VALUES
-	(1, 'Люди', '/images/svg/categories/cat01/icon.svg', '/images/svg/categories/cat01/icon_inv.svg', 'Люди'),
-	(2, 'Мебель', '/images/svg/categories/cat02/icon.svg', '/images/svg/categories/cat02/icon_inv.svg', 'Мебель'),
-	(3, 'Архитектура', '/images/svg/categories/cat03/icon.svg', '/images/svg/categories/cat03/icon_inv.svg', 'Архитектура'),
-	(4, 'Транспорт', '/images/svg/categories/cat04/icon.svg', '/images/svg/categories/cat04/icon_inv.svg', 'Транспорт'),
-	(5, 'Военные', '/images/svg/categories/cat05/icon.svg', '/images/svg/categories/cat05/icon_inv.svg', 'Военные'),
-	(6, 'Медицина', '/images/svg/categories/cat06/icon.svg', '/images/svg/categories/cat06/icon_inv.svg', 'Медицина'),
-	(7, 'Животные', '/images/svg/categories/cat07/icon.svg', '/images/svg/categories/cat07/icon_inv.svg', 'Животные'),
-	(8, 'Волшебные существа', '/images/svg/categories/cat08/icon.svg', '/images/svg/categories/cat08/icon_inv.svg', 'Волшебные существа'),
-	(9, 'Динозавры', '/images/svg/categories/cat09/icon.svg', '/images/svg/categories/cat09/icon_inv.svg', 'Динозавры'),
-	(10, 'Смерть', '/images/svg/categories/cat10/icon.svg', '/images/svg/categories/cat10/icon_inv.svg', 'Смерть'),
-	(11, 'Стихии', '/images/svg/categories/cat11/icon.svg', '/images/svg/categories/cat11/icon_inv.svg', 'Стихии'),
-	(12, 'Природа', '/images/svg/categories/cat12/icon.svg', '/images/svg/categories/cat12/icon_inv.svg', 'Природа'),
-	(13, 'Соединения и разделители', '/images/svg/categories/cat13/icon.svg', '/images/svg/categories/cat13/icon_inv.svg', 'Соединения и разделители'),
-	(14, 'Стройка', '/images/svg/categories/cat14/icon.svg', '/images/svg/categories/cat14/icon_inv.svg', 'Стройка'),
-	(15, 'Еда', '/images/svg/categories/cat15/icon.svg', '/images/svg/categories/cat15/icon_inv.svg', 'Еда');
+--
+-- Dumping data for table `categories`
+--
 
--- Dumping structure for table sandbox.categoryimage
+LOCK TABLES `categories` WRITE;
+/*!40000 ALTER TABLE `categories` DISABLE KEYS */;
+INSERT INTO `categories` VALUES (1,'Люди','/images/svg/categories/cat01/icon.svg','/images/svg/categories/cat01/icon_inv.svg','Люди'),(2,'Мебель','/images/svg/categories/cat02/icon.svg','/images/svg/categories/cat02/icon_inv.svg','Мебель'),(3,'Архитектура','/images/svg/categories/cat03/icon.svg','/images/svg/categories/cat03/icon_inv.svg','Архитектура'),(4,'Транспорт','/images/svg/categories/cat04/icon.svg','/images/svg/categories/cat04/icon_inv.svg','Транспорт'),(5,'Военные','/images/svg/categories/cat05/icon.svg','/images/svg/categories/cat05/icon_inv.svg','Военные'),(6,'Медицина','/images/svg/categories/cat06/icon.svg','/images/svg/categories/cat06/icon_inv.svg','Медицина'),(7,'Животные','/images/svg/categories/cat07/icon.svg','/images/svg/categories/cat07/icon_inv.svg','Животные'),(8,'Волшебные существа','/images/svg/categories/cat08/icon.svg','/images/svg/categories/cat08/icon_inv.svg','Волшебные существа'),(9,'Динозавры','/images/svg/categories/cat09/icon.svg','/images/svg/categories/cat09/icon_inv.svg','Динозавры'),(10,'Смерть','/images/svg/categories/cat10/icon.svg','/images/svg/categories/cat10/icon_inv.svg','Смерть'),(11,'Стихии','/images/svg/categories/cat11/icon.svg','/images/svg/categories/cat11/icon_inv.svg','Стихии'),(12,'Природа','/images/svg/categories/cat12/icon.svg','/images/svg/categories/cat12/icon_inv.svg','Природа'),(13,'Соединения и разделители','/images/svg/categories/cat13/icon.svg','/images/svg/categories/cat13/icon_inv.svg','Соединения и разделители'),(14,'Стройка','/images/svg/categories/cat14/icon.svg','/images/svg/categories/cat14/icon_inv.svg','Стройка'),(15,'Еда','/images/svg/categories/cat15/icon.svg','/images/svg/categories/cat15/icon_inv.svg','Еда');
+/*!40000 ALTER TABLE `categories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `categoryimage`
+--
+
 DROP TABLE IF EXISTS `categoryimage`;
-CREATE TABLE IF NOT EXISTS `categoryimage` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `categoryimage` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `categoryId` int(11) DEFAULT 0,
   `image` varchar(350) DEFAULT NULL,
@@ -60,708 +58,80 @@ CREATE TABLE IF NOT EXISTS `categoryimage` (
   PRIMARY KEY (`id`),
   KEY `Index 2` (`categoryId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=484 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Dumping data for table sandbox.categoryimage: ~407 rows (approximately)
-REPLACE INTO `categoryimage` (`id`, `categoryId`, `image`, `title`, `free`) VALUES
-	(1, 1, '/images/svg/categories/cat01/img001.svg', NULL, 0),
-	(7, 2, '/images/svg/categories/cat02/img001.svg', NULL, 0),
-	(8, 2, '/images/svg/categories/cat02/img002.svg', NULL, 0),
-	(9, 2, '/images/svg/categories/cat02/img003.svg', NULL, 0),
-	(10, 2, '/images/svg/categories/cat02/img004.svg', NULL, 0),
-	(11, 2, '/images/svg/categories/cat02/img005.svg', NULL, 0),
-	(12, 2, '/images/svg/categories/cat02/img006.svg', NULL, 0),
-	(13, 2, '/images/svg/categories/cat02/img007.svg', NULL, 0),
-	(14, 2, '/images/svg/categories/cat02/img008.svg', NULL, 0),
-	(15, 4, '/images/svg/categories/cat04/img001.svg', NULL, 0),
-	(16, 4, '/images/svg/categories/cat04/img002.svg', NULL, 0),
-	(17, 4, '/images/svg/categories/cat04/img003.svg', NULL, 0),
-	(18, 4, '/images/svg/categories/cat04/img004.svg', NULL, 0),
-	(19, 4, '/images/svg/categories/cat04/img005.svg', NULL, 0),
-	(20, 4, '/images/svg/categories/cat04/img006.svg', NULL, 0),
-	(21, 4, '/images/svg/categories/cat04/img007.svg', NULL, 0),
-	(22, 4, '/images/svg/categories/cat04/img008.svg', NULL, 0),
-	(23, 4, '/images/svg/categories/cat04/img009.svg', NULL, 0),
-	(24, 4, '/images/svg/categories/cat04/img010.svg', NULL, 0),
-	(25, 3, '/images/svg/categories/cat03/img001.svg', NULL, 0),
-	(26, 3, '/images/svg/categories/cat03/img002.svg', NULL, 0),
-	(27, 3, '/images/svg/categories/cat03/img003.svg', NULL, 0),
-	(28, 3, '/images/svg/categories/cat03/img004.svg', NULL, 0),
-	(29, 3, '/images/svg/categories/cat03/img005.svg', NULL, 0),
-	(30, 3, '/images/svg/categories/cat03/img006.svg', NULL, 0),
-	(31, 3, '/images/svg/categories/cat03/img007.svg', NULL, 0),
-	(32, 3, '/images/svg/categories/cat03/img008.svg', NULL, 0),
-	(33, 3, '/images/svg/categories/cat03/img009.svg', NULL, 0),
-	(34, 3, '/images/svg/categories/cat03/img010.svg', NULL, 0),
-	(35, 3, '/images/svg/categories/cat03/img011.svg', NULL, 0),
-	(36, 3, '/images/svg/categories/cat03/img012.svg', NULL, 0),
-	(37, 3, '/images/svg/categories/cat03/img013.svg', NULL, 0),
-	(38, 3, '/images/svg/categories/cat03/img014.svg', NULL, 0),
-	(39, 3, '/images/svg/categories/cat03/img015.svg', NULL, 0),
-	(40, 3, '/images/svg/categories/cat03/img016.svg', NULL, 0),
-	(41, 3, '/images/svg/categories/cat03/img017.svg', NULL, 0),
-	(42, 3, '/images/svg/categories/cat03/img018.svg', NULL, 0),
-	(43, 2, '/images/svg/categories/cat02/img009.svg', NULL, 0),
-	(44, 2, '/images/svg/categories/cat02/img010.svg', NULL, 0),
-	(45, 2, '/images/svg/categories/cat02/img011.svg', NULL, 0),
-	(46, 2, '/images/svg/categories/cat02/img012.svg', NULL, 0),
-	(47, 2, '/images/svg/categories/cat02/img013.svg', NULL, 0),
-	(48, 2, '/images/svg/categories/cat02/img014.svg', NULL, 0),
-	(49, 2, '/images/svg/categories/cat02/img015.svg', NULL, 0),
-	(50, 5, '/images/svg/categories/cat05/img001.svg', NULL, 0),
-	(51, 6, '/images/svg/categories/cat06/img001.svg', NULL, 0),
-	(52, 5, '/images/svg/categories/cat05/img002.svg', NULL, 0),
-	(53, 5, '/images/svg/categories/cat05/img003.svg', NULL, 0),
-	(54, 5, '/images/svg/categories/cat05/img004.svg', NULL, 0),
-	(55, 5, '/images/svg/categories/cat05/img005.svg', NULL, 0),
-	(56, 5, '/images/svg/categories/cat05/img006.svg', NULL, 0),
-	(57, 5, '/images/svg/categories/cat05/img007.svg', NULL, 0),
-	(58, 5, '/images/svg/categories/cat05/img008.svg', NULL, 0),
-	(59, 5, '/images/svg/categories/cat05/img009.svg', NULL, 0),
-	(60, 5, '/images/svg/categories/cat05/img010.svg', NULL, 0),
-	(61, 6, '/images/svg/categories/cat06/img002.svg', NULL, 0),
-	(62, 6, '/images/svg/categories/cat06/img003.svg', NULL, 0),
-	(63, 6, '/images/svg/categories/cat06/img004.svg', NULL, 0),
-	(64, 7, '/images/svg/categories/cat07/img001.svg', NULL, 0),
-	(65, 7, '/images/svg/categories/cat07/img002.svg', NULL, 0),
-	(66, 7, '/images/svg/categories/cat07/img003.svg', NULL, 0),
-	(67, 7, '/images/svg/categories/cat07/img004.svg', NULL, 0),
-	(68, 7, '/images/svg/categories/cat07/img005.svg', NULL, 0),
-	(69, 7, '/images/svg/categories/cat07/img006.svg', NULL, 0),
-	(70, 7, '/images/svg/categories/cat07/img007.svg', NULL, 0),
-	(71, 8, '/images/svg/categories/cat08/img001.svg', NULL, 0),
-	(72, 8, '/images/svg/categories/cat08/img002.svg', NULL, 0),
-	(73, 8, '/images/svg/categories/cat08/img003.svg', NULL, 0),
-	(74, 8, '/images/svg/categories/cat08/img004.svg', NULL, 0),
-	(75, 8, '/images/svg/categories/cat08/img005.svg', NULL, 0),
-	(76, 8, '/images/svg/categories/cat08/img006.svg', NULL, 0),
-	(77, 8, '/images/svg/categories/cat08/img007.svg', NULL, 0),
-	(78, 8, '/images/svg/categories/cat08/img008.svg', NULL, 0),
-	(79, 8, '/images/svg/categories/cat08/img009.svg', NULL, 0),
-	(80, 8, '/images/svg/categories/cat08/img010.svg', NULL, 0),
-	(81, 8, '/images/svg/categories/cat08/img011.svg', NULL, 0),
-	(82, 8, '/images/svg/categories/cat08/img012.svg', NULL, 0),
-	(83, 9, '/images/svg/categories/cat09/img001.svg', NULL, 0),
-	(84, 9, '/images/svg/categories/cat09/img002.svg', NULL, 0),
-	(85, 9, '/images/svg/categories/cat09/img003.svg', NULL, 0),
-	(86, 9, '/images/svg/categories/cat09/img004.svg', NULL, 0),
-	(87, 9, '/images/svg/categories/cat09/img005.svg', NULL, 0),
-	(88, 9, '/images/svg/categories/cat09/img006.svg', NULL, 0),
-	(89, 10, '/images/svg/categories/cat10/img001.svg', NULL, 0),
-	(90, 10, '/images/svg/categories/cat10/img002.svg', NULL, 0),
-	(91, 10, '/images/svg/categories/cat10/img003.svg', NULL, 0),
-	(92, 10, '/images/svg/categories/cat10/img004.svg', NULL, 0),
-	(93, 10, '/images/svg/categories/cat10/img005.svg', NULL, 0),
-	(94, 10, '/images/svg/categories/cat10/img006.svg', NULL, 0),
-	(95, 10, '/images/svg/categories/cat10/img007.svg', NULL, 0),
-	(96, 10, '/images/svg/categories/cat10/img008.svg', NULL, 0),
-	(97, 11, '/images/svg/categories/cat11/img001.svg', NULL, 0),
-	(98, 11, '/images/svg/categories/cat11/img002.svg', NULL, 0),
-	(99, 11, '/images/svg/categories/cat11/img003.svg', NULL, 0),
-	(100, 11, '/images/svg/categories/cat11/img004.svg', NULL, 0),
-	(101, 11, '/images/svg/categories/cat11/img005.svg', NULL, 0),
-	(102, 11, '/images/svg/categories/cat11/img006.svg', NULL, 0),
-	(103, 11, '/images/svg/categories/cat11/img007.svg', NULL, 0),
-	(104, 11, '/images/svg/categories/cat11/img008.svg', NULL, 0),
-	(105, 11, '/images/svg/categories/cat11/img009.svg', NULL, 0),
-	(106, 12, '/images/svg/categories/cat12/img001.svg', NULL, 0),
-	(107, 12, '/images/svg/categories/cat12/img002.svg', NULL, 0),
-	(108, 12, '/images/svg/categories/cat12/img003.svg', NULL, 0),
-	(109, 12, '/images/svg/categories/cat12/img004.svg', NULL, 0),
-	(110, 12, '/images/svg/categories/cat12/img005.svg', NULL, 0),
-	(111, 12, '/images/svg/categories/cat12/img006.svg', NULL, 0),
-	(112, 12, '/images/svg/categories/cat12/img007.svg', NULL, 0),
-	(113, 12, '/images/svg/categories/cat12/img008.svg', NULL, 0),
-	(114, 15, '/images/svg/categories/cat15/img001.svg', NULL, 0),
-	(115, 15, '/images/svg/categories/cat15/img002.svg', NULL, 0),
-	(116, 15, '/images/svg/categories/cat15/img003.svg', NULL, 0),
-	(117, 15, '/images/svg/categories/cat15/img004.svg', NULL, 0),
-	(118, 15, '/images/svg/categories/cat15/img005.svg', NULL, 0),
-	(119, 15, '/images/svg/categories/cat15/img006.svg', NULL, 0),
-	(120, 15, '/images/svg/categories/cat15/img007.svg', NULL, 0),
-	(121, 15, '/images/svg/categories/cat15/img008.svg', NULL, 0),
-	(122, 14, '/images/svg/categories/cat14/img001.svg', NULL, 0),
-	(123, 14, '/images/svg/categories/cat14/img002.svg', NULL, 0),
-	(124, 14, '/images/svg/categories/cat14/img003.svg', NULL, 0),
-	(125, 14, '/images/svg/categories/cat14/img004.svg', NULL, 0),
-	(126, 14, '/images/svg/categories/cat14/img005.svg', NULL, 0),
-	(127, 14, '/images/svg/categories/cat14/img006.svg', NULL, 0),
-	(128, 14, '/images/svg/categories/cat14/img007.svg', NULL, 0),
-	(129, 14, '/images/svg/categories/cat14/img008.svg', NULL, 0),
-	(130, 14, '/images/svg/categories/cat14/img009.svg', NULL, 0),
-	(131, 14, '/images/svg/categories/cat14/img010.svg', NULL, 0),
-	(132, 14, '/images/svg/categories/cat14/img011.svg', NULL, 0),
-	(133, 14, '/images/svg/categories/cat14/img012.svg', NULL, 0),
-	(134, 14, '/images/svg/categories/cat14/img013.svg', NULL, 0),
-	(135, 14, '/images/svg/categories/cat14/img014.svg', NULL, 0),
-	(136, 14, '/images/svg/categories/cat14/img015.svg', NULL, 0),
-	(137, 14, '/images/svg/categories/cat14/img016.svg', NULL, 0),
-	(138, 14, '/images/svg/categories/cat14/img017.svg', NULL, 0),
-	(163, 13, '/images/svg/categories/cat13/img001.svg', NULL, 0),
-	(164, 13, '/images/svg/categories/cat13/img002.svg', NULL, 0),
-	(165, 13, '/images/svg/categories/cat13/img003.svg', NULL, 0),
-	(166, 13, '/images/svg/categories/cat13/img004.svg', NULL, 0),
-	(167, 13, '/images/svg/categories/cat13/img005.svg', NULL, 0),
-	(168, 13, '/images/svg/categories/cat13/img006.svg', NULL, 0),
-	(169, 13, '/images/svg/categories/cat13/img007.svg', NULL, 0),
-	(170, 13, '/images/svg/categories/cat13/img008.svg', NULL, 0),
-	(171, 13, '/images/svg/categories/cat13/img009.svg', NULL, 0),
-	(172, 13, '/images/svg/categories/cat13/img010.svg', NULL, 0),
-	(173, 13, '/images/svg/categories/cat13/img011.svg', NULL, 0),
-	(174, 13, '/images/svg/categories/cat13/img012.svg', NULL, 0),
-	(175, 13, '/images/svg/categories/cat13/img013.svg', NULL, 0),
-	(176, 13, '/images/svg/categories/cat13/img014.svg', NULL, 0),
-	(177, 13, '/images/svg/categories/cat13/img015.svg', NULL, 0),
-	(178, 13, '/images/svg/categories/cat13/img016.svg', NULL, 0),
-	(226, 1, '/images/svg/categories/cat01/img047.svg', NULL, 0),
-	(227, 1, '/images/svg/categories/cat01/img048.svg', NULL, 0),
-	(228, 1, '/images/svg/categories/cat01/img049.svg', NULL, 0),
-	(229, 1, '/images/svg/categories/cat01/img050.svg', NULL, 0),
-	(230, 1, '/images/svg/categories/cat01/img051.svg', NULL, 0),
-	(231, 1, '/images/svg/categories/cat01/img002.svg', NULL, 0),
-	(232, 1, '/images/svg/categories/cat01/img003.svg', NULL, 0),
-	(233, 1, '/images/svg/categories/cat01/img004.svg', NULL, 0),
-	(234, 1, '/images/svg/categories/cat01/img005.svg', NULL, 0),
-	(235, 1, '/images/svg/categories/cat01/img006.svg', NULL, 0),
-	(236, 1, '/images/svg/categories/cat01/img007.svg', NULL, 0),
-	(237, 1, '/images/svg/categories/cat01/img008.svg', NULL, 0),
-	(238, 1, '/images/svg/categories/cat01/img009.svg', NULL, 0),
-	(239, 1, '/images/svg/categories/cat01/img010.svg', NULL, 0),
-	(240, 1, '/images/svg/categories/cat01/img011.svg', NULL, 0),
-	(241, 1, '/images/svg/categories/cat01/img012.svg', NULL, 0),
-	(242, 1, '/images/svg/categories/cat01/img013.svg', NULL, 0),
-	(243, 1, '/images/svg/categories/cat01/img014.svg', NULL, 0),
-	(244, 1, '/images/svg/categories/cat01/img015.svg', NULL, 0),
-	(245, 1, '/images/svg/categories/cat01/img016.svg', NULL, 0),
-	(246, 1, '/images/svg/categories/cat01/img017.svg', NULL, 0),
-	(247, 1, '/images/svg/categories/cat01/img018.svg', NULL, 0),
-	(248, 1, '/images/svg/categories/cat01/img019.svg', NULL, 0),
-	(249, 1, '/images/svg/categories/cat01/img020.svg', NULL, 0),
-	(250, 1, '/images/svg/categories/cat01/img021.svg', NULL, 0),
-	(251, 1, '/images/svg/categories/cat01/img022.svg', NULL, 0),
-	(252, 1, '/images/svg/categories/cat01/img023.svg', NULL, 0),
-	(253, 1, '/images/svg/categories/cat01/img024.svg', NULL, 0),
-	(254, 1, '/images/svg/categories/cat01/img025.svg', NULL, 0),
-	(255, 1, '/images/svg/categories/cat01/img026.svg', NULL, 0),
-	(256, 1, '/images/svg/categories/cat01/img027.svg', NULL, 0),
-	(257, 1, '/images/svg/categories/cat01/img028.svg', NULL, 0),
-	(258, 1, '/images/svg/categories/cat01/img029.svg', NULL, 0),
-	(259, 1, '/images/svg/categories/cat01/img030.svg', NULL, 0),
-	(260, 1, '/images/svg/categories/cat01/img031.svg', NULL, 0),
-	(261, 1, '/images/svg/categories/cat01/img032.svg', NULL, 0),
-	(262, 1, '/images/svg/categories/cat01/img033.svg', NULL, 0),
-	(263, 1, '/images/svg/categories/cat01/img034.svg', NULL, 0),
-	(264, 1, '/images/svg/categories/cat01/img035.svg', NULL, 0),
-	(265, 1, '/images/svg/categories/cat01/img036.svg', NULL, 0),
-	(266, 1, '/images/svg/categories/cat01/img037.svg', NULL, 0),
-	(267, 1, '/images/svg/categories/cat01/img038.svg', NULL, 0),
-	(268, 1, '/images/svg/categories/cat01/img039.svg', NULL, 0),
-	(269, 1, '/images/svg/categories/cat01/img040.svg', NULL, 0),
-	(270, 1, '/images/svg/categories/cat01/img041.svg', NULL, 0),
-	(271, 1, '/images/svg/categories/cat01/img042.svg', NULL, 0),
-	(272, 1, '/images/svg/categories/cat01/img043.svg', NULL, 0),
-	(273, 1, '/images/svg/categories/cat01/img044.svg', NULL, 0),
-	(274, 1, '/images/svg/categories/cat01/img045.svg', NULL, 0),
-	(275, 1, '/images/svg/categories/cat01/img046.svg', NULL, 0),
-	(276, 1, '/images/svg/categories/cat01/img052.svg', NULL, 0),
-	(277, 2, '/images/svg/categories/cat02/img016.svg', NULL, 0),
-	(278, 2, '/images/svg/categories/cat02/img017.svg', NULL, 0),
-	(279, 2, '/images/svg/categories/cat02/img018.svg', NULL, 0),
-	(280, 2, '/images/svg/categories/cat02/img019.svg', NULL, 0),
-	(281, 2, '/images/svg/categories/cat02/img020.svg', NULL, 0),
-	(282, 2, '/images/svg/categories/cat02/img021.svg', NULL, 0),
-	(283, 2, '/images/svg/categories/cat02/img022.svg', NULL, 0),
-	(284, 2, '/images/svg/categories/cat02/img023.svg', NULL, 0),
-	(285, 2, '/images/svg/categories/cat02/img024.svg', NULL, 0),
-	(286, 2, '/images/svg/categories/cat02/img025.svg', NULL, 0),
-	(287, 2, '/images/svg/categories/cat02/img026.svg', NULL, 0),
-	(288, 2, '/images/svg/categories/cat02/img027.svg', NULL, 0),
-	(289, 2, '/images/svg/categories/cat02/img028.svg', NULL, 0),
-	(290, 2, '/images/svg/categories/cat02/img029.svg', NULL, 0),
-	(291, 2, '/images/svg/categories/cat02/img030.svg', NULL, 0),
-	(292, 3, '/images/svg/categories/cat03/img019.svg', NULL, 0),
-	(293, 3, '/images/svg/categories/cat03/img020.svg', NULL, 0),
-	(294, 3, '/images/svg/categories/cat03/img021.svg', NULL, 0),
-	(295, 3, '/images/svg/categories/cat03/img022.svg', NULL, 0),
-	(296, 3, '/images/svg/categories/cat03/img023.svg', NULL, 0),
-	(297, 3, '/images/svg/categories/cat03/img024.svg', NULL, 0),
-	(298, 3, '/images/svg/categories/cat03/img025.svg', NULL, 0),
-	(299, 3, '/images/svg/categories/cat03/img026.svg', NULL, 0),
-	(300, 4, '/images/svg/categories/cat04/img011.svg', NULL, 0),
-	(301, 4, '/images/svg/categories/cat04/img012.svg', NULL, 0),
-	(302, 4, '/images/svg/categories/cat04/img013.svg', NULL, 0),
-	(303, 4, '/images/svg/categories/cat04/img014.svg', NULL, 0),
-	(304, 4, '/images/svg/categories/cat04/img015.svg', NULL, 0),
-	(305, 4, '/images/svg/categories/cat04/img016.svg', NULL, 0),
-	(306, 4, '/images/svg/categories/cat04/img017.svg', NULL, 0),
-	(307, 4, '/images/svg/categories/cat04/img018.svg', NULL, 0),
-	(308, 4, '/images/svg/categories/cat04/img019.svg', NULL, 0),
-	(309, 4, '/images/svg/categories/cat04/img020.svg', NULL, 0),
-	(310, 4, '/images/svg/categories/cat04/img021.svg', NULL, 0),
-	(311, 4, '/images/svg/categories/cat04/img022.svg', NULL, 0),
-	(312, 4, '/images/svg/categories/cat04/img023.svg', NULL, 0),
-	(313, 4, '/images/svg/categories/cat04/img024.svg', NULL, 0),
-	(314, 4, '/images/svg/categories/cat04/img025.svg', NULL, 0),
-	(315, 4, '/images/svg/categories/cat04/img026.svg', NULL, 0),
-	(316, 4, '/images/svg/categories/cat04/img027.svg', NULL, 0),
-	(317, 4, '/images/svg/categories/cat04/img028.svg', NULL, 0),
-	(318, 4, '/images/svg/categories/cat04/img029.svg', NULL, 0),
-	(319, 4, '/images/svg/categories/cat04/img030.svg', NULL, 0),
-	(320, 4, '/images/svg/categories/cat04/img031.svg', NULL, 0),
-	(321, 4, '/images/svg/categories/cat04/img032.svg', NULL, 0),
-	(322, 4, '/images/svg/categories/cat04/img033.svg', NULL, 0),
-	(323, 4, '/images/svg/categories/cat04/img034.svg', NULL, 0),
-	(324, 4, '/images/svg/categories/cat04/img035.svg', NULL, 0),
-	(325, 4, '/images/svg/categories/cat04/img036.svg', NULL, 0),
-	(326, 4, '/images/svg/categories/cat04/img037.svg', NULL, 0),
-	(327, 4, '/images/svg/categories/cat04/img038.svg', NULL, 0),
-	(328, 4, '/images/svg/categories/cat04/img039.svg', NULL, 0),
-	(329, 4, '/images/svg/categories/cat04/img040.svg', NULL, 0),
-	(330, 4, '/images/svg/categories/cat04/img041.svg', NULL, 0),
-	(331, 4, '/images/svg/categories/cat04/img042.svg', NULL, 0),
-	(332, 4, '/images/svg/categories/cat04/img043.svg', NULL, 0),
-	(333, 4, '/images/svg/categories/cat04/img044.svg', NULL, 0),
-	(334, 4, '/images/svg/categories/cat04/img045.svg', NULL, 0),
-	(335, 4, '/images/svg/categories/cat04/img046.svg', NULL, 0),
-	(336, 5, '/images/svg/categories/cat05/img011.svg', NULL, 0),
-	(337, 5, '/images/svg/categories/cat05/img012.svg', NULL, 0),
-	(338, 5, '/images/svg/categories/cat05/img013.svg', NULL, 0),
-	(339, 5, '/images/svg/categories/cat05/img014.svg', NULL, 0),
-	(340, 5, '/images/svg/categories/cat05/img015.svg', NULL, 0),
-	(341, 5, '/images/svg/categories/cat05/img016.svg', NULL, 0),
-	(342, 5, '/images/svg/categories/cat05/img017.svg', NULL, 0),
-	(343, 5, '/images/svg/categories/cat05/img018.svg', NULL, 0),
-	(344, 5, '/images/svg/categories/cat05/img019.svg', NULL, 0),
-	(345, 5, '/images/svg/categories/cat05/img020.svg', NULL, 0),
-	(346, 5, '/images/svg/categories/cat05/img021.svg', NULL, 0),
-	(347, 5, '/images/svg/categories/cat05/img022.svg', NULL, 0),
-	(348, 5, '/images/svg/categories/cat05/img023.svg', NULL, 0),
-	(349, 5, '/images/svg/categories/cat05/img024.svg', NULL, 0),
-	(350, 5, '/images/svg/categories/cat05/img025.svg', NULL, 0),
-	(351, 5, '/images/svg/categories/cat05/img026.svg', NULL, 0),
-	(352, 5, '/images/svg/categories/cat05/img027.svg', NULL, 0),
-	(353, 6, '/images/svg/categories/cat06/img005.svg', NULL, 0),
-	(354, 6, '/images/svg/categories/cat06/img006.svg', NULL, 0),
-	(355, 6, '/images/svg/categories/cat06/img007.svg', NULL, 0),
-	(356, 6, '/images/svg/categories/cat06/img008.svg', NULL, 0),
-	(357, 6, '/images/svg/categories/cat06/img009.svg', NULL, 0),
-	(358, 6, '/images/svg/categories/cat06/img010.svg', NULL, 0),
-	(359, 6, '/images/svg/categories/cat06/img011.svg', NULL, 0),
-	(360, 6, '/images/svg/categories/cat06/img012.svg', NULL, 0),
-	(361, 6, '/images/svg/categories/cat06/img013.svg', NULL, 0),
-	(362, 6, '/images/svg/categories/cat06/img014.svg', NULL, 0),
-	(363, 6, '/images/svg/categories/cat06/img015.svg', NULL, 0),
-	(364, 6, '/images/svg/categories/cat06/img016.svg', NULL, 0),
-	(365, 6, '/images/svg/categories/cat06/img017.svg', NULL, 0),
-	(366, 6, '/images/svg/categories/cat06/img018.svg', NULL, 0),
-	(367, 6, '/images/svg/categories/cat06/img019.svg', NULL, 0),
-	(368, 6, '/images/svg/categories/cat06/img020.svg', NULL, 0),
-	(369, 6, '/images/svg/categories/cat06/img021.svg', NULL, 0),
-	(370, 6, '/images/svg/categories/cat06/img022.svg', NULL, 0),
-	(371, 7, '/images/svg/categories/cat07/img008.svg', NULL, 0),
-	(372, 7, '/images/svg/categories/cat07/img009.svg', NULL, 0),
-	(373, 7, '/images/svg/categories/cat07/img010.svg', NULL, 0),
-	(374, 7, '/images/svg/categories/cat07/img011.svg', NULL, 0),
-	(375, 7, '/images/svg/categories/cat07/img012.svg', NULL, 0),
-	(376, 7, '/images/svg/categories/cat07/img013.svg', NULL, 0),
-	(377, 7, '/images/svg/categories/cat07/img014.svg', NULL, 0),
-	(378, 7, '/images/svg/categories/cat07/img015.svg', NULL, 0),
-	(379, 7, '/images/svg/categories/cat07/img016.svg', NULL, 0),
-	(380, 7, '/images/svg/categories/cat07/img017.svg', NULL, 0),
-	(381, 7, '/images/svg/categories/cat07/img018.svg', NULL, 0),
-	(382, 7, '/images/svg/categories/cat07/img019.svg', NULL, 0),
-	(383, 7, '/images/svg/categories/cat07/img020.svg', NULL, 0),
-	(384, 7, '/images/svg/categories/cat07/img021.svg', NULL, 0),
-	(385, 7, '/images/svg/categories/cat07/img022.svg', NULL, 0),
-	(386, 7, '/images/svg/categories/cat07/img023.svg', NULL, 0),
-	(387, 7, '/images/svg/categories/cat07/img024.svg', NULL, 0),
-	(388, 7, '/images/svg/categories/cat07/img025.svg', NULL, 0),
-	(389, 7, '/images/svg/categories/cat07/img026.svg', NULL, 0),
-	(390, 7, '/images/svg/categories/cat07/img027.svg', NULL, 0),
-	(391, 7, '/images/svg/categories/cat07/img028.svg', NULL, 0),
-	(392, 7, '/images/svg/categories/cat07/img029.svg', NULL, 0),
-	(393, 7, '/images/svg/categories/cat07/img030.svg', NULL, 0),
-	(394, 7, '/images/svg/categories/cat07/img031.svg', NULL, 0),
-	(395, 7, '/images/svg/categories/cat07/img032.svg', NULL, 0),
-	(396, 7, '/images/svg/categories/cat07/img033.svg', NULL, 0),
-	(397, 7, '/images/svg/categories/cat07/img034.svg', NULL, 0),
-	(398, 7, '/images/svg/categories/cat07/img035.svg', NULL, 0),
-	(399, 7, '/images/svg/categories/cat07/img036.svg', NULL, 0),
-	(400, 7, '/images/svg/categories/cat07/img037.svg', NULL, 0),
-	(401, 7, '/images/svg/categories/cat07/img038.svg', NULL, 0),
-	(402, 7, '/images/svg/categories/cat07/img039.svg', NULL, 0),
-	(403, 7, '/images/svg/categories/cat07/img040.svg', NULL, 0),
-	(404, 7, '/images/svg/categories/cat07/img041.svg', NULL, 0),
-	(405, 7, '/images/svg/categories/cat07/img042.svg', NULL, 0),
-	(406, 7, '/images/svg/categories/cat07/img043.svg', NULL, 0),
-	(407, 7, '/images/svg/categories/cat07/img044.svg', NULL, 0),
-	(408, 8, '/images/svg/categories/cat08/img013.svg', NULL, 0),
-	(409, 8, '/images/svg/categories/cat08/img014.svg', NULL, 0),
-	(410, 8, '/images/svg/categories/cat08/img015.svg', NULL, 0),
-	(411, 8, '/images/svg/categories/cat08/img016.svg', NULL, 0),
-	(412, 8, '/images/svg/categories/cat08/img017.svg', NULL, 0),
-	(413, 9, '/images/svg/categories/cat09/img007.svg', NULL, 0),
-	(414, 9, '/images/svg/categories/cat09/img008.svg', NULL, 0),
-	(415, 9, '/images/svg/categories/cat09/img009.svg', NULL, 0),
-	(416, 9, '/images/svg/categories/cat09/img010.svg', NULL, 0),
-	(417, 9, '/images/svg/categories/cat09/img011.svg', NULL, 0),
-	(418, 9, '/images/svg/categories/cat09/img012.svg', NULL, 0),
-	(419, 9, '/images/svg/categories/cat09/img013.svg', NULL, 0),
-	(420, 9, '/images/svg/categories/cat09/img014.svg', NULL, 0),
-	(421, 9, '/images/svg/categories/cat09/img015.svg', NULL, 0),
-	(422, 9, '/images/svg/categories/cat09/img016.svg', NULL, 0),
-	(423, 9, '/images/svg/categories/cat09/img017.svg', NULL, 0),
-	(424, 10, '/images/svg/categories/cat10/img009.svg', NULL, 0),
-	(425, 10, '/images/svg/categories/cat10/img010.svg', NULL, 0),
-	(426, 10, '/images/svg/categories/cat10/img011.svg', NULL, 0),
-	(427, 10, '/images/svg/categories/cat10/img012.svg', NULL, 0),
-	(428, 10, '/images/svg/categories/cat10/img013.svg', NULL, 0),
-	(429, 10, '/images/svg/categories/cat10/img014.svg', NULL, 0),
-	(430, 10, '/images/svg/categories/cat10/img015.svg', NULL, 0),
-	(431, 10, '/images/svg/categories/cat10/img016.svg', NULL, 0),
-	(432, 10, '/images/svg/categories/cat10/img017.svg', NULL, 0),
-	(433, 10, '/images/svg/categories/cat10/img018.svg', NULL, 0),
-	(434, 11, '/images/svg/categories/cat11/img010.svg', NULL, 0),
-	(435, 11, '/images/svg/categories/cat11/img011.svg', NULL, 0),
-	(436, 11, '/images/svg/categories/cat11/img012.svg', NULL, 0),
-	(437, 11, '/images/svg/categories/cat11/img013.svg', NULL, 0),
-	(438, 12, '/images/svg/categories/cat12/img009.svg', NULL, 0),
-	(439, 12, '/images/svg/categories/cat12/img010.svg', NULL, 0),
-	(440, 12, '/images/svg/categories/cat12/img011.svg', NULL, 0),
-	(441, 12, '/images/svg/categories/cat12/img012.svg', NULL, 0),
-	(442, 12, '/images/svg/categories/cat12/img013.svg', NULL, 0),
-	(443, 12, '/images/svg/categories/cat12/img014.svg', NULL, 0),
-	(444, 12, '/images/svg/categories/cat12/img015.svg', NULL, 0),
-	(445, 12, '/images/svg/categories/cat12/img016.svg', NULL, 0),
-	(446, 12, '/images/svg/categories/cat12/img017.svg', NULL, 0),
-	(447, 12, '/images/svg/categories/cat12/img018.svg', NULL, 0),
-	(448, 12, '/images/svg/categories/cat12/img019.svg', NULL, 0),
-	(449, 12, '/images/svg/categories/cat12/img020.svg', NULL, 0),
-	(450, 12, '/images/svg/categories/cat12/img021.svg', NULL, 0),
-	(451, 12, '/images/svg/categories/cat12/img022.svg', NULL, 0),
-	(452, 12, '/images/svg/categories/cat12/img023.svg', NULL, 0),
-	(453, 12, '/images/svg/categories/cat12/img024.svg', NULL, 0),
-	(454, 12, '/images/svg/categories/cat12/img025.svg', NULL, 0),
-	(455, 12, '/images/svg/categories/cat12/img026.svg', NULL, 0),
-	(456, 12, '/images/svg/categories/cat12/img027.svg', NULL, 0),
-	(457, 12, '/images/svg/categories/cat12/img028.svg', NULL, 0),
-	(458, 12, '/images/svg/categories/cat12/img029.svg', NULL, 0),
-	(459, 15, '/images/svg/categories/cat15/img009.svg', NULL, 0),
-	(460, 15, '/images/svg/categories/cat15/img010.svg', NULL, 0),
-	(461, 15, '/images/svg/categories/cat15/img011.svg', NULL, 0),
-	(462, 15, '/images/svg/categories/cat15/img012.svg', NULL, 0),
-	(463, 15, '/images/svg/categories/cat15/img013.svg', NULL, 0),
-	(464, 15, '/images/svg/categories/cat15/img014.svg', NULL, 0),
-	(465, 15, '/images/svg/categories/cat15/img015.svg', NULL, 0),
-	(466, 15, '/images/svg/categories/cat15/img016.svg', NULL, 0),
-	(467, 15, '/images/svg/categories/cat15/img017.svg', NULL, 0),
-	(468, 15, '/images/svg/categories/cat15/img018.svg', NULL, 0),
-	(469, 15, '/images/svg/categories/cat15/img019.svg', NULL, 0),
-	(470, 15, '/images/svg/categories/cat15/img020.svg', NULL, 0),
-	(471, 15, '/images/svg/categories/cat15/img021.svg', NULL, 0),
-	(472, 15, '/images/svg/categories/cat15/img022.svg', NULL, 0),
-	(473, 15, '/images/svg/categories/cat15/img023.svg', NULL, 0),
-	(474, 15, '/images/svg/categories/cat15/img024.svg', NULL, 0),
-	(475, 15, '/images/svg/categories/cat15/img025.svg', NULL, 0),
-	(476, 15, '/images/svg/categories/cat15/img026.svg', NULL, 0),
-	(477, 15, '/images/svg/categories/cat15/img027.svg', NULL, 0),
-	(478, 15, '/images/svg/categories/cat15/img028.svg', NULL, 0),
-	(479, 15, '/images/svg/categories/cat15/img029.svg', NULL, 0),
-	(480, 15, '/images/svg/categories/cat15/img030.svg', NULL, 0),
-	(481, 15, '/images/svg/categories/cat15/img031.svg', NULL, 0),
-	(482, 15, '/images/svg/categories/cat15/img032.svg', NULL, 0),
-	(483, 15, '/images/svg/categories/cat15/img033.svg', NULL, 0);
+--
+-- Dumping data for table `categoryimage`
+--
 
--- Dumping structure for table sandbox.sandboxes
+LOCK TABLES `categoryimage` WRITE;
+/*!40000 ALTER TABLE `categoryimage` DISABLE KEYS */;
+INSERT INTO `categoryimage` VALUES (1,1,'/images/svg/categories/cat01/img001.svg',NULL,0),(7,2,'/images/svg/categories/cat02/img001.svg',NULL,0),(8,2,'/images/svg/categories/cat02/img002.svg',NULL,0),(9,2,'/images/svg/categories/cat02/img003.svg',NULL,0),(10,2,'/images/svg/categories/cat02/img004.svg',NULL,0),(11,2,'/images/svg/categories/cat02/img005.svg',NULL,0),(12,2,'/images/svg/categories/cat02/img006.svg',NULL,0),(13,2,'/images/svg/categories/cat02/img007.svg',NULL,0),(14,2,'/images/svg/categories/cat02/img008.svg',NULL,0),(15,4,'/images/svg/categories/cat04/img001.svg',NULL,0),(16,4,'/images/svg/categories/cat04/img002.svg',NULL,0),(17,4,'/images/svg/categories/cat04/img003.svg',NULL,0),(18,4,'/images/svg/categories/cat04/img004.svg',NULL,0),(19,4,'/images/svg/categories/cat04/img005.svg',NULL,0),(20,4,'/images/svg/categories/cat04/img006.svg',NULL,0),(21,4,'/images/svg/categories/cat04/img007.svg',NULL,0),(22,4,'/images/svg/categories/cat04/img008.svg',NULL,0),(23,4,'/images/svg/categories/cat04/img009.svg',NULL,0),(24,4,'/images/svg/categories/cat04/img010.svg',NULL,0),(25,3,'/images/svg/categories/cat03/img001.svg',NULL,0),(26,3,'/images/svg/categories/cat03/img002.svg',NULL,0),(27,3,'/images/svg/categories/cat03/img003.svg',NULL,0),(28,3,'/images/svg/categories/cat03/img004.svg',NULL,0),(29,3,'/images/svg/categories/cat03/img005.svg',NULL,0),(30,3,'/images/svg/categories/cat03/img006.svg',NULL,0),(31,3,'/images/svg/categories/cat03/img007.svg',NULL,0),(32,3,'/images/svg/categories/cat03/img008.svg',NULL,0),(33,3,'/images/svg/categories/cat03/img009.svg',NULL,0),(34,3,'/images/svg/categories/cat03/img010.svg',NULL,0),(35,3,'/images/svg/categories/cat03/img011.svg',NULL,0),(36,3,'/images/svg/categories/cat03/img012.svg',NULL,0),(37,3,'/images/svg/categories/cat03/img013.svg',NULL,0),(38,3,'/images/svg/categories/cat03/img014.svg',NULL,0),(39,3,'/images/svg/categories/cat03/img015.svg',NULL,0),(40,3,'/images/svg/categories/cat03/img016.svg',NULL,0),(41,3,'/images/svg/categories/cat03/img017.svg',NULL,0),(42,3,'/images/svg/categories/cat03/img018.svg',NULL,0),(43,2,'/images/svg/categories/cat02/img009.svg',NULL,0),(44,2,'/images/svg/categories/cat02/img010.svg',NULL,0),(45,2,'/images/svg/categories/cat02/img011.svg',NULL,0),(46,2,'/images/svg/categories/cat02/img012.svg',NULL,0),(47,2,'/images/svg/categories/cat02/img013.svg',NULL,0),(48,2,'/images/svg/categories/cat02/img014.svg',NULL,0),(49,2,'/images/svg/categories/cat02/img015.svg',NULL,0),(50,5,'/images/svg/categories/cat05/img001.svg',NULL,0),(51,6,'/images/svg/categories/cat06/img001.svg',NULL,0),(52,5,'/images/svg/categories/cat05/img002.svg',NULL,0),(53,5,'/images/svg/categories/cat05/img003.svg',NULL,0),(54,5,'/images/svg/categories/cat05/img004.svg',NULL,0),(55,5,'/images/svg/categories/cat05/img005.svg',NULL,0),(56,5,'/images/svg/categories/cat05/img006.svg',NULL,0),(57,5,'/images/svg/categories/cat05/img007.svg',NULL,0),(58,5,'/images/svg/categories/cat05/img008.svg',NULL,0),(59,5,'/images/svg/categories/cat05/img009.svg',NULL,0),(60,5,'/images/svg/categories/cat05/img010.svg',NULL,0),(61,6,'/images/svg/categories/cat06/img002.svg',NULL,0),(62,6,'/images/svg/categories/cat06/img003.svg',NULL,0),(63,6,'/images/svg/categories/cat06/img004.svg',NULL,0),(64,7,'/images/svg/categories/cat07/img001.svg',NULL,0),(65,7,'/images/svg/categories/cat07/img002.svg',NULL,0),(66,7,'/images/svg/categories/cat07/img003.svg',NULL,0),(67,7,'/images/svg/categories/cat07/img004.svg',NULL,0),(68,7,'/images/svg/categories/cat07/img005.svg',NULL,0),(69,7,'/images/svg/categories/cat07/img006.svg',NULL,0),(70,7,'/images/svg/categories/cat07/img007.svg',NULL,0),(71,8,'/images/svg/categories/cat08/img001.svg',NULL,0),(72,8,'/images/svg/categories/cat08/img002.svg',NULL,0),(73,8,'/images/svg/categories/cat08/img003.svg',NULL,0),(74,8,'/images/svg/categories/cat08/img004.svg',NULL,0),(75,8,'/images/svg/categories/cat08/img005.svg',NULL,0),(76,8,'/images/svg/categories/cat08/img006.svg',NULL,0),(77,8,'/images/svg/categories/cat08/img007.svg',NULL,0),(78,8,'/images/svg/categories/cat08/img008.svg',NULL,0),(79,8,'/images/svg/categories/cat08/img009.svg',NULL,0),(80,8,'/images/svg/categories/cat08/img010.svg',NULL,0),(81,8,'/images/svg/categories/cat08/img011.svg',NULL,0),(82,8,'/images/svg/categories/cat08/img012.svg',NULL,0),(83,9,'/images/svg/categories/cat09/img001.svg',NULL,0),(84,9,'/images/svg/categories/cat09/img002.svg',NULL,0),(85,9,'/images/svg/categories/cat09/img003.svg',NULL,0),(86,9,'/images/svg/categories/cat09/img004.svg',NULL,0),(87,9,'/images/svg/categories/cat09/img005.svg',NULL,0),(88,9,'/images/svg/categories/cat09/img006.svg',NULL,0),(89,10,'/images/svg/categories/cat10/img001.svg',NULL,0),(90,10,'/images/svg/categories/cat10/img002.svg',NULL,0),(91,10,'/images/svg/categories/cat10/img003.svg',NULL,0),(92,10,'/images/svg/categories/cat10/img004.svg',NULL,0),(93,10,'/images/svg/categories/cat10/img005.svg',NULL,0),(94,10,'/images/svg/categories/cat10/img006.svg',NULL,0),(95,10,'/images/svg/categories/cat10/img007.svg',NULL,0),(96,10,'/images/svg/categories/cat10/img008.svg',NULL,0),(97,11,'/images/svg/categories/cat11/img001.svg',NULL,0),(98,11,'/images/svg/categories/cat11/img002.svg',NULL,0),(99,11,'/images/svg/categories/cat11/img003.svg',NULL,0),(100,11,'/images/svg/categories/cat11/img004.svg',NULL,0),(101,11,'/images/svg/categories/cat11/img005.svg',NULL,0),(102,11,'/images/svg/categories/cat11/img006.svg',NULL,0),(103,11,'/images/svg/categories/cat11/img007.svg',NULL,0),(104,11,'/images/svg/categories/cat11/img008.svg',NULL,0),(105,11,'/images/svg/categories/cat11/img009.svg',NULL,0),(106,12,'/images/svg/categories/cat12/img001.svg',NULL,0),(107,12,'/images/svg/categories/cat12/img002.svg',NULL,0),(108,12,'/images/svg/categories/cat12/img003.svg',NULL,0),(109,12,'/images/svg/categories/cat12/img004.svg',NULL,0),(110,12,'/images/svg/categories/cat12/img005.svg',NULL,0),(111,12,'/images/svg/categories/cat12/img006.svg',NULL,0),(112,12,'/images/svg/categories/cat12/img007.svg',NULL,0),(113,12,'/images/svg/categories/cat12/img008.svg',NULL,0),(114,15,'/images/svg/categories/cat15/img001.svg',NULL,0),(115,15,'/images/svg/categories/cat15/img002.svg',NULL,0),(116,15,'/images/svg/categories/cat15/img003.svg',NULL,0),(117,15,'/images/svg/categories/cat15/img004.svg',NULL,0),(118,15,'/images/svg/categories/cat15/img005.svg',NULL,0),(119,15,'/images/svg/categories/cat15/img006.svg',NULL,0),(120,15,'/images/svg/categories/cat15/img007.svg',NULL,0),(121,15,'/images/svg/categories/cat15/img008.svg',NULL,0),(122,14,'/images/svg/categories/cat14/img001.svg',NULL,0),(123,14,'/images/svg/categories/cat14/img002.svg',NULL,0),(124,14,'/images/svg/categories/cat14/img003.svg',NULL,0),(125,14,'/images/svg/categories/cat14/img004.svg',NULL,0),(126,14,'/images/svg/categories/cat14/img005.svg',NULL,0),(127,14,'/images/svg/categories/cat14/img006.svg',NULL,0),(128,14,'/images/svg/categories/cat14/img007.svg',NULL,0),(129,14,'/images/svg/categories/cat14/img008.svg',NULL,0),(130,14,'/images/svg/categories/cat14/img009.svg',NULL,0),(131,14,'/images/svg/categories/cat14/img010.svg',NULL,0),(132,14,'/images/svg/categories/cat14/img011.svg',NULL,0),(133,14,'/images/svg/categories/cat14/img012.svg',NULL,0),(134,14,'/images/svg/categories/cat14/img013.svg',NULL,0),(135,14,'/images/svg/categories/cat14/img014.svg',NULL,0),(136,14,'/images/svg/categories/cat14/img015.svg',NULL,0),(137,14,'/images/svg/categories/cat14/img016.svg',NULL,0),(138,14,'/images/svg/categories/cat14/img017.svg',NULL,0),(163,13,'/images/svg/categories/cat13/img001.svg',NULL,0),(164,13,'/images/svg/categories/cat13/img002.svg',NULL,0),(165,13,'/images/svg/categories/cat13/img003.svg',NULL,0),(166,13,'/images/svg/categories/cat13/img004.svg',NULL,0),(167,13,'/images/svg/categories/cat13/img005.svg',NULL,0),(168,13,'/images/svg/categories/cat13/img006.svg',NULL,0),(169,13,'/images/svg/categories/cat13/img007.svg',NULL,0),(170,13,'/images/svg/categories/cat13/img008.svg',NULL,0),(171,13,'/images/svg/categories/cat13/img009.svg',NULL,0),(172,13,'/images/svg/categories/cat13/img010.svg',NULL,0),(173,13,'/images/svg/categories/cat13/img011.svg',NULL,0),(174,13,'/images/svg/categories/cat13/img012.svg',NULL,0),(175,13,'/images/svg/categories/cat13/img013.svg',NULL,0),(176,13,'/images/svg/categories/cat13/img014.svg',NULL,0),(177,13,'/images/svg/categories/cat13/img015.svg',NULL,0),(178,13,'/images/svg/categories/cat13/img016.svg',NULL,0),(226,1,'/images/svg/categories/cat01/img047.svg',NULL,0),(227,1,'/images/svg/categories/cat01/img048.svg',NULL,0),(228,1,'/images/svg/categories/cat01/img049.svg',NULL,0),(229,1,'/images/svg/categories/cat01/img050.svg',NULL,0),(230,1,'/images/svg/categories/cat01/img051.svg',NULL,0),(231,1,'/images/svg/categories/cat01/img002.svg',NULL,0),(232,1,'/images/svg/categories/cat01/img003.svg',NULL,0),(233,1,'/images/svg/categories/cat01/img004.svg',NULL,0),(234,1,'/images/svg/categories/cat01/img005.svg',NULL,0),(235,1,'/images/svg/categories/cat01/img006.svg',NULL,0),(236,1,'/images/svg/categories/cat01/img007.svg',NULL,0),(237,1,'/images/svg/categories/cat01/img008.svg',NULL,0),(238,1,'/images/svg/categories/cat01/img009.svg',NULL,0),(239,1,'/images/svg/categories/cat01/img010.svg',NULL,0),(240,1,'/images/svg/categories/cat01/img011.svg',NULL,0),(241,1,'/images/svg/categories/cat01/img012.svg',NULL,0),(242,1,'/images/svg/categories/cat01/img013.svg',NULL,0),(243,1,'/images/svg/categories/cat01/img014.svg',NULL,0),(244,1,'/images/svg/categories/cat01/img015.svg',NULL,0),(245,1,'/images/svg/categories/cat01/img016.svg',NULL,0),(246,1,'/images/svg/categories/cat01/img017.svg',NULL,0),(247,1,'/images/svg/categories/cat01/img018.svg',NULL,0),(248,1,'/images/svg/categories/cat01/img019.svg',NULL,0),(249,1,'/images/svg/categories/cat01/img020.svg',NULL,0),(250,1,'/images/svg/categories/cat01/img021.svg',NULL,0),(251,1,'/images/svg/categories/cat01/img022.svg',NULL,0),(252,1,'/images/svg/categories/cat01/img023.svg',NULL,0),(253,1,'/images/svg/categories/cat01/img024.svg',NULL,0),(254,1,'/images/svg/categories/cat01/img025.svg',NULL,0),(255,1,'/images/svg/categories/cat01/img026.svg',NULL,0),(256,1,'/images/svg/categories/cat01/img027.svg',NULL,0),(257,1,'/images/svg/categories/cat01/img028.svg',NULL,0),(258,1,'/images/svg/categories/cat01/img029.svg',NULL,0),(259,1,'/images/svg/categories/cat01/img030.svg',NULL,0),(260,1,'/images/svg/categories/cat01/img031.svg',NULL,0),(261,1,'/images/svg/categories/cat01/img032.svg',NULL,0),(262,1,'/images/svg/categories/cat01/img033.svg',NULL,0),(263,1,'/images/svg/categories/cat01/img034.svg',NULL,0),(264,1,'/images/svg/categories/cat01/img035.svg',NULL,0),(265,1,'/images/svg/categories/cat01/img036.svg',NULL,0),(266,1,'/images/svg/categories/cat01/img037.svg',NULL,0),(267,1,'/images/svg/categories/cat01/img038.svg',NULL,0),(268,1,'/images/svg/categories/cat01/img039.svg',NULL,0),(269,1,'/images/svg/categories/cat01/img040.svg',NULL,0),(270,1,'/images/svg/categories/cat01/img041.svg',NULL,0),(271,1,'/images/svg/categories/cat01/img042.svg',NULL,0),(272,1,'/images/svg/categories/cat01/img043.svg',NULL,0),(273,1,'/images/svg/categories/cat01/img044.svg',NULL,0),(274,1,'/images/svg/categories/cat01/img045.svg',NULL,0),(275,1,'/images/svg/categories/cat01/img046.svg',NULL,0),(276,1,'/images/svg/categories/cat01/img052.svg',NULL,0),(277,2,'/images/svg/categories/cat02/img016.svg',NULL,0),(278,2,'/images/svg/categories/cat02/img017.svg',NULL,0),(279,2,'/images/svg/categories/cat02/img018.svg',NULL,0),(280,2,'/images/svg/categories/cat02/img019.svg',NULL,0),(281,2,'/images/svg/categories/cat02/img020.svg',NULL,0),(282,2,'/images/svg/categories/cat02/img021.svg',NULL,0),(283,2,'/images/svg/categories/cat02/img022.svg',NULL,0),(284,2,'/images/svg/categories/cat02/img023.svg',NULL,0),(285,2,'/images/svg/categories/cat02/img024.svg',NULL,0),(286,2,'/images/svg/categories/cat02/img025.svg',NULL,0),(287,2,'/images/svg/categories/cat02/img026.svg',NULL,0),(288,2,'/images/svg/categories/cat02/img027.svg',NULL,0),(289,2,'/images/svg/categories/cat02/img028.svg',NULL,0),(290,2,'/images/svg/categories/cat02/img029.svg',NULL,0),(291,2,'/images/svg/categories/cat02/img030.svg',NULL,0),(292,3,'/images/svg/categories/cat03/img019.svg',NULL,0),(293,3,'/images/svg/categories/cat03/img020.svg',NULL,0),(294,3,'/images/svg/categories/cat03/img021.svg',NULL,0),(295,3,'/images/svg/categories/cat03/img022.svg',NULL,0),(296,3,'/images/svg/categories/cat03/img023.svg',NULL,0),(297,3,'/images/svg/categories/cat03/img024.svg',NULL,0),(298,3,'/images/svg/categories/cat03/img025.svg',NULL,0),(299,3,'/images/svg/categories/cat03/img026.svg',NULL,0),(300,4,'/images/svg/categories/cat04/img011.svg',NULL,0),(301,4,'/images/svg/categories/cat04/img012.svg',NULL,0),(302,4,'/images/svg/categories/cat04/img013.svg',NULL,0),(303,4,'/images/svg/categories/cat04/img014.svg',NULL,0),(304,4,'/images/svg/categories/cat04/img015.svg',NULL,0),(305,4,'/images/svg/categories/cat04/img016.svg',NULL,0),(306,4,'/images/svg/categories/cat04/img017.svg',NULL,0),(307,4,'/images/svg/categories/cat04/img018.svg',NULL,0),(308,4,'/images/svg/categories/cat04/img019.svg',NULL,0),(309,4,'/images/svg/categories/cat04/img020.svg',NULL,0),(310,4,'/images/svg/categories/cat04/img021.svg',NULL,0),(311,4,'/images/svg/categories/cat04/img022.svg',NULL,0),(312,4,'/images/svg/categories/cat04/img023.svg',NULL,0),(313,4,'/images/svg/categories/cat04/img024.svg',NULL,0),(314,4,'/images/svg/categories/cat04/img025.svg',NULL,0),(315,4,'/images/svg/categories/cat04/img026.svg',NULL,0),(316,4,'/images/svg/categories/cat04/img027.svg',NULL,0),(317,4,'/images/svg/categories/cat04/img028.svg',NULL,0),(318,4,'/images/svg/categories/cat04/img029.svg',NULL,0),(319,4,'/images/svg/categories/cat04/img030.svg',NULL,0),(320,4,'/images/svg/categories/cat04/img031.svg',NULL,0),(321,4,'/images/svg/categories/cat04/img032.svg',NULL,0),(322,4,'/images/svg/categories/cat04/img033.svg',NULL,0),(323,4,'/images/svg/categories/cat04/img034.svg',NULL,0),(324,4,'/images/svg/categories/cat04/img035.svg',NULL,0),(325,4,'/images/svg/categories/cat04/img036.svg',NULL,0),(326,4,'/images/svg/categories/cat04/img037.svg',NULL,0),(327,4,'/images/svg/categories/cat04/img038.svg',NULL,0),(328,4,'/images/svg/categories/cat04/img039.svg',NULL,0),(329,4,'/images/svg/categories/cat04/img040.svg',NULL,0),(330,4,'/images/svg/categories/cat04/img041.svg',NULL,0),(331,4,'/images/svg/categories/cat04/img042.svg',NULL,0),(332,4,'/images/svg/categories/cat04/img043.svg',NULL,0),(333,4,'/images/svg/categories/cat04/img044.svg',NULL,0),(334,4,'/images/svg/categories/cat04/img045.svg',NULL,0),(335,4,'/images/svg/categories/cat04/img046.svg',NULL,0),(336,5,'/images/svg/categories/cat05/img011.svg',NULL,0),(337,5,'/images/svg/categories/cat05/img012.svg',NULL,0),(338,5,'/images/svg/categories/cat05/img013.svg',NULL,0),(339,5,'/images/svg/categories/cat05/img014.svg',NULL,0),(340,5,'/images/svg/categories/cat05/img015.svg',NULL,0),(341,5,'/images/svg/categories/cat05/img016.svg',NULL,0),(342,5,'/images/svg/categories/cat05/img017.svg',NULL,0),(343,5,'/images/svg/categories/cat05/img018.svg',NULL,0),(344,5,'/images/svg/categories/cat05/img019.svg',NULL,0),(345,5,'/images/svg/categories/cat05/img020.svg',NULL,0),(346,5,'/images/svg/categories/cat05/img021.svg',NULL,0),(347,5,'/images/svg/categories/cat05/img022.svg',NULL,0),(348,5,'/images/svg/categories/cat05/img023.svg',NULL,0),(349,5,'/images/svg/categories/cat05/img024.svg',NULL,0),(350,5,'/images/svg/categories/cat05/img025.svg',NULL,0),(351,5,'/images/svg/categories/cat05/img026.svg',NULL,0),(352,5,'/images/svg/categories/cat05/img027.svg',NULL,0),(353,6,'/images/svg/categories/cat06/img005.svg',NULL,0),(354,6,'/images/svg/categories/cat06/img006.svg',NULL,0),(355,6,'/images/svg/categories/cat06/img007.svg',NULL,0),(356,6,'/images/svg/categories/cat06/img008.svg',NULL,0),(357,6,'/images/svg/categories/cat06/img009.svg',NULL,0),(358,6,'/images/svg/categories/cat06/img010.svg',NULL,0),(359,6,'/images/svg/categories/cat06/img011.svg',NULL,0),(360,6,'/images/svg/categories/cat06/img012.svg',NULL,0),(361,6,'/images/svg/categories/cat06/img013.svg',NULL,0),(362,6,'/images/svg/categories/cat06/img014.svg',NULL,0),(363,6,'/images/svg/categories/cat06/img015.svg',NULL,0),(364,6,'/images/svg/categories/cat06/img016.svg',NULL,0),(365,6,'/images/svg/categories/cat06/img017.svg',NULL,0),(366,6,'/images/svg/categories/cat06/img018.svg',NULL,0),(367,6,'/images/svg/categories/cat06/img019.svg',NULL,0),(368,6,'/images/svg/categories/cat06/img020.svg',NULL,0),(369,6,'/images/svg/categories/cat06/img021.svg',NULL,0),(370,6,'/images/svg/categories/cat06/img022.svg',NULL,0),(371,7,'/images/svg/categories/cat07/img008.svg',NULL,0),(372,7,'/images/svg/categories/cat07/img009.svg',NULL,0),(373,7,'/images/svg/categories/cat07/img010.svg',NULL,0),(374,7,'/images/svg/categories/cat07/img011.svg',NULL,0),(375,7,'/images/svg/categories/cat07/img012.svg',NULL,0),(376,7,'/images/svg/categories/cat07/img013.svg',NULL,0),(377,7,'/images/svg/categories/cat07/img014.svg',NULL,0),(378,7,'/images/svg/categories/cat07/img015.svg',NULL,0),(379,7,'/images/svg/categories/cat07/img016.svg',NULL,0),(380,7,'/images/svg/categories/cat07/img017.svg',NULL,0),(381,7,'/images/svg/categories/cat07/img018.svg',NULL,0),(382,7,'/images/svg/categories/cat07/img019.svg',NULL,0),(383,7,'/images/svg/categories/cat07/img020.svg',NULL,0),(384,7,'/images/svg/categories/cat07/img021.svg',NULL,0),(385,7,'/images/svg/categories/cat07/img022.svg',NULL,0),(386,7,'/images/svg/categories/cat07/img023.svg',NULL,0),(387,7,'/images/svg/categories/cat07/img024.svg',NULL,0),(388,7,'/images/svg/categories/cat07/img025.svg',NULL,0),(389,7,'/images/svg/categories/cat07/img026.svg',NULL,0),(390,7,'/images/svg/categories/cat07/img027.svg',NULL,0),(391,7,'/images/svg/categories/cat07/img028.svg',NULL,0),(392,7,'/images/svg/categories/cat07/img029.svg',NULL,0),(393,7,'/images/svg/categories/cat07/img030.svg',NULL,0),(394,7,'/images/svg/categories/cat07/img031.svg',NULL,0),(395,7,'/images/svg/categories/cat07/img032.svg',NULL,0),(396,7,'/images/svg/categories/cat07/img033.svg',NULL,0),(397,7,'/images/svg/categories/cat07/img034.svg',NULL,0),(398,7,'/images/svg/categories/cat07/img035.svg',NULL,0),(399,7,'/images/svg/categories/cat07/img036.svg',NULL,0),(400,7,'/images/svg/categories/cat07/img037.svg',NULL,0),(401,7,'/images/svg/categories/cat07/img038.svg',NULL,0),(402,7,'/images/svg/categories/cat07/img039.svg',NULL,0),(403,7,'/images/svg/categories/cat07/img040.svg',NULL,0),(404,7,'/images/svg/categories/cat07/img041.svg',NULL,0),(405,7,'/images/svg/categories/cat07/img042.svg',NULL,0),(406,7,'/images/svg/categories/cat07/img043.svg',NULL,0),(407,7,'/images/svg/categories/cat07/img044.svg',NULL,0),(408,8,'/images/svg/categories/cat08/img013.svg',NULL,0),(409,8,'/images/svg/categories/cat08/img014.svg',NULL,0),(410,8,'/images/svg/categories/cat08/img015.svg',NULL,0),(411,8,'/images/svg/categories/cat08/img016.svg',NULL,0),(412,8,'/images/svg/categories/cat08/img017.svg',NULL,0),(413,9,'/images/svg/categories/cat09/img007.svg',NULL,0),(414,9,'/images/svg/categories/cat09/img008.svg',NULL,0),(415,9,'/images/svg/categories/cat09/img009.svg',NULL,0),(416,9,'/images/svg/categories/cat09/img010.svg',NULL,0),(417,9,'/images/svg/categories/cat09/img011.svg',NULL,0),(418,9,'/images/svg/categories/cat09/img012.svg',NULL,0),(419,9,'/images/svg/categories/cat09/img013.svg',NULL,0),(420,9,'/images/svg/categories/cat09/img014.svg',NULL,0),(421,9,'/images/svg/categories/cat09/img015.svg',NULL,0),(422,9,'/images/svg/categories/cat09/img016.svg',NULL,0),(423,9,'/images/svg/categories/cat09/img017.svg',NULL,0),(424,10,'/images/svg/categories/cat10/img009.svg',NULL,0),(425,10,'/images/svg/categories/cat10/img010.svg',NULL,0),(426,10,'/images/svg/categories/cat10/img011.svg',NULL,0),(427,10,'/images/svg/categories/cat10/img012.svg',NULL,0),(428,10,'/images/svg/categories/cat10/img013.svg',NULL,0),(429,10,'/images/svg/categories/cat10/img014.svg',NULL,0),(430,10,'/images/svg/categories/cat10/img015.svg',NULL,0),(431,10,'/images/svg/categories/cat10/img016.svg',NULL,0),(432,10,'/images/svg/categories/cat10/img017.svg',NULL,0),(433,10,'/images/svg/categories/cat10/img018.svg',NULL,0),(434,11,'/images/svg/categories/cat11/img010.svg',NULL,0),(435,11,'/images/svg/categories/cat11/img011.svg',NULL,0),(436,11,'/images/svg/categories/cat11/img012.svg',NULL,0),(437,11,'/images/svg/categories/cat11/img013.svg',NULL,0),(438,12,'/images/svg/categories/cat12/img009.svg',NULL,0),(439,12,'/images/svg/categories/cat12/img010.svg',NULL,0),(440,12,'/images/svg/categories/cat12/img011.svg',NULL,0),(441,12,'/images/svg/categories/cat12/img012.svg',NULL,0),(442,12,'/images/svg/categories/cat12/img013.svg',NULL,0),(443,12,'/images/svg/categories/cat12/img014.svg',NULL,0),(444,12,'/images/svg/categories/cat12/img015.svg',NULL,0),(445,12,'/images/svg/categories/cat12/img016.svg',NULL,0),(446,12,'/images/svg/categories/cat12/img017.svg',NULL,0),(447,12,'/images/svg/categories/cat12/img018.svg',NULL,0),(448,12,'/images/svg/categories/cat12/img019.svg',NULL,0),(449,12,'/images/svg/categories/cat12/img020.svg',NULL,0),(450,12,'/images/svg/categories/cat12/img021.svg',NULL,0),(451,12,'/images/svg/categories/cat12/img022.svg',NULL,0),(452,12,'/images/svg/categories/cat12/img023.svg',NULL,0),(453,12,'/images/svg/categories/cat12/img024.svg',NULL,0),(454,12,'/images/svg/categories/cat12/img025.svg',NULL,0),(455,12,'/images/svg/categories/cat12/img026.svg',NULL,0),(456,12,'/images/svg/categories/cat12/img027.svg',NULL,0),(457,12,'/images/svg/categories/cat12/img028.svg',NULL,0),(458,12,'/images/svg/categories/cat12/img029.svg',NULL,0),(459,15,'/images/svg/categories/cat15/img009.svg',NULL,0),(460,15,'/images/svg/categories/cat15/img010.svg',NULL,0),(461,15,'/images/svg/categories/cat15/img011.svg',NULL,0),(462,15,'/images/svg/categories/cat15/img012.svg',NULL,0),(463,15,'/images/svg/categories/cat15/img013.svg',NULL,0),(464,15,'/images/svg/categories/cat15/img014.svg',NULL,0),(465,15,'/images/svg/categories/cat15/img015.svg',NULL,0),(466,15,'/images/svg/categories/cat15/img016.svg',NULL,0),(467,15,'/images/svg/categories/cat15/img017.svg',NULL,0),(468,15,'/images/svg/categories/cat15/img018.svg',NULL,0),(469,15,'/images/svg/categories/cat15/img019.svg',NULL,0),(470,15,'/images/svg/categories/cat15/img020.svg',NULL,0),(471,15,'/images/svg/categories/cat15/img021.svg',NULL,0),(472,15,'/images/svg/categories/cat15/img022.svg',NULL,0),(473,15,'/images/svg/categories/cat15/img023.svg',NULL,0),(474,15,'/images/svg/categories/cat15/img024.svg',NULL,0),(475,15,'/images/svg/categories/cat15/img025.svg',NULL,0),(476,15,'/images/svg/categories/cat15/img026.svg',NULL,0),(477,15,'/images/svg/categories/cat15/img027.svg',NULL,0),(478,15,'/images/svg/categories/cat15/img028.svg',NULL,0),(479,15,'/images/svg/categories/cat15/img029.svg',NULL,0),(480,15,'/images/svg/categories/cat15/img030.svg',NULL,0),(481,15,'/images/svg/categories/cat15/img031.svg',NULL,0),(482,15,'/images/svg/categories/cat15/img032.svg',NULL,0),(483,15,'/images/svg/categories/cat15/img033.svg',NULL,0);
+/*!40000 ALTER TABLE `categoryimage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sandboxes`
+--
+
 DROP TABLE IF EXISTS `sandboxes`;
-CREATE TABLE IF NOT EXISTS `sandboxes` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sandboxes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(250) DEFAULT NULL,
   `ownerId` int(11) DEFAULT NULL,
   `sessionUuid` varchar(50) DEFAULT uuid(),
   `uuid` varchar(50) DEFAULT uuid(),
-  `createdt` datetime DEFAULT uuid(),
+  `createdt` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `Index 2` (`ownerId`)
-) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=145 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Dumping data for table sandbox.sandboxes: ~88 rows (approximately)
-REPLACE INTO `sandboxes` (`id`, `name`, `ownerId`, `sessionUuid`, `uuid`, `createdt`) VALUES
-	(1, 'Test1', 1, '0a6bd202-afd1-4fb5-9f41-f416a8376c9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(2, 'erteportipo', 1, 'd686b8e4-65a2-4aaf-96b5-5fd5b7b23649', '68de3e36-e8a0-11ef-ad91-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(58, NULL, NULL, '4000fa7c-c5af-4a02-86cc-44689fe96b4f', 'bf1f48ab-ff9e-11ef-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(59, NULL, NULL, 'c0374ab0-71df-44a2-bbc8-53442b781356', '7f97bb46-041b-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(60, NULL, NULL, '54c7e7e2-3884-4321-af0f-2e57d687f03e', 'b7b39334-041c-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(61, NULL, NULL, 'da16f20a-a0c1-43a9-9fde-346c46edbbc5', 'fea66817-0421-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(62, NULL, NULL, 'ea93b583-95ad-40c3-9bc6-8daaf5496a28', '05eb7fc5-0422-11f0-9faa-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(63, NULL, NULL, 'd1f12abc-cfc7-45e1-be2d-cd5083f3ee02', 'd9134a60-0aa7-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(64, NULL, NULL, '4d24659a-0b21-416b-93ee-4253601a33d4', 'dc4beee4-0aa9-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(65, NULL, NULL, 'a87e5c04-b469-4383-9915-2968a59550b2', 'e8c08c6a-0aa9-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(66, NULL, NULL, 'd1a5e19a-0cd8-4097-9ff2-57c908c27df0', '82498979-0b59-11f0-b6ac-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(67, NULL, NULL, '60b4963a-6669-412c-9684-83b89ab00da8', 'a99daa7d-0c1b-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(68, NULL, NULL, 'fd085235-cb87-4fd0-ac4e-f3139627103a', 'cdc56e38-0c1d-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(69, NULL, NULL, '79aacc1b-764d-4b20-bdee-91fb6c93b209', '3bb7229b-0c20-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(70, NULL, NULL, '871445a1-f6c7-4e57-98d6-97257f714e6c', '4c8053f5-0c25-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(71, NULL, NULL, '852bd368-fd7c-4a51-a438-75d0f2b5f2be', '9b7a0edb-0c25-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(72, NULL, NULL, 'e64cd015-d310-4c0e-a0e1-eda241ae710b', '9ddf25f2-0c26-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(73, NULL, NULL, 'b03f7cdb-1812-40ad-9991-1db2d2bb93b4', '83cc816c-0c28-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(74, NULL, NULL, '48d58e90-b9cb-41a8-8382-2002d66467ef', 'a79faa36-0e6c-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(75, NULL, NULL, 'e45f1c9a-ee54-4bb1-8a81-135b3f184d1f', 'a4334c4d-0e6d-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(76, NULL, NULL, '9a4db692-7573-423d-890f-887837fee455', '39340e5e-0e6e-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(77, NULL, NULL, '611cc179-2c43-46d6-b155-0f3df597672f', '0d3622c5-0e6f-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(78, NULL, NULL, 'ae8129d9-688f-40f8-a3aa-b8db37cba6e8', '3ca66e4e-0e6f-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(79, NULL, NULL, 'eaac9a7d-0d53-44f8-866d-d18fca10747a', 'b0a070dd-0e6f-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(80, NULL, NULL, '8498725b-6b73-4ce9-9a13-a89bc2c20f84', '31747103-0e71-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(81, NULL, NULL, 'ffd93351-cb03-4990-ad1f-c961531eddf8', 'fde5f836-0e74-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(82, NULL, NULL, 'd8998057-1fdc-4bd4-8c6e-5981a9db4bb4', '6610d7a9-0e77-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(83, NULL, NULL, '10aec4fe-e779-4f19-ab5d-a626d9c6e747', '2cb00bc2-0e79-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(84, NULL, NULL, 'c08a12cd-0a3b-4367-b3df-0312facb9c4e', 'e9e4cef9-0e79-11f0-ae5b-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(85, NULL, NULL, 'b1eb06a0-2f66-48ae-bbd9-dfbd04a1e1fc', '3d62a2bc-10f9-11f0-8092-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(86, NULL, NULL, 'ead42ef8-006f-4dc2-80c3-618334ed40f8', '7a96377c-149a-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(87, NULL, NULL, 'a5b4351b-31b6-4304-ab5e-1a2f545c4332', '78a0aef6-149b-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(88, NULL, NULL, '7d15c9f0-630c-48d0-8be9-4a0fe4b5f9da', '82006d04-149b-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(89, NULL, NULL, '43c034dd-40b3-439f-87a9-c19b0fba31c3', 'ba0eef1c-149b-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(90, NULL, NULL, '14a28a16-5954-47e1-9a65-1fc1a219d336', 'bf97d198-155d-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(91, NULL, NULL, '7ab28f5f-aa42-4778-bdff-ff90f55b5714', '1e9badbd-155f-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(92, NULL, NULL, '1522c7bc-0b39-4850-8a6a-91a27a60f1a7', '5d438a89-1562-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(93, NULL, NULL, '1a0710dd-3ee3-436b-80e2-8b0d5ec893ea', 'a7b9670e-1562-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(94, NULL, NULL, 'b594b6cf-248d-47f0-93ff-9ddf8449833e', '273e40c2-161d-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(95, NULL, NULL, 'bbdc58bd-2037-4383-9e91-d1fa739d6e59', '4e84a25f-161d-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(96, NULL, NULL, '06a2d472-e80f-4805-ab43-ebcb0160cf16', 'dc319f64-161e-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(97, NULL, NULL, 'af6b2e3b-a5c0-4307-8743-915cc9f0e462', 'cee6f656-16dd-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(98, NULL, NULL, 'e5a44714-7c5e-42c2-b328-7ae2eefdc4b5', 'e8c3693c-16dd-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(99, NULL, NULL, '7cd05d03-40fe-43f3-97d3-d6bcdf5cea41', '5ad26533-16e2-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(100, NULL, NULL, '7ad1b8c6-820a-4493-a406-e2c7776cfde4', 'c739c4a4-189d-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(101, NULL, NULL, '975ebb55-e92a-4c08-af0f-3753ce5fe81b', '60683f52-189e-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(102, NULL, NULL, '942d68a8-a081-42ef-991a-2ec321288144', '8383554d-189e-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(103, NULL, NULL, '330b3842-facd-452d-b0ed-257b5e98984f', 'b1cd9baf-189e-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(104, NULL, NULL, '55058995-a05d-4dc3-b22d-6c38bf988bd8', 'd24f925c-18a0-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(105, NULL, NULL, '8c99e24d-ae22-4703-a103-fce98f61cd64', 'b4d09c75-18a1-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(106, NULL, NULL, '8a62a154-d4a2-4b75-bb0e-fd16b9467e67', 'fd977a9a-18a1-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(107, NULL, NULL, '4259cad9-344a-4aed-babf-354bc53f0267', '41d27f62-196f-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(108, NULL, NULL, '2b7b92b6-4b3e-49ca-a2d3-12d8388f986d', '499d97cb-196f-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(109, NULL, NULL, 'd06738e4-3a0f-43c1-95ba-b60384d1136a', '65524232-196f-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(110, NULL, NULL, 'd0e9b2e6-f6b8-4f19-9de3-6e4b3385ec00', '43f86594-1970-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(111, NULL, NULL, '9d98a11e-ee2a-4c38-8b0e-657a04f940ce', '57d81717-1970-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(112, NULL, NULL, '213ad191-61e9-4e9e-b8b4-eb2cec0147e3', 'dacd4619-1970-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(113, NULL, NULL, 'c26d4e3a-476b-4e7d-a0d3-6951715d8bf9', '35497764-1971-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(114, NULL, NULL, 'ed2fab6d-b25a-46c1-a78f-e79c162be971', '5b332b00-1973-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(115, NULL, NULL, 'e19d28d3-2800-40a3-b352-1fa43b37bdfe', 'f6a0397e-1973-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(116, NULL, NULL, 'c0760386-bf35-45ca-8259-27bf3f7bb008', '45005dc1-1974-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(117, NULL, NULL, 'a58cedef-cac2-46e6-84b3-e88354cdc26d', 'd0ca7f68-1974-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(118, NULL, NULL, 'b5f90e25-3416-4892-bba7-6c43f895247b', '4c4215f4-197f-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(119, NULL, NULL, 'f06dc5aa-d163-438e-9a0c-d46ab2a307bb', 'd85fff29-1980-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(120, NULL, NULL, 'd69c6967-4de4-4a68-bc4f-bcb92ac1d2d1', '49b0fe1f-1981-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(121, NULL, NULL, '185e5846-f625-41a6-90b6-3e6aeb04ffa8', 'ece98f4c-1981-11f0-991d-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(122, NULL, NULL, 'a0b5bd55-274e-41a7-97a2-9b3cd7e7830c', '7fd5b3f8-1d53-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(123, NULL, NULL, 'cc5e1f0d-e7a9-469f-a965-fa0695e64f50', 'f729b4b3-1d53-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(124, NULL, NULL, '8761c72d-a898-4d5e-b70b-7c494a35b12e', 'b111cd6e-1d54-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(125, NULL, NULL, 'cdc9da03-0d11-49da-8f80-0e89d181a961', '61c3e783-1d56-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(126, NULL, NULL, 'b022bd93-fc87-4160-873d-1e3feed9d289', '61803b71-1d57-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(127, NULL, NULL, 'b73641d3-4da5-4e68-9ae3-a53f01bfbcaa', 'f57e6153-1d58-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(128, NULL, NULL, 'f6c6278b-4df6-4ea7-9bee-cbe7be9d27d4', '2f0d5738-1d59-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(129, NULL, NULL, 'a87a96be-d48c-4b7c-b1db-4cc7a550b6e0', '4bb4739c-1d5a-11f0-9c72-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(130, NULL, NULL, 'cf377cf9-63b9-44bd-bdca-c0e8694b741f', 'fe26c549-2b85-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(131, NULL, NULL, '187f7c08-fced-49bd-a81f-632dc034be75', '3a690f02-2b86-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(132, NULL, NULL, '69005cdc-7fd1-4668-8f61-b1082b198893', '2daeea27-2b87-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(133, NULL, NULL, '4db6a000-1655-42db-b370-90a433d79109', 'fb909bc7-2b87-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(134, NULL, NULL, '9a37d7a5-8323-4e38-9dee-fdd51010a7d2', 'ef7f3d8d-2b88-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(135, NULL, NULL, 'b73c2b1d-aba1-4915-9182-2c07f55bedd4', 'afed4dd8-2b8f-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(136, NULL, NULL, '8c29ea1d-ebc6-40b3-9840-5d5218c32e74', '61d943f1-2e44-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(137, NULL, NULL, 'd8ae9414-d091-4dc3-b523-c0308318eb94', 'f016d630-2e44-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(138, NULL, NULL, 'd46d1399-1365-4e97-b122-1299ce9a4169', '40e94a35-2f62-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(139, NULL, NULL, 'baa1abcf-a06e-4a03-b021-e3625c89b523', '7dc62160-2f62-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(140, NULL, NULL, '9ff6c8a4-5623-4872-a171-3660b0a6e807', '52872925-3014-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(141, NULL, NULL, '596c2cda-cfa4-43d6-9cae-b11cd4d9e9b7', '8e207a0d-3014-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(142, NULL, NULL, '7d235228-73c1-4a17-a47c-fca871c96ca1', 'a23b93b4-3015-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00'),
-	(143, NULL, NULL, 'fd292fe9-87dc-4a31-aff9-785cdf0fd1bd', 'd61a4cd6-3015-11f0-b3e1-e840f2c38b9b', '0000-00-00 00:00:00');
+--
+-- Dumping data for table `sandboxes`
+--
 
--- Dumping structure for table sandbox.sessionimage
+LOCK TABLES `sandboxes` WRITE;
+/*!40000 ALTER TABLE `sandboxes` DISABLE KEYS */;
+INSERT INTO `sandboxes` VALUES (1,'Test1',1,'0a6bd202-afd1-4fb5-9f41-f416a8376c9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','0000-00-00 00:00:00'),(2,'erteportipo',1,'d686b8e4-65a2-4aaf-96b5-5fd5b7b23649','68de3e36-e8a0-11ef-ad91-e840f2c38b9b','0000-00-00 00:00:00'),(58,NULL,NULL,'4000fa7c-c5af-4a02-86cc-44689fe96b4f','bf1f48ab-ff9e-11ef-9faa-e840f2c38b9b','0000-00-00 00:00:00'),(59,NULL,NULL,'c0374ab0-71df-44a2-bbc8-53442b781356','7f97bb46-041b-11f0-9faa-e840f2c38b9b','0000-00-00 00:00:00'),(60,NULL,NULL,'54c7e7e2-3884-4321-af0f-2e57d687f03e','b7b39334-041c-11f0-9faa-e840f2c38b9b','0000-00-00 00:00:00'),(61,NULL,NULL,'da16f20a-a0c1-43a9-9fde-346c46edbbc5','fea66817-0421-11f0-9faa-e840f2c38b9b','0000-00-00 00:00:00'),(62,NULL,NULL,'ea93b583-95ad-40c3-9bc6-8daaf5496a28','05eb7fc5-0422-11f0-9faa-e840f2c38b9b','0000-00-00 00:00:00'),(63,NULL,NULL,'d1f12abc-cfc7-45e1-be2d-cd5083f3ee02','d9134a60-0aa7-11f0-b6ac-e840f2c38b9b','0000-00-00 00:00:00'),(64,NULL,NULL,'4d24659a-0b21-416b-93ee-4253601a33d4','dc4beee4-0aa9-11f0-b6ac-e840f2c38b9b','0000-00-00 00:00:00'),(65,NULL,NULL,'a87e5c04-b469-4383-9915-2968a59550b2','e8c08c6a-0aa9-11f0-b6ac-e840f2c38b9b','0000-00-00 00:00:00'),(66,NULL,NULL,'d1a5e19a-0cd8-4097-9ff2-57c908c27df0','82498979-0b59-11f0-b6ac-e840f2c38b9b','0000-00-00 00:00:00'),(67,NULL,NULL,'60b4963a-6669-412c-9684-83b89ab00da8','a99daa7d-0c1b-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(68,NULL,NULL,'fd085235-cb87-4fd0-ac4e-f3139627103a','cdc56e38-0c1d-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(69,NULL,NULL,'79aacc1b-764d-4b20-bdee-91fb6c93b209','3bb7229b-0c20-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(70,NULL,NULL,'871445a1-f6c7-4e57-98d6-97257f714e6c','4c8053f5-0c25-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(71,NULL,NULL,'852bd368-fd7c-4a51-a438-75d0f2b5f2be','9b7a0edb-0c25-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(72,NULL,NULL,'e64cd015-d310-4c0e-a0e1-eda241ae710b','9ddf25f2-0c26-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(73,NULL,NULL,'b03f7cdb-1812-40ad-9991-1db2d2bb93b4','83cc816c-0c28-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(74,NULL,NULL,'48d58e90-b9cb-41a8-8382-2002d66467ef','a79faa36-0e6c-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(75,NULL,NULL,'e45f1c9a-ee54-4bb1-8a81-135b3f184d1f','a4334c4d-0e6d-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(76,NULL,NULL,'9a4db692-7573-423d-890f-887837fee455','39340e5e-0e6e-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(77,NULL,NULL,'611cc179-2c43-46d6-b155-0f3df597672f','0d3622c5-0e6f-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(78,NULL,NULL,'ae8129d9-688f-40f8-a3aa-b8db37cba6e8','3ca66e4e-0e6f-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(79,NULL,NULL,'eaac9a7d-0d53-44f8-866d-d18fca10747a','b0a070dd-0e6f-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(80,NULL,NULL,'8498725b-6b73-4ce9-9a13-a89bc2c20f84','31747103-0e71-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(81,NULL,NULL,'ffd93351-cb03-4990-ad1f-c961531eddf8','fde5f836-0e74-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(82,NULL,NULL,'d8998057-1fdc-4bd4-8c6e-5981a9db4bb4','6610d7a9-0e77-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(83,NULL,NULL,'10aec4fe-e779-4f19-ab5d-a626d9c6e747','2cb00bc2-0e79-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(84,NULL,NULL,'c08a12cd-0a3b-4367-b3df-0312facb9c4e','e9e4cef9-0e79-11f0-ae5b-e840f2c38b9b','0000-00-00 00:00:00'),(85,NULL,NULL,'b1eb06a0-2f66-48ae-bbd9-dfbd04a1e1fc','3d62a2bc-10f9-11f0-8092-e840f2c38b9b','0000-00-00 00:00:00'),(86,NULL,NULL,'ead42ef8-006f-4dc2-80c3-618334ed40f8','7a96377c-149a-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(87,NULL,NULL,'a5b4351b-31b6-4304-ab5e-1a2f545c4332','78a0aef6-149b-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(88,NULL,NULL,'7d15c9f0-630c-48d0-8be9-4a0fe4b5f9da','82006d04-149b-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(89,NULL,NULL,'43c034dd-40b3-439f-87a9-c19b0fba31c3','ba0eef1c-149b-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(90,NULL,NULL,'14a28a16-5954-47e1-9a65-1fc1a219d336','bf97d198-155d-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(91,NULL,NULL,'7ab28f5f-aa42-4778-bdff-ff90f55b5714','1e9badbd-155f-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(92,NULL,NULL,'1522c7bc-0b39-4850-8a6a-91a27a60f1a7','5d438a89-1562-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(93,NULL,NULL,'1a0710dd-3ee3-436b-80e2-8b0d5ec893ea','a7b9670e-1562-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(94,NULL,NULL,'b594b6cf-248d-47f0-93ff-9ddf8449833e','273e40c2-161d-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(95,NULL,NULL,'bbdc58bd-2037-4383-9e91-d1fa739d6e59','4e84a25f-161d-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(96,NULL,NULL,'06a2d472-e80f-4805-ab43-ebcb0160cf16','dc319f64-161e-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(97,NULL,NULL,'af6b2e3b-a5c0-4307-8743-915cc9f0e462','cee6f656-16dd-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(98,NULL,NULL,'e5a44714-7c5e-42c2-b328-7ae2eefdc4b5','e8c3693c-16dd-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(99,NULL,NULL,'7cd05d03-40fe-43f3-97d3-d6bcdf5cea41','5ad26533-16e2-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(100,NULL,NULL,'7ad1b8c6-820a-4493-a406-e2c7776cfde4','c739c4a4-189d-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(101,NULL,NULL,'975ebb55-e92a-4c08-af0f-3753ce5fe81b','60683f52-189e-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(102,NULL,NULL,'942d68a8-a081-42ef-991a-2ec321288144','8383554d-189e-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(103,NULL,NULL,'330b3842-facd-452d-b0ed-257b5e98984f','b1cd9baf-189e-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(104,NULL,NULL,'55058995-a05d-4dc3-b22d-6c38bf988bd8','d24f925c-18a0-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(105,NULL,NULL,'8c99e24d-ae22-4703-a103-fce98f61cd64','b4d09c75-18a1-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(106,NULL,NULL,'8a62a154-d4a2-4b75-bb0e-fd16b9467e67','fd977a9a-18a1-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(107,NULL,NULL,'4259cad9-344a-4aed-babf-354bc53f0267','41d27f62-196f-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(108,NULL,NULL,'2b7b92b6-4b3e-49ca-a2d3-12d8388f986d','499d97cb-196f-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(109,NULL,NULL,'d06738e4-3a0f-43c1-95ba-b60384d1136a','65524232-196f-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(110,NULL,NULL,'d0e9b2e6-f6b8-4f19-9de3-6e4b3385ec00','43f86594-1970-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(111,NULL,NULL,'9d98a11e-ee2a-4c38-8b0e-657a04f940ce','57d81717-1970-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(112,NULL,NULL,'213ad191-61e9-4e9e-b8b4-eb2cec0147e3','dacd4619-1970-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(113,NULL,NULL,'c26d4e3a-476b-4e7d-a0d3-6951715d8bf9','35497764-1971-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(114,NULL,NULL,'ed2fab6d-b25a-46c1-a78f-e79c162be971','5b332b00-1973-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(115,NULL,NULL,'e19d28d3-2800-40a3-b352-1fa43b37bdfe','f6a0397e-1973-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(116,NULL,NULL,'c0760386-bf35-45ca-8259-27bf3f7bb008','45005dc1-1974-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(117,NULL,NULL,'a58cedef-cac2-46e6-84b3-e88354cdc26d','d0ca7f68-1974-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(118,NULL,NULL,'b5f90e25-3416-4892-bba7-6c43f895247b','4c4215f4-197f-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(119,NULL,NULL,'f06dc5aa-d163-438e-9a0c-d46ab2a307bb','d85fff29-1980-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(120,NULL,NULL,'d69c6967-4de4-4a68-bc4f-bcb92ac1d2d1','49b0fe1f-1981-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(121,NULL,NULL,'185e5846-f625-41a6-90b6-3e6aeb04ffa8','ece98f4c-1981-11f0-991d-e840f2c38b9b','0000-00-00 00:00:00'),(122,NULL,NULL,'a0b5bd55-274e-41a7-97a2-9b3cd7e7830c','7fd5b3f8-1d53-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(123,NULL,NULL,'cc5e1f0d-e7a9-469f-a965-fa0695e64f50','f729b4b3-1d53-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(124,NULL,NULL,'8761c72d-a898-4d5e-b70b-7c494a35b12e','b111cd6e-1d54-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(125,NULL,NULL,'cdc9da03-0d11-49da-8f80-0e89d181a961','61c3e783-1d56-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(126,NULL,NULL,'b022bd93-fc87-4160-873d-1e3feed9d289','61803b71-1d57-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(127,NULL,NULL,'b73641d3-4da5-4e68-9ae3-a53f01bfbcaa','f57e6153-1d58-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(128,NULL,NULL,'f6c6278b-4df6-4ea7-9bee-cbe7be9d27d4','2f0d5738-1d59-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(129,NULL,NULL,'a87a96be-d48c-4b7c-b1db-4cc7a550b6e0','4bb4739c-1d5a-11f0-9c72-e840f2c38b9b','0000-00-00 00:00:00'),(130,NULL,NULL,'cf377cf9-63b9-44bd-bdca-c0e8694b741f','fe26c549-2b85-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(131,NULL,NULL,'187f7c08-fced-49bd-a81f-632dc034be75','3a690f02-2b86-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(132,NULL,NULL,'69005cdc-7fd1-4668-8f61-b1082b198893','2daeea27-2b87-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(133,NULL,NULL,'4db6a000-1655-42db-b370-90a433d79109','fb909bc7-2b87-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(134,NULL,NULL,'9a37d7a5-8323-4e38-9dee-fdd51010a7d2','ef7f3d8d-2b88-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(135,NULL,NULL,'b73c2b1d-aba1-4915-9182-2c07f55bedd4','afed4dd8-2b8f-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(136,NULL,NULL,'8c29ea1d-ebc6-40b3-9840-5d5218c32e74','61d943f1-2e44-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(137,NULL,NULL,'d8ae9414-d091-4dc3-b523-c0308318eb94','f016d630-2e44-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(138,NULL,NULL,'d46d1399-1365-4e97-b122-1299ce9a4169','40e94a35-2f62-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(139,NULL,NULL,'baa1abcf-a06e-4a03-b021-e3625c89b523','7dc62160-2f62-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(140,NULL,NULL,'9ff6c8a4-5623-4872-a171-3660b0a6e807','52872925-3014-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(141,NULL,NULL,'596c2cda-cfa4-43d6-9cae-b11cd4d9e9b7','8e207a0d-3014-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(142,NULL,NULL,'7d235228-73c1-4a17-a47c-fca871c96ca1','a23b93b4-3015-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(143,NULL,NULL,'fd292fe9-87dc-4a31-aff9-785cdf0fd1bd','d61a4cd6-3015-11f0-b3e1-e840f2c38b9b','0000-00-00 00:00:00'),(144,NULL,NULL,'0b086362-7d9d-491e-a84d-9c7b5f4e55bb','d15df428-ab47-11f0-9527-423920a0443d','2025-10-17 10:55:39');
+/*!40000 ALTER TABLE `sandboxes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sessionimage`
+--
+
 DROP TABLE IF EXISTS `sessionimage`;
-CREATE TABLE IF NOT EXISTS `sessionimage` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sessionimage` (
   `sessionId` varchar(50) DEFAULT NULL,
   `image` varchar(250) DEFAULT NULL,
   `createDt` timestamp NULL DEFAULT NULL,
   KEY `Index 1` (`sessionId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Dumping data for table sandbox.sessionimage: ~161 rows (approximately)
-REPLACE INTO `sessionimage` (`sessionId`, `image`, `createDt`) VALUES
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/0.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/1.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/2.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/3.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/4.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/5.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/6.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/7.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/8.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/9.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/10.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/11.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/12.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/13.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/14.png', NULL),
-	('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b', 'a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/15.png', NULL),
-	('null', 'null/0.png', NULL),
-	('null', 'null/1.png', NULL),
-	('null', 'null/2.png', NULL),
-	('null', 'null/3.png', NULL),
-	('null', 'null/4.png', NULL),
-	('null', 'null/5.png', NULL),
-	('null', 'null/6.png', NULL),
-	('null', 'null/7.png', NULL),
-	('null', 'null/8.png', NULL),
-	('null', 'null/9.png', NULL),
-	('null', 'null/10.png', NULL),
-	('null', 'null/11.png', NULL),
-	('null', 'null/12.png', NULL),
-	('null', 'null/13.png', NULL),
-	('null', 'null/14.png', NULL),
-	('null', 'null/15.png', NULL),
-	('null', 'null/16.png', NULL),
-	('null', 'null/17.png', NULL),
-	('null', 'null/18.png', NULL),
-	('null', 'null/19.png', NULL),
-	('null', 'null/20.png', NULL),
-	('null', 'null/21.png', NULL),
-	('null', 'null/22.png', NULL),
-	('null', 'null/23.png', NULL),
-	('null', 'null/24.png', NULL),
-	('null', 'null/25.png', NULL),
-	('null', 'null/26.png', NULL),
-	('null', 'null/27.png', NULL),
-	('null', 'null/28.png', NULL),
-	('null', 'null/29.png', NULL),
-	('null', 'null/30.png', NULL),
-	('null', 'null/31.png', NULL),
-	('null', 'null/32.png', NULL),
-	('null', 'null/33.png', NULL),
-	('null', 'null/34.png', NULL),
-	('null', 'null/35.png', NULL),
-	('null', 'null/36.png', NULL),
-	('null', 'null/37.png', NULL),
-	('null', 'null/38.png', NULL),
-	('null', 'null/39.png', NULL),
-	('null', 'null/40.png', NULL),
-	('null', 'null/41.png', NULL),
-	('null', 'null/42.png', NULL),
-	('null', 'null/43.png', NULL),
-	('null', 'null/44.png', NULL),
-	('null', 'null/45.png', NULL),
-	('null', 'null/46.png', NULL),
-	('null', 'null/47.png', NULL),
-	('null', 'null/48.png', NULL),
-	('null', 'null/49.png', NULL),
-	('null', 'null/50.png', NULL),
-	('null', 'null/51.png', NULL),
-	('null', 'null/52.png', NULL),
-	('null', 'null/53.png', NULL),
-	('null', 'null/54.png', NULL),
-	('null', 'null/55.png', NULL),
-	('null', 'null/56.png', NULL),
-	('null', 'null/57.png', NULL),
-	('null', 'null/58.png', NULL),
-	('null', 'null/59.png', NULL),
-	('null', 'null/60.png', NULL),
-	('null', 'null/61.png', NULL),
-	('null', 'null/62.png', NULL),
-	('null', 'null/63.png', NULL),
-	('null', 'null/64.png', NULL),
-	('null', 'null/65.png', NULL),
-	('null', 'null/66.png', NULL),
-	('null', 'null/67.png', NULL),
-	('null', 'null/68.png', NULL),
-	('null', 'null/69.png', NULL),
-	('null', 'null/70.png', NULL),
-	('null', 'null/71.png', NULL),
-	('null', 'null/72.png', NULL),
-	('null', 'null/73.png', NULL),
-	('null', 'null/74.png', NULL),
-	('null', 'null/75.png', NULL),
-	('null', 'null/76.png', NULL),
-	('null', 'null/77.png', NULL),
-	('null', 'null/78.png', NULL),
-	('null', 'null/79.png', NULL),
-	('null', 'null/80.png', NULL),
-	('null', 'null/81.png', NULL),
-	('null', 'null/82.png', NULL),
-	('null', 'null/83.png', NULL),
-	('null', 'null/84.png', NULL),
-	('null', 'null/85.png', NULL),
-	('null', 'null/86.png', NULL),
-	('null', 'null/87.png', NULL),
-	('null', 'null/88.png', NULL),
-	('null', 'null/89.png', NULL),
-	('null', 'null/90.png', NULL),
-	('null', 'null/91.png', NULL),
-	('null', 'null/92.png', NULL),
-	('null', 'null/93.png', NULL),
-	('null', 'null/94.png', NULL),
-	('null', 'null/95.png', NULL),
-	('null', 'null/96.png', NULL),
-	('null', 'null/97.png', NULL),
-	('null', 'null/98.png', NULL),
-	('null', 'null/99.png', NULL),
-	('null', 'null/100.png', NULL),
-	('null', 'null/101.png', NULL),
-	('null', 'null/102.png', NULL),
-	('null', 'null/103.png', NULL),
-	('null', 'null/104.png', NULL),
-	('null', 'null/105.png', NULL),
-	('null', 'null/106.png', NULL),
-	('null', 'null/107.png', NULL),
-	('null', 'null/108.png', NULL),
-	('null', 'null/109.png', NULL),
-	('null', 'null/110.png', NULL),
-	('null', 'null/111.png', NULL),
-	('null', 'null/112.png', NULL),
-	('null', 'null/113.png', NULL),
-	('null', 'null/114.png', NULL),
-	('null', 'null/115.png', NULL),
-	('null', 'null/116.png', NULL),
-	('null', 'null/117.png', NULL),
-	('null', 'null/118.png', NULL),
-	('null', 'null/119.png', NULL),
-	('null', 'null/120.png', NULL),
-	('null', 'null/121.png', NULL),
-	('null', 'null/122.png', NULL),
-	('null', 'null/123.png', NULL),
-	('null', 'null/124.png', NULL),
-	('null', 'null/125.png', NULL),
-	('null', 'null/126.png', NULL),
-	('null', 'null/127.png', NULL),
-	('null', 'null/128.png', NULL),
-	('null', 'null/129.png', '0000-00-00 00:00:00'),
-	('null', 'null/130.png', '0000-00-00 00:00:00'),
-	('null', 'null/131.png', '0000-00-00 00:00:00'),
-	('null', 'null/132.png', '0000-00-00 00:00:00'),
-	('null', 'null/133.png', '0000-00-00 00:00:00'),
-	('null', 'null/134.png', '0000-00-00 00:00:00'),
-	('null', 'null/135.png', '0000-00-00 00:00:00'),
-	('null', 'null/136.png', '0000-00-00 00:00:00'),
-	('null', 'null/137.png', '0000-00-00 00:00:00'),
-	('null', 'null/138.png', '0000-00-00 00:00:00'),
-	('null', 'null/139.png', '0000-00-00 00:00:00'),
-	('null', 'null/140.png', '0000-00-00 00:00:00'),
-	('null', 'null/141.png', '0000-00-00 00:00:00'),
-	('null', 'null/142.png', '0000-00-00 00:00:00'),
-	('null', 'null/143.png', '0000-00-00 00:00:00'),
-	('null', 'null/144.png', '0000-00-00 00:00:00'),
-	('null', 'null/145.png', '0000-00-00 00:00:00'),
-	('null', 'null/146.png', '0000-00-00 00:00:00'),
-	('null', 'null/147.png', '0000-00-00 00:00:00'),
-	('null', 'null/148.png', '0000-00-00 00:00:00'),
-	('null', 'null/149.png', '0000-00-00 00:00:00'),
-	('null', 'null/150.png', '0000-00-00 00:00:00'),
-	('null', 'null/151.png', '0000-00-00 00:00:00'),
-	('null', 'null/152.png', '0000-00-00 00:00:00'),
-	('null', 'null/153.png', '0000-00-00 00:00:00'),
-	('null', 'null/154.png', '0000-00-00 00:00:00'),
-	('null', 'null/155.png', '0000-00-00 00:00:00');
+--
+-- Dumping data for table `sessionimage`
+--
 
--- Dumping structure for table sandbox.users
+LOCK TABLES `sessionimage` WRITE;
+/*!40000 ALTER TABLE `sessionimage` DISABLE KEYS */;
+INSERT INTO `sessionimage` VALUES ('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/0.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/1.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/2.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/3.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/4.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/5.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/6.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/7.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/8.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/9.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/10.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/11.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/12.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/13.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/14.png',NULL),('a9b7556f-c3cc-11ef-a02c-e840f2c38b9b','a9b7556f-c3cc-11ef-a02c-e840f2c38b9b/15.png',NULL),('null','null/0.png',NULL),('null','null/1.png',NULL),('null','null/2.png',NULL),('null','null/3.png',NULL),('null','null/4.png',NULL),('null','null/5.png',NULL),('null','null/6.png',NULL),('null','null/7.png',NULL),('null','null/8.png',NULL),('null','null/9.png',NULL),('null','null/10.png',NULL),('null','null/11.png',NULL),('null','null/12.png',NULL),('null','null/13.png',NULL),('null','null/14.png',NULL),('null','null/15.png',NULL),('null','null/16.png',NULL),('null','null/17.png',NULL),('null','null/18.png',NULL),('null','null/19.png',NULL),('null','null/20.png',NULL),('null','null/21.png',NULL),('null','null/22.png',NULL),('null','null/23.png',NULL),('null','null/24.png',NULL),('null','null/25.png',NULL),('null','null/26.png',NULL),('null','null/27.png',NULL),('null','null/28.png',NULL),('null','null/29.png',NULL),('null','null/30.png',NULL),('null','null/31.png',NULL),('null','null/32.png',NULL),('null','null/33.png',NULL),('null','null/34.png',NULL),('null','null/35.png',NULL),('null','null/36.png',NULL),('null','null/37.png',NULL),('null','null/38.png',NULL),('null','null/39.png',NULL),('null','null/40.png',NULL),('null','null/41.png',NULL),('null','null/42.png',NULL),('null','null/43.png',NULL),('null','null/44.png',NULL),('null','null/45.png',NULL),('null','null/46.png',NULL),('null','null/47.png',NULL),('null','null/48.png',NULL),('null','null/49.png',NULL),('null','null/50.png',NULL),('null','null/51.png',NULL),('null','null/52.png',NULL),('null','null/53.png',NULL),('null','null/54.png',NULL),('null','null/55.png',NULL),('null','null/56.png',NULL),('null','null/57.png',NULL),('null','null/58.png',NULL),('null','null/59.png',NULL),('null','null/60.png',NULL),('null','null/61.png',NULL),('null','null/62.png',NULL),('null','null/63.png',NULL),('null','null/64.png',NULL),('null','null/65.png',NULL),('null','null/66.png',NULL),('null','null/67.png',NULL),('null','null/68.png',NULL),('null','null/69.png',NULL),('null','null/70.png',NULL),('null','null/71.png',NULL),('null','null/72.png',NULL),('null','null/73.png',NULL),('null','null/74.png',NULL),('null','null/75.png',NULL),('null','null/76.png',NULL),('null','null/77.png',NULL),('null','null/78.png',NULL),('null','null/79.png',NULL),('null','null/80.png',NULL),('null','null/81.png',NULL),('null','null/82.png',NULL),('null','null/83.png',NULL),('null','null/84.png',NULL),('null','null/85.png',NULL),('null','null/86.png',NULL),('null','null/87.png',NULL),('null','null/88.png',NULL),('null','null/89.png',NULL),('null','null/90.png',NULL),('null','null/91.png',NULL),('null','null/92.png',NULL),('null','null/93.png',NULL),('null','null/94.png',NULL),('null','null/95.png',NULL),('null','null/96.png',NULL),('null','null/97.png',NULL),('null','null/98.png',NULL),('null','null/99.png',NULL),('null','null/100.png',NULL),('null','null/101.png',NULL),('null','null/102.png',NULL),('null','null/103.png',NULL),('null','null/104.png',NULL),('null','null/105.png',NULL),('null','null/106.png',NULL),('null','null/107.png',NULL),('null','null/108.png',NULL),('null','null/109.png',NULL),('null','null/110.png',NULL),('null','null/111.png',NULL),('null','null/112.png',NULL),('null','null/113.png',NULL),('null','null/114.png',NULL),('null','null/115.png',NULL),('null','null/116.png',NULL),('null','null/117.png',NULL),('null','null/118.png',NULL),('null','null/119.png',NULL),('null','null/120.png',NULL),('null','null/121.png',NULL),('null','null/122.png',NULL),('null','null/123.png',NULL),('null','null/124.png',NULL),('null','null/125.png',NULL),('null','null/126.png',NULL),('null','null/127.png',NULL),('null','null/128.png',NULL),('null','null/129.png','0000-00-00 00:00:00'),('null','null/130.png','0000-00-00 00:00:00'),('null','null/131.png','0000-00-00 00:00:00'),('null','null/132.png','0000-00-00 00:00:00'),('null','null/133.png','0000-00-00 00:00:00'),('null','null/134.png','0000-00-00 00:00:00'),('null','null/135.png','0000-00-00 00:00:00'),('null','null/136.png','0000-00-00 00:00:00'),('null','null/137.png','0000-00-00 00:00:00'),('null','null/138.png','0000-00-00 00:00:00'),('null','null/139.png','0000-00-00 00:00:00'),('null','null/140.png','0000-00-00 00:00:00'),('null','null/141.png','0000-00-00 00:00:00'),('null','null/142.png','0000-00-00 00:00:00'),('null','null/143.png','0000-00-00 00:00:00'),('null','null/144.png','0000-00-00 00:00:00'),('null','null/145.png','0000-00-00 00:00:00'),('null','null/146.png','0000-00-00 00:00:00'),('null','null/147.png','0000-00-00 00:00:00'),('null','null/148.png','0000-00-00 00:00:00'),('null','null/149.png','0000-00-00 00:00:00'),('null','null/150.png','0000-00-00 00:00:00'),('null','null/151.png','0000-00-00 00:00:00'),('null','null/152.png','0000-00-00 00:00:00'),('null','null/153.png','0000-00-00 00:00:00'),('null','null/154.png','0000-00-00 00:00:00'),('null','null/155.png','0000-00-00 00:00:00');
+/*!40000 ALTER TABLE `sessionimage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
 DROP TABLE IF EXISTS `users`;
-CREATE TABLE IF NOT EXISTS `users` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
   `uuid` int(11) NOT NULL AUTO_INCREMENT,
   `username` text NOT NULL,
   `email` text NOT NULL,
@@ -769,13 +139,29 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`uuid`),
   UNIQUE KEY `email` (`email`) USING HASH
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Dumping data for table sandbox.users: ~0 rows (approximately)
-REPLACE INTO `users` (`uuid`, `username`, `email`, `password`) VALUES
-	(1, 'Vasyl Shevchuk', 'vasyl.shevchuk.78@gmail.com', '$2b$10$TL1im728diyKCVAUmql2Q.Vo6uJsiOjDXpZldcqOA0pI820yltbgi');
+--
+-- Dumping data for table `users`
+--
 
-/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'Vasyl Shevchuk','vasyl.shevchuk.78@gmail.com','$2b$10$TL1im728diyKCVAUmql2Q.Vo6uJsiOjDXpZldcqOA0pI820yltbgi');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'sandbox'
+--
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-10-17 11:03:43
