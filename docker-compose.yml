@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  db:
+    image: mariadb:10.4.17
+    container_name: sandbox-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_change_me
+      MYSQL_DATABASE: sandbox
+      MYSQL_USER: sandboxuser
+      MYSQL_PASSWORD: sandboxuser_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./DB:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_change_me"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+  app:
+    build: .
+    container_name: sandbox-app
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: sandboxuser
+      DB_PASSWORD: sandboxuser_pass
+      DB_NAME: sandbox
+      BASE_URL: box.sandoria.org
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: npm start
+
+volumes:
+  mysql-data:

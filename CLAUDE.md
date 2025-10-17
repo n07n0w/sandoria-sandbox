@@ -207,3 +207,135 @@ const [results, fields] = await pool.execute(sql, values);
 - Console logging via custom console-logger.js (loaded first in app.js)
 - Pino logger available via logger.js (with pino-pretty for development)
 - Morgan middleware logs HTTP requests in 'dev' format
+
+## Deployment
+
+### GitHub Actions CI/CD
+
+The repository includes automated deployment to EC2 via GitHub Actions (`.github/workflows/deploy.yml`).
+
+**Required GitHub Secrets**:
+- `EC2_HOST`: Your EC2 instance public IP or hostname
+- `EC2_USER`: SSH username (typically `ubuntu` for Ubuntu servers)
+- `EC2_PASSWORD`: SSH password for the user
+
+**Deployment Trigger**:
+- Automatic: Push to `master` or `main` branch
+- Manual: Use "Actions" tab → "Deploy to EC2" → "Run workflow"
+
+**What the Pipeline Does**:
+1. Checks out the code
+2. Connects to EC2 via SSH (using sshpass for password authentication)
+3. Installs system dependencies (Node.js 18, Git, MySQL, PM2)
+4. Clones/updates the repository on the server
+5. Installs npm dependencies
+6. **Creates MySQL database and user automatically** with secure credentials
+7. **Imports database backup from `DB/timeweb.sandbox.sql`** (or fallback to `DB/sandbox.sql`)
+8. Creates `.env` file with auto-generated database credentials
+9. Starts/restarts the application using PM2
+10. Sets up PM2 to run on system startup
+
+**Post-Deployment**:
+- Application runs via PM2 process manager (process name: `sandoria-sandbox`)
+- Access at: `http://<EC2_PUBLIC_IP>:3000`
+- Logs available via: `pm2 logs sandoria-sandbox`
+
+### Manual Deployment
+
+For manual deployment to a fresh Ubuntu server, use the `scripts/manual-deploy.sh` script:
+
+```bash
+# On your EC2 server:
+wget https://raw.githubusercontent.com/yourusername/sandoria-sandbox/master/scripts/manual-deploy.sh
+chmod +x manual-deploy.sh
+./manual-deploy.sh
+```
+
+Or SSH into your server and run:
+```bash
+curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/master/scripts/manual-deploy.sh | bash
+```
+
+**Manual Setup Steps**:
+1. Update repository URL in `scripts/manual-deploy.sh`
+2. Script will install all dependencies (Node.js, MySQL, PM2)
+3. Clone the repository to `~/sandoria-sandbox`
+4. **Automatically creates MySQL database `sandbox` and user `sandboxuser`** with secure password
+5. **Imports database from `DB/timeweb.sandbox.sql`** (primary) or `DB/sandbox.sql` (fallback)
+6. Creates `.env` file with auto-generated credentials (displayed at end of script)
+7. Start application with PM2
+
+### Server Requirements
+
+**Minimum Specs**:
+- Ubuntu 18.04+ or similar Debian-based Linux
+- 1GB RAM (2GB recommended)
+- 10GB disk space
+- Open ports: 22 (SSH), 3000 (Application)
+
+**Installed Software** (via deployment scripts):
+- Node.js 18.x
+- MySQL Server 5.7+
+- PM2 (process manager)
+- Git
+
+### Database Setup on Server
+
+**The deployment scripts handle database setup automatically:**
+
+1. **Installs MySQL Server** (if not present)
+2. **Creates database** `sandbox`
+3. **Creates user** `sandboxuser` with auto-generated secure password
+4. **Grants privileges** to the user on the database
+5. **Imports backup** from `DB/timeweb.sandbox.sql` (or `DB/sandbox.sql` as fallback)
+6. **Creates `.env`** file with the generated credentials
+
+**Important**: Make sure you have `DB/timeweb.sandbox.sql` in your repository - this is the primary database backup that will be imported.
+
+**Manual database access** (if needed):
+```bash
+# View current database credentials
+cat ~/sandoria-sandbox/.env | grep DB_
+
+# Access MySQL with the created user
+mysql -u sandboxuser -p sandbox
+# (password is in .env file)
+
+# Or use root access
+sudo mysql sandbox
+```
+
+### PM2 Management Commands
+
+```bash
+pm2 status                    # Check application status
+pm2 logs sandoria-sandbox     # View real-time logs
+pm2 restart sandoria-sandbox  # Restart application
+pm2 stop sandoria-sandbox     # Stop application
+pm2 start sandoria-sandbox    # Start application
+pm2 monit                     # Monitor CPU/memory usage
+pm2 save                      # Save PM2 process list
+```
+
+### Troubleshooting Deployment
+
+**Database connection errors**:
+- Check `.env` file has correct DB credentials: `cat ~/sandoria-sandbox/.env | grep DB_`
+- Verify MySQL is running: `sudo systemctl status mysql`
+- Test connection: `mysql -u sandboxuser -p sandbox` (password from .env)
+- Check if database was imported: `sudo mysql -e "USE sandbox; SHOW TABLES;"`
+
+**Port already in use**:
+- Check if app is already running: `pm2 status`
+- Kill existing process: `pm2 delete sandoria-sandbox`
+- Check for other processes: `sudo lsof -i :3000`
+
+**Application won't start**:
+- Check logs: `pm2 logs sandoria-sandbox --lines 100`
+- Verify Node.js version: `node --version` (should be 18.x)
+- Check file permissions in app directory
+
+**Can't access application**:
+- Verify EC2 security group allows inbound traffic on port 3000
+- Check firewall: `sudo ufw status`
+- Verify app is running: `pm2 status`
