@@ -8,13 +8,13 @@ const {
 
 
 async function insertNewSandbox(name, owner, sessionuuid) {
-	logger.info(["insertNewSandbox :: START", name, owner, sessionuuid]);
+	logger.info(['insertNewSandbox :: START', name, owner, sessionuuid]);
 	try {
 		let values = [name, owner, sessionuuid];
-		var sql = "INSERT INTO sandboxes (`name`, `ownerId`, `sessionUuid`) VALUES (?, ?, ?)";
+		var sql = 'INSERT INTO sandboxes (`name`, `ownerId`, `sessionUuid`) VALUES (?, ?, ?)';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
-		logger.info(["insertNewSandbox :: END", name, owner, sessionuuid]);
+		logger.info(['insertNewSandbox :: END', name, owner, sessionuuid]);
 		return results;
 	} catch (error) {
 		logger.error('insertNewSandbox ERROR:', error);
@@ -36,6 +36,6 @@ const handleNewSandbox = async (req, res) => {
     } catch (err) {
         res.status(500).json({ 'message': err.message });
     }
-}
+};
 
 module.exports = { handleNewSandbox };

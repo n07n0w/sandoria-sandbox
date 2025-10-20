@@ -13,10 +13,10 @@ function ensureDirectoryExistence(filePath) {
 }
 
 async function getSessionImagesCount(sessionId) {
-	logger.info(["getSessionImagesCount :: START", sessionId])
+	logger.info(['getSessionImagesCount :: START', sessionId]);
 	try {
 		let values = [sessionId];
-		var sql = "SELECT count(*) as imagesCount FROM sessionimage WHERE sessionId = ?";
+		var sql = 'SELECT count(*) as imagesCount FROM sessionimage WHERE sessionId = ?';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
 		return results[0]['imagesCount'];
@@ -27,10 +27,10 @@ async function getSessionImagesCount(sessionId) {
 }
 
 async function saveSessionImageToDatabase(sessionId, imagePath, createDt) {
-	logger.info(["saveSessionImageToDatabase :: START", sessionId, imagePath, createDt, '***']);
+	logger.info(['saveSessionImageToDatabase :: START', sessionId, imagePath, createDt, '***']);
 	try {
 		let values = [sessionId, imagePath, createDt];
-		var sql = "INSERT INTO sessionimage (`sessionId`, `image`, `createDt`) VALUES (?, ?, ?)";
+		var sql = 'INSERT INTO sessionimage (`sessionId`, `image`, `createDt`) VALUES (?, ?, ?)';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
 		return results;
@@ -51,8 +51,8 @@ const handlePost = async (req, res, next) => {
         let newpath = `public/images/screenshots/${imageDbPath}`;
 
         ensureDirectoryExistence(newpath);
-        const data = image.replace(/^data:image\/\w+;base64,/, "");
-        const buf = Buffer.from(data, "base64");
+        const data = image.replace(/^data:image\/\w+;base64,/, '');
+        const buf = Buffer.from(data, 'base64');
         await fs.writeFileSync(newpath, buf);
         await saveSessionImageToDatabase(sessionId, imageDbPath, createDt);
 	res.json({
@@ -62,6 +62,6 @@ const handlePost = async (req, res, next) => {
     } else {
     	return res.status(5000).json({ 'message': 'POST canvas image processing error' });
     }
-}
+};
 
 module.exports = { handlePost };

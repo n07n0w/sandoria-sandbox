@@ -8,18 +8,18 @@ const cabinetController = require('../controllers/cabinetController');
 
 const configurationDB = {
     configuration: require('../model/configuration.json')
-}
+};
 
 router.post('/', cabinetController.handleNewSandbox);
 
 async function getSandboxesByOwner(owner) {
-	logger.info(["getSandboxesByOwner :: START", owner])
+	logger.info(['getSandboxesByOwner :: START', owner]);
 	try {
 		let values = [owner];
-		var sql = "SELECT * FROM sandboxes WHERE ownerid = ?";
+		var sql = 'SELECT * FROM sandboxes WHERE ownerid = ?';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
-		logger.info(["getSandboxesByOwner :: END", owner])
+		logger.info(['getSandboxesByOwner :: END', owner]);
 		return results;
 	} catch (error) {
 		logger.error('getSandboxesByOwner ERROR:', error);
@@ -28,13 +28,13 @@ async function getSandboxesByOwner(owner) {
 }
 
 async function getSandboxByUuid(uuid) {
-	logger.info(["getSandboxByUuid :: START", uuid])
+	logger.info(['getSandboxByUuid :: START', uuid]);
 	try {
 		let values = [uuid];
-		var sql = "SELECT * FROM sandboxes WHERE uuid = ?";
+		var sql = 'SELECT * FROM sandboxes WHERE uuid = ?';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
-		logger.info(["getSandboxByUuid :: END", uuid])
+		logger.info(['getSandboxByUuid :: END', uuid]);
 		return results[0];
 	} catch (error) {
 		logger.error('getSandboxByUuid ERROR:', error);
@@ -55,7 +55,7 @@ const handleGetIndex = async (req, res) => {
 		title: 'Песочницы'
 	});
 
-}
+};
 
 const handleGetCabinet = async (req, res) => {
 	var user = req.session.user;
@@ -64,8 +64,8 @@ const handleGetCabinet = async (req, res) => {
 	var sandbox = await getSandboxByUuid(cabinetUuid);
 	console.log(sandbox);
 	if (!sandbox) return res.sendStatus(404); //Unauthorized 
-	var sessionLink = configurationDB.configuration.servername.concat("/session/sid_", sandbox.sessionUuid, "/opsid_", sandbox.uuid);
-	var sessionViewLink = configurationDB.configuration.servername.concat("/session/view/", sandbox.uuid);
+	var sessionLink = configurationDB.configuration.servername.concat('/session/sid_', sandbox.sessionUuid, '/opsid_', sandbox.uuid);
+	var sessionViewLink = configurationDB.configuration.servername.concat('/session/view/', sandbox.uuid);
 
 	res.render('cabinetDetails', {
 		user: user,
@@ -74,7 +74,7 @@ const handleGetCabinet = async (req, res) => {
 		sessionViewLink: sessionViewLink,
 		title: 'Песочница ' + sandbox.name
 	});
-}
+};
 
 /* GET home page. */
 router.get('/', handleGetIndex);

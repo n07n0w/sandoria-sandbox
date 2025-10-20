@@ -8,7 +8,7 @@ var categoryRepository = new CategoryRepository();
 
 
 async function getUser(location, area, rooms, maxNum) {
-	logger.info(["getLocationSimilars :: START", location, area, rooms, maxNum])
+	logger.info(['getLocationSimilars :: START', location, area, rooms, maxNum]);
 	let connection = null;
 	try {
 		connection = await pool.getConnection();
@@ -42,7 +42,7 @@ const handleGetIndex = async (req, res, next) => {
 		logger.error('Error in handleGetIndex:', error);
 		next(error); // Pass error to Express error handler
 	}
-}
+};
 
 const handleLogTrace = async (req, res) => {
 	const logEntry = req.body;
@@ -50,7 +50,7 @@ const handleLogTrace = async (req, res) => {
 //	const logMessage = `[${logEntry.timestamp}] Type: ${logEntry.type}, Message: ${logEntry.message}\nStack: ${logEntry.trace}\n\n`;
 	console.trace(logEntry);
 	res.status(200).send('Trace logged successfully');
-}
+};
 
 /* GET home page. */
 router.get('/', handleGetIndex);

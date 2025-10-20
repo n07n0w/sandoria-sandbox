@@ -3,15 +3,15 @@ const logger = require('../logger');
 
 const usersDB = {
     users: require('../model/users.json'),
-    setUsers: function (data) { this.users = data }
-}
+    setUsers: function (data) { this.users = data; }
+};
 const bcrypt = require('bcrypt');
 
 async function getUserByEmail(email) {
-	logger.info(["getUserByEmail :: START", email])
+	logger.info(['getUserByEmail :: START', email]);
 	try {
 		let values = [email];
-		var sql = "SELECT * FROM users WHERE email = ?";
+		var sql = 'SELECT * FROM users WHERE email = ?';
 		const [results, fields] = await pool.execute(sql, values);
 		logger.info(results);
 		return results[0];
@@ -39,6 +39,6 @@ const handleLogin = async (req, res) => {
     } else {
         res.sendStatus(401);
     }
-}
+};
 
 module.exports = { handleLogin };

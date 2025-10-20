@@ -13,7 +13,7 @@ var sandboxRepository = new SandboxRepository();
 
 const configurationDB = {
     configuration: require('../model/configuration.json')
-}
+};
 
 const handleGetSession = async (req, res, next) => {
 	var sessionId = req.params.sessionId;
@@ -25,7 +25,7 @@ const handleGetSession = async (req, res, next) => {
 		opponentSessionId: opponentSessionId,
 		title: 'Express'
 	});
-}
+};
 
 const handleGetSessionView = async (req, res, next) => {
 	var user = req.session.user;
@@ -37,19 +37,19 @@ const handleGetSessionView = async (req, res, next) => {
 		sessionId: sessionId,
 		title: 'Express'
 	});
-}
+};
 
 const handlePostSessionInit = async (req, res, next) => {
 	var sandboxInsertResult = await sandboxRepository.insertNewSandbox(null, null);
 	var newSandbox = await sandboxRepository.getSandboxById(sandboxInsertResult.insertId);
-	var sessionLink = constants.BASE_URL.concat("/s/", newSandbox.uuid);
+	var sessionLink = constants.BASE_URL.concat('/s/', newSandbox.uuid);
 
 	res.json({
 		sessionId: newSandbox.sessionUuid,
 		opponentSessionId: newSandbox.uuid,
 		sessionLink: sessionLink
 	});
-}
+};
 
 router.get('/sid_:sessionId/opsid_:opponentSessionId', handleGetSession);
 router.get('/view/:sessionId', handleGetSessionView);

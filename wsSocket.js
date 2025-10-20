@@ -12,8 +12,8 @@ sockserver.on('connection', ws => {
 		});
 	});
 	ws.onerror = function () {
-		console.log('websocket error')
-	}
+		console.log('websocket error');
+	};
 });
 
 module.exports = sockserver;

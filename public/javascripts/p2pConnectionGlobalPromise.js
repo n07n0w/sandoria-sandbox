@@ -56,8 +56,8 @@
 	};
 
     function sendMessage(data) {
-      const text = typeof data === "string" ? data : JSON.stringify(data);
-      if (dataChannel && dataChannel.readyState === "open") {
+      const text = typeof data === 'string' ? data : JSON.stringify(data);
+      if (dataChannel && dataChannel.readyState === 'open') {
         try {
           dataChannel.send(text);
         } catch (e) {
@@ -65,7 +65,7 @@
           pendingMessages.push(text);
         }
       } else {
-        log("⏳ Queueing message...");
+        log('⏳ Queueing message...');
         pendingMessages.push(text);
       }
     }
@@ -73,7 +73,7 @@
     function flushQueue() {
       while (pendingMessages.length > 0) {
         // sendMessage will re-queue if channel not ready, but we prefer to break to avoid tight loop
-        if (!(dataChannel && dataChannel.readyState === "open")) break;
+        if (!(dataChannel && dataChannel.readyState === 'open')) break;
         sendMessage(pendingMessages.shift());
       }
     }
@@ -85,21 +85,21 @@
       ws.onopen = () => {
         try {
           if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "register", clientId }));
+            ws.send(JSON.stringify({ type: 'register', clientId }));
           }
         } catch (e) {
           log('Failed to send register', e);
         }
-        log("🔌 WS connected");
+        log('🔌 WS connected');
         if (onStatusChange) onStatusChange('ws-connected');
         setupPeerConnection();
       };
 
       ws.onclose = () => {
-        log("❌ WS closed");
-        if (onStatusChange) onStatusChange("ws-closed");
+        log('❌ WS closed');
+        if (onStatusChange) onStatusChange('ws-closed');
         if (!closedManually) {
-          if (onStatusChange) onStatusChange("ws-reconnecting");
+          if (onStatusChange) onStatusChange('ws-reconnecting');
           setTimeout(() => {
             try { setupWebSocket(); } catch (e) { log('Reconnection failed', e); }
           }, 2000);
@@ -109,18 +109,18 @@
       ws.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === "offer") {
+          if (data.type === 'offer') {
             // if peerConnection is not ready, create it
             if (!peerConnection) setupPeerConnection();
             await peerConnection.setRemoteDescription(data.sdp);
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
             if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: "answer", sdp: peerConnection.localDescription, targetId: data.fromId }));
+              ws.send(JSON.stringify({ type: 'answer', sdp: peerConnection.localDescription, targetId: data.fromId }));
             }
-          } else if (data.type === "answer") {
+          } else if (data.type === 'answer') {
             if (peerConnection) await peerConnection.setRemoteDescription(data.sdp);
-          } else if (data.type === "ice") {
+          } else if (data.type === 'ice') {
             if (peerConnection) await peerConnection.addIceCandidate(data.candidate);
           }
         } catch (e) {
@@ -150,13 +150,13 @@
 		}
 
       peerConnection = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
       });
 
       peerConnection.onicecandidate = ({ candidate }) => {
         try {
           if (candidate && ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "ice", candidate, targetId }));
+            ws.send(JSON.stringify({ type: 'ice', candidate, targetId }));
           }
         } catch (e) {
           log('Failed to send ICE candidate', e);
@@ -164,18 +164,18 @@
       };
 
       peerConnection.ondatachannel = (event) => {
-        log("📥 Got data channel");
+        log('📥 Got data channel');
         setupDataChannel(event.channel);
       };
 
       peerConnection.onconnectionstatechange = () => {
         try {
           const state = peerConnection.connectionState;
-          log("🔄 RTC state:", state);
+          log('🔄 RTC state:', state);
           if (state === 'connected') {
             if (onStatusChange) onStatusChange('connected');
-          } else if ((state === "disconnected" || state === "failed" || state === 'closed') && !closedManually) {
-            if (onStatusChange) onStatusChange("reconnecting");
+          } else if ((state === 'disconnected' || state === 'failed' || state === 'closed') && !closedManually) {
+            if (onStatusChange) onStatusChange('reconnecting');
             setTimeout(() => {
               try { setupPeerConnection(); } catch (e) { log('Re-setup failed', e); }
             }, 3000);
@@ -186,14 +186,14 @@
 //      if (clientId < targetId) {
       if (isInitiatorOfDataChannel) {
         try {
-          dataChannel = peerConnection.createDataChannel("chat");
+          dataChannel = peerConnection.createDataChannel('chat');
           setupDataChannel(dataChannel);
           (async () => {
             try {
               const offer = await peerConnection.createOffer();
               await peerConnection.setLocalDescription(offer);
               if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: "offer", sdp: peerConnection.localDescription, targetId }));
+                ws.send(JSON.stringify({ type: 'offer', sdp: peerConnection.localDescription, targetId }));
               } else {
                 log('WS not open, cannot send offer', ws && ws.readyState);
               }
@@ -212,7 +212,7 @@
       dataChannel = channel;
       dataChannel.onopen = () => {
         isReady = true;
-        if (onStatusChange) onStatusChange("connected");
+        if (onStatusChange) onStatusChange('connected');
         flushQueue();
       };
       dataChannel.onmessage = (e) => {
@@ -227,7 +227,7 @@
       };
       dataChannel.onclose = () => {
         isReady = false;
-        if (onStatusChange) onStatusChange("disconnected");
+        if (onStatusChange) onStatusChange('disconnected');
       };
       dataChannel.onerror = (err) => {
         log('DataChannel error', err);
@@ -237,7 +237,7 @@
     function close() {
 	log('close()');
       closedManually = true;
-      if (onStatusChange) onStatusChange("closed");
+      if (onStatusChange) onStatusChange('closed');
       try { if (dataChannel) dataChannel.close(); } catch (e) { log('Error closing dataChannel', e); }
       cleanupPeerConnection();
       try { if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) ws.close(); } catch (e) { log('Error closing ws', e); }

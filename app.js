@@ -45,7 +45,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-const oneHour = 3_600_000 // 3600000msec => 1hour
+const oneHour = 3_600_000; // 3600000msec => 1hour
 
 app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'public')));
