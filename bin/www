@@ -4,19 +4,19 @@
  * Module dependencies.
  */
 
-var { app, initializeApp, initWebSocket } = require('../app');
-var debug = require('debug')('mysandbox:server');
-var http = require('http');
+var { app, initializeApp, initWebSocket } = require("../app");
+var debug = require("debug")("mysandbox:server");
+var http = require("http");
 
-console.log('Starting server...');
+console.log("Starting server...");
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-console.log('Port set to:', port);
+var port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
+console.log("Port set to:", port);
 
 /**
  * Create HTTP server.
@@ -25,36 +25,36 @@ console.log('Port set to:', port);
 var server = http.createServer(app);
 
 // Handle uncaught exceptions
-process.on('uncaughtException', function(err) {
-    console.error('Uncaught exception:', err);
-    console.error(err.stack);
-    process.exit(1);
+process.on("uncaughtException", function (err) {
+  console.error("Uncaught exception:", err);
+  console.error(err.stack);
+  process.exit(1);
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', function(reason, promise) {
-    console.error('Unhandled Rejection at:', promise);
-    console.error('Reason:', reason);
+process.on("unhandledRejection", function (reason, promise) {
+  console.error("Unhandled Rejection at:", promise);
+  console.error("Reason:", reason);
 });
 
 /**
  * Initialize app and start listening
  */
 async function startServer() {
-    try {
-        console.log('Initializing application...');
-        await initializeApp();
-	await initWebSocket(server);
-        console.log('Starting HTTP server...');
-        server.listen(port);
-        server.on('error', onError);
-        server.on('listening', onListening);
-        
-        console.log('Server startup completed');
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
-    }
+  try {
+    console.log("Initializing application...");
+    await initializeApp();
+    await initWebSocket(server);
+    console.log("Starting HTTP server...");
+    server.listen(port);
+    server.on("error", onError);
+    server.on("listening", onListening);
+
+    console.log("Server startup completed");
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 }
 
 startServer();
@@ -64,19 +64,19 @@ startServer();
  */
 
 function normalizePort(val) {
-    var port = parseInt(val, 10);
+  var port = parseInt(val, 10);
 
-    if (isNaN(port)) {
-        // named pipe
-        return val;
-    }
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
 
-    if (port >= 0) {
-        // port number
-        return port;
-    }
+  if (port >= 0) {
+    // port number
+    return port;
+  }
 
-    return false;
+  return false;
 }
 
 /**
@@ -84,27 +84,25 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-    if (error.syscall !== 'listen') {
-        throw error;
-    }
+  if (error.syscall !== "listen") {
+    throw error;
+  }
 
-    var bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port;
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-        case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
-            process.exit(1);
-            break;
-        case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
-            process.exit(1);
-            break;
-        default:
-            throw error;
-    }
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
 }
 
 /**
@@ -112,10 +110,8 @@ function onError(error) {
  */
 
 function onListening() {
-    var addr = server.address();
-    var bind = typeof addr === 'string'
-        ? 'pipe ' + addr
-        : 'port ' + addr.port;
-    debug('Listening on ' + bind);
-    console.log('Server is listening on ' + bind);
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+  console.log("Server is listening on " + bind);
 }

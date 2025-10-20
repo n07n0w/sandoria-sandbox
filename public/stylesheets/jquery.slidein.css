@@ -24,20 +24,20 @@
 */
 
 .slidein {
-    display: block;      /* don't change this */
-    position: absolute;  /* don't change this */
-    z-index: 999;
-    background: lightgrey;
+  display: block; /* don't change this */
+  position: absolute; /* don't change this */
+  z-index: 999;
+  background: lightgrey;
 }
 
 .slidein-panel {
-    /* don't add width or height, use 'breadth' widget option as it then works for horz and vert */
+  /* don't add width or height, use 'breadth' widget option as it then works for horz and vert */
 }
 
 .slidein-handle {
-    overflow: hidden;  /* don't change this */
-    padding: 10px;
-    white-space: nowrap;
-    user-select: none;
-    cursor: pointer;
+  overflow: hidden; /* don't change this */
+  padding: 10px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
 }

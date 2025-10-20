@@ -71,46 +71,52 @@ npm install redis
 // routes/session.js - ДОБАВИТЬ новые роуты
 
 // Сохранить состояние сессии
-router.post('/state/:sessionId', async (req, res) => {
-    const { sessionId } = req.params;
-    const { state, timestamp } = req.body;
+router.post("/state/:sessionId", async (req, res) => {
+  const { sessionId } = req.params;
+  const { state, timestamp } = req.body;
 
-    try {
-        // Сохранить в DB (или Redis)
-        await pool.execute(
-            'INSERT INTO session_state (session_id, state, timestamp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE state = ?, timestamp = ?',
-            [sessionId, JSON.stringify(state), timestamp, JSON.stringify(state), timestamp]
-        );
+  try {
+    // Сохранить в DB (или Redis)
+    await pool.execute(
+      "INSERT INTO session_state (session_id, state, timestamp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE state = ?, timestamp = ?",
+      [
+        sessionId,
+        JSON.stringify(state),
+        timestamp,
+        JSON.stringify(state),
+        timestamp,
+      ],
+    );
 
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Failed to save state:', error);
-        res.status(500).json({ error: 'Failed to save state' });
-    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to save state:", error);
+    res.status(500).json({ error: "Failed to save state" });
+  }
 });
 
 // Получить состояние сессии
-router.get('/state/:sessionId', async (req, res) => {
-    const { sessionId } = req.params;
+router.get("/state/:sessionId", async (req, res) => {
+  const { sessionId } = req.params;
 
-    try {
-        const [results] = await pool.execute(
-            'SELECT state, timestamp FROM session_state WHERE session_id = ? ORDER BY timestamp DESC LIMIT 1',
-            [sessionId]
-        );
+  try {
+    const [results] = await pool.execute(
+      "SELECT state, timestamp FROM session_state WHERE session_id = ? ORDER BY timestamp DESC LIMIT 1",
+      [sessionId],
+    );
 
-        if (results.length > 0) {
-            res.json({
-                state: JSON.parse(results[0].state),
-                timestamp: results[0].timestamp
-            });
-        } else {
-            res.json({});
-        }
-    } catch (error) {
-        console.error('Failed to load state:', error);
-        res.status(500).json({ error: 'Failed to load state' });
+    if (results.length > 0) {
+      res.json({
+        state: JSON.parse(results[0].state),
+        timestamp: results[0].timestamp,
+      });
+    } else {
+      res.json({});
     }
+  } catch (error) {
+    console.error("Failed to load state:", error);
+    res.status(500).json({ error: "Failed to load state" });
+  }
 });
 ```
 
@@ -136,56 +142,62 @@ CREATE TABLE IF NOT EXISTS session_state (
 
 // Автосохранение каждые 30 секунд
 setInterval(async () => {
-    if (myConn && myConn.isConnected()) {
-        const state = stage.toJSON();
+  if (myConn && myConn.isConnected()) {
+    const state = stage.toJSON();
 
-        try {
-            await fetch(`/session/state/${sessionId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    state,
-                    timestamp: Date.now()
-                })
-            });
-            console.log('✅ State auto-saved to server');
-        } catch (error) {
-            console.error('Failed to save state to server:', error);
-        }
+    try {
+      await fetch(`/session/state/${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          state,
+          timestamp: Date.now(),
+        }),
+      });
+      console.log("✅ State auto-saved to server");
+    } catch (error) {
+      console.error("Failed to save state to server:", error);
     }
+  }
 }, 30000); // Каждые 30 секунд
 
 // При reconnect - загрузить с сервера
 const reLoadStateAfterReconnect = async () => {
-    try {
-        // Получить state с сервера
-        const response = await fetch(`/session/state/${sessionId}`);
-        const { state: serverState, timestamp: serverTimestamp } = await response.json();
+  try {
+    // Получить state с сервера
+    const response = await fetch(`/session/state/${sessionId}`);
+    const { state: serverState, timestamp: serverTimestamp } =
+      await response.json();
 
-        // Получить локальный state
-        const localState = localStorage.getItem('konvaAppState');
-        const localTimestamp = parseInt(localStorage.getItem('konvaAppState_timestamp') || '0');
+    // Получить локальный state
+    const localState = localStorage.getItem("konvaAppState");
+    const localTimestamp = parseInt(
+      localStorage.getItem("konvaAppState_timestamp") || "0",
+    );
 
-        // Выбрать более свежий
-        let newestState;
-        if (serverState && serverTimestamp > localTimestamp) {
-            newestState = serverState;
-            console.log('✅ Using server state (newer)');
-        } else if (localState) {
-            newestState = localState;
-            console.log('✅ Using local state (newer)');
-        }
-
-        // Загрузить state (БЕЗ removeAll!)
-        if (newestState) {
-            await stageFromJson(typeof newestState === 'string' ? newestState : JSON.stringify(newestState));
-        }
-
-    } catch (error) {
-        console.error('Failed to reload state:', error);
-        // Fallback к localStorage
-        loadKonvaState();
+    // Выбрать более свежий
+    let newestState;
+    if (serverState && serverTimestamp > localTimestamp) {
+      newestState = serverState;
+      console.log("✅ Using server state (newer)");
+    } else if (localState) {
+      newestState = localState;
+      console.log("✅ Using local state (newer)");
     }
+
+    // Загрузить state (БЕЗ removeAll!)
+    if (newestState) {
+      await stageFromJson(
+        typeof newestState === "string"
+          ? newestState
+          : JSON.stringify(newestState),
+      );
+    }
+  } catch (error) {
+    console.error("Failed to reload state:", error);
+    // Fallback к localStorage
+    loadKonvaState();
+  }
 };
 ```
 
@@ -194,21 +206,21 @@ const reLoadStateAfterReconnect = async () => {
 ```javascript
 // СТАРЫЙ КОД (УДАЛИТЬ):
 const reLoadStateAfterReconnect = () => {
-    removeAll();  // ❌ УДАЛЯЕТ ВСЕ!
-    loadKonvaState();
+  removeAll(); // ❌ УДАЛЯЕТ ВСЕ!
+  loadKonvaState();
 };
 
 // НОВЫЙ КОД:
 const reLoadStateAfterReconnect = async () => {
-    // Загружаем state БЕЗ удаления существующего
-    await loadStateFromServerOrLocal();
+  // Загружаем state БЕЗ удаления существующего
+  await loadStateFromServerOrLocal();
 
-    // Запрашиваем state у оппонента для синхронизации
-    sendEvent({
-        event: 'requestState',
-        requester: clientId,
-        timestamp: Date.now()
-    });
+  // Запрашиваем state у оппонента для синхронизации
+  sendEvent({
+    event: "requestState",
+    requester: clientId,
+    timestamp: Date.now(),
+  });
 };
 ```
 
@@ -256,31 +268,37 @@ git push
 
 ```javascript
 // tests/state-storage.test.js
-const assert = require('assert');
-const { test } = require('node:test');
+const assert = require("assert");
+const { test } = require("node:test");
 
-test('Session state can be saved to server', async () => {
-    const state = { test: 'data', timestamp: Date.now() };
+test("Session state can be saved to server", async () => {
+  const state = { test: "data", timestamp: Date.now() };
 
-    const response = await fetch('http://localhost:3000/session/state/test-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state, timestamp: Date.now() })
-    });
+  const response = await fetch(
+    "http://localhost:3000/session/state/test-session",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ state, timestamp: Date.now() }),
+    },
+  );
 
-    const result = await response.json();
-    assert.strictEqual(result.success, true);
+  const result = await response.json();
+  assert.strictEqual(result.success, true);
 });
 
-test('Session state can be retrieved from server', async () => {
-    const response = await fetch('http://localhost:3000/session/state/test-session');
-    const result = await response.json();
+test("Session state can be retrieved from server", async () => {
+  const response = await fetch(
+    "http://localhost:3000/session/state/test-session",
+  );
+  const result = await response.json();
 
-    assert.ok(result.state || result.timestamp >= 0);
+  assert.ok(result.state || result.timestamp >= 0);
 });
 ```
 
 Добавьте в workflow:
+
 ```yaml
 # .github/workflows/ci-quick-test.yml
 - name: Test Server State Storage
@@ -296,6 +314,7 @@ test('Session state can be retrieved from server', async () => {
 ## 🎯 План на неделю
 
 ### День 1-2: Серверное хранилище
+
 - [x] Тесты работают
 - [ ] Добавить таблицу `session_state`
 - [ ] Создать API endpoints
@@ -304,16 +323,19 @@ test('Session state can be retrieved from server', async () => {
 - [ ] Протестировать
 
 ### День 3: Exponential Backoff
+
 - [ ] Обновить логику reconnect в `p2pConnectionGlobalPromise.js`
 - [ ] Добавить конфигурацию (MAX_ATTEMPTS, BASE_DELAY)
 - [ ] Протестировать с отключением Wi-Fi
 
 ### День 4: Heartbeat
+
 - [ ] Добавить heartbeat mechanism
 - [ ] Добавить timeout detection
 - [ ] Протестировать
 
 ### День 5: Тестирование
+
 - [ ] Симуляция разрывов
 - [ ] Тестирование incognito mode
 - [ ] Нагрузочное тестирование
@@ -360,6 +382,7 @@ git push origin feature/server-state-storage
 ## 🎉 Готово!
 
 Теперь у вас есть:
+
 - ✅ Автоматические тесты на всех ветках
 - ✅ Быстрая валидация (< 1 сек)
 - ✅ Информативный CI (< 3 мин)

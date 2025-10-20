@@ -17,7 +17,11 @@
     "no-constant-condition": "warn",
     "no-empty": "warn",
     "semi": ["warn", "always"],
-    "quotes": ["warn", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
+    "quotes": [
+      "warn",
+      "single",
+      { "avoidEscape": true, "allowTemplateLiterals": true }
+    ]
   },
   "ignorePatterns": [
     "node_modules/",

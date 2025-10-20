@@ -18,18 +18,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Starting the Application
+
 ```bash
 npm start                 # Start the server (runs bin/www)
 ```
+
 Server runs on port 3000 by default (configurable via PORT env var).
 
 ### Database Setup
+
 ```bash
 npm run db:init          # Initialize/reset database from DB/sandbox.sql
 ```
+
 Note: In production (NODE_ENV=production), database initialization happens automatically on server start.
 
 ### Docker
+
 ```bash
 docker build -t mysandbox .
 docker run -p 3000:3000 mysandbox
@@ -58,12 +63,14 @@ docker run -p 3000:3000 mysandbox
 ### Communication Architecture
 
 **WebSocket Signaling Server** (app.js:109-166):
+
 - Maintains a Map of clientId → WebSocket connections
 - Handles client registration (`register` type messages)
 - Routes WebRTC signaling messages (offer/answer/ice) between peers
 - Each client must register with a unique clientId before sending signaling messages
 
 **P2P Data Channel** (public/p2pConnection.js):
+
 - Uses WebRTC RTCDataChannel for direct peer-to-peer communication
 - WebSocket is only used for initial WebRTC handshake (signaling)
 - Auto-reconnection logic for both WebSocket and peer connections
@@ -71,6 +78,7 @@ docker run -p 3000:3000 mysandbox
 - Initiator determination: client with lower clientId creates the data channel
 
 **Session Management**:
+
 - Each sandbox has two UUIDs: `sessionUuid` and `uuid` (opponent session ID)
 - Sessions created via POST /session/init return both IDs
 - Route `/s/:opponentSessionId` looks up the corresponding `sessionUuid` to connect peers
@@ -102,6 +110,7 @@ docker run -p 3000:3000 mysandbox
 ### Configuration
 
 **Environment Variables** (.env):
+
 ```
 # Database - either use JAWSDB_MARIA_URL (parsed automatically) or individual vars:
 JAWSDB_MARIA_URL=mysql://user:pass@host:port/dbname
@@ -128,22 +137,26 @@ NODE_ENV=development
 ```
 
 **Database Configuration** (dbConfig.js):
+
 - Prioritizes JAWSDB_MARIA_URL (Heroku MySQL addon format)
-- Falls back to individual DB_* environment variables
+- Falls back to individual DB\_\* environment variables
 - Automatically enables SSL for AWS RDS hosts
 - Validates required fields (host, user, database)
 
 **Application Constants** (constants.js):
+
 - BASE_URL: Used to generate session share links
-- PEER_SERVER_*: Configuration passed to client-side PeerJS (if used)
+- PEER*SERVER*\*: Configuration passed to client-side PeerJS (if used)
 
 ### Database Layer
 
 **Connection Management**:
+
 - `dbConnection.js`: Exports a mysql2 promise pool
 - `init-db.js`: Database initialization with retry logic
 
 **Repositories**:
+
 - `sandboxRepository.js`: Manages session/sandbox records (insertNewSandbox, getSandboxById, etc.)
 - `categoryRepository.js`: Manages categories (getCategories)
 
@@ -152,30 +165,36 @@ Both repositories use the pool from dbConnection.js and return promises.
 ### Client-Side Architecture
 
 **P2P Connection Module** (public/p2pConnection.js):
+
 - Exports `startP2PConnection(clientId, targetId, onMessageCallback, onStatusChange)`
 - Returns object with `send()`, `isConnected()`, `close()` methods
 - Handles message queuing and auto-reconnection
 - Status callbacks: "ws-closed", "ws-reconnecting", "reconnecting", "connected", "disconnected", "closed"
 
 **Konva.js Integration**:
+
 - Used for interactive canvas manipulation
 - Files located in public/javascripts/konva.js
 
 ## Common Development Patterns
 
 ### Adding a New Route
+
 1. Create route file in `routes/` directory
 2. Define handlers (can import from controllers/)
 3. Register in `app.js` inside `initializeApp()` function after database initialization
 
 ### Database Queries
+
 Always use the connection pool from `dbConnection.js`:
+
 ```javascript
-const pool = require('./dbConnection');
+const pool = require("./dbConnection");
 const [results, fields] = await pool.execute(sql, values);
 ```
 
 ### Session Creation Flow
+
 1. Client calls POST /session/init
 2. Server creates new sandbox record with two UUIDs
 3. Server returns sessionId (for initiator) and opponentSessionId (for link sharing)
@@ -186,6 +205,7 @@ const [results, fields] = await pool.execute(sql, values);
 8. P2P data channel established for direct communication
 
 ### WebRTC Signaling Flow
+
 1. Both clients connect to WebSocket server and send `{type: "register", clientId}`
 2. Client with lower ID initiates: creates offer, sends via WebSocket with targetId
 3. Target receives offer via WebSocket, creates answer, sends back
@@ -215,15 +235,18 @@ const [results, fields] = await pool.execute(sql, values);
 The repository includes automated deployment to EC2 via GitHub Actions (`.github/workflows/deploy.yml`).
 
 **Required GitHub Secrets**:
+
 - `EC2_HOST`: Your EC2 instance public IP or hostname
 - `EC2_USER`: SSH username (typically `ubuntu` for Ubuntu servers)
 - `EC2_PASSWORD`: SSH password for the user
 
 **Deployment Trigger**:
+
 - Automatic: Push to `master` or `main` branch
 - Manual: Use "Actions" tab → "Deploy to EC2" → "Run workflow"
 
 **What the Pipeline Does**:
+
 1. Checks out the code
 2. Connects to EC2 via SSH (using sshpass for password authentication)
 3. Installs system dependencies (Node.js 18, Git, MySQL, PM2)
@@ -236,6 +259,7 @@ The repository includes automated deployment to EC2 via GitHub Actions (`.github
 10. Sets up PM2 to run on system startup
 
 **Post-Deployment**:
+
 - Application runs via PM2 process manager (process name: `sandoria-sandbox`)
 - Access at: `http://<EC2_PUBLIC_IP>:3000`
 - Logs available via: `pm2 logs sandoria-sandbox`
@@ -252,11 +276,13 @@ chmod +x manual-deploy.sh
 ```
 
 Or SSH into your server and run:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/master/scripts/manual-deploy.sh | bash
 ```
 
 **Manual Setup Steps**:
+
 1. Update repository URL in `scripts/manual-deploy.sh`
 2. Script will install all dependencies (Node.js, MySQL, PM2)
 3. Clone the repository to `~/sandoria-sandbox`
@@ -268,12 +294,14 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/maste
 ### Server Requirements
 
 **Minimum Specs**:
+
 - Ubuntu 18.04+ or similar Debian-based Linux
 - 1GB RAM (2GB recommended)
 - 10GB disk space
 - Open ports: 22 (SSH), 3000 (Application)
 
 **Installed Software** (via deployment scripts):
+
 - Node.js 18.x
 - MySQL Server 5.7+
 - PM2 (process manager)
@@ -293,6 +321,7 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/sandoria-sandbox/maste
 **Important**: Make sure you have `DB/timeweb.sandbox.sql` in your repository - this is the primary database backup that will be imported.
 
 **Manual database access** (if needed):
+
 ```bash
 # View current database credentials
 cat ~/sandoria-sandbox/.env | grep DB_
@@ -320,22 +349,26 @@ pm2 save                      # Save PM2 process list
 ### Troubleshooting Deployment
 
 **Database connection errors**:
+
 - Check `.env` file has correct DB credentials: `cat ~/sandoria-sandbox/.env | grep DB_`
 - Verify MySQL is running: `sudo systemctl status mysql`
 - Test connection: `mysql -u sandboxuser -p sandbox` (password from .env)
 - Check if database was imported: `sudo mysql -e "USE sandbox; SHOW TABLES;"`
 
 **Port already in use**:
+
 - Check if app is already running: `pm2 status`
 - Kill existing process: `pm2 delete sandoria-sandbox`
 - Check for other processes: `sudo lsof -i :3000`
 
 **Application won't start**:
+
 - Check logs: `pm2 logs sandoria-sandbox --lines 100`
 - Verify Node.js version: `node --version` (should be 18.x)
 - Check file permissions in app directory
 
 **Can't access application**:
+
 - Verify EC2 security group allows inbound traffic on port 3000
 - Check firewall: `sudo ufw status`
 - Verify app is running: `pm2 status`

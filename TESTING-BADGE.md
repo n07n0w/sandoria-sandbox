@@ -38,6 +38,7 @@ Online sand therapy application for psychologists and clients.
 4. Добавьте badge в README.md
 
 Badge будет показывать:
+
 - ✅ Зеленый (passing) - все тесты прошли
 - ❌ Красный (failing) - есть ошибки
 - 🟡 Желтый (running) - тесты выполняются
@@ -47,16 +48,19 @@ Badge будет показывать:
 ## Дополнительные badges (опционально):
 
 ### Node.js версия:
+
 ```markdown
 ![Node.js Version](https://img.shields.io/badge/node-18.x-brightgreen)
 ```
 
 ### License:
+
 ```markdown
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ```
 
 ### Status:
+
 ```markdown
 ![Status](https://img.shields.io/badge/status-active-success)
 ```
@@ -91,10 +95,13 @@ npm start
 ## Testing
 
 \`\`\`bash
+
 # Run all tests
+
 npm test
 
 # Quick validation
+
 npm run validate
 \`\`\`
 

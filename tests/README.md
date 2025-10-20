@@ -19,7 +19,9 @@ npm run validate
 ## Test Structure
 
 ### Smoke Tests (`smoke.test.js`)
+
 Fast basic tests that check:
+
 - Core modules can load
 - Express app structure is correct
 - Constants are defined
@@ -28,7 +30,9 @@ Fast basic tests that check:
 **Runtime:** ~600ms
 
 ### P2P Tests (`p2p.test.js`)
+
 Tests for P2P connection logic:
+
 - P2P modules exist
 - Valid JavaScript syntax
 - Reconnection logic present
@@ -39,14 +43,17 @@ Tests for P2P connection logic:
 ## CI/CD
 
 ### GitHub Actions Workflow
+
 File: `.github/workflows/ci-quick-test.yml`
 
 **Runs on:**
+
 - Every push to any branch
 - Every pull request
 - Manual trigger (workflow_dispatch)
 
 **What it does:**
+
 1. ✅ Syntax checks (all .js files)
 2. ✅ Structure validation (directories and files exist)
 3. ✅ Smoke tests
@@ -62,12 +69,12 @@ File: `.github/workflows/ci-quick-test.yml`
 
 ```javascript
 // tests/smoke.test.js
-const assert = require('assert');
-const { test } = require('node:test');
+const assert = require("assert");
+const { test } = require("node:test");
 
-test('Your test description', async () => {
+test("Your test description", async () => {
   // Test logic here
-  assert.ok(true, 'Should pass');
+  assert.ok(true, "Should pass");
 });
 ```
 
@@ -75,10 +82,10 @@ test('Your test description', async () => {
 
 ```javascript
 // tests/myfeature.test.js
-const assert = require('assert');
-const { test } = require('node:test');
+const assert = require("assert");
+const { test } = require("node:test");
 
-test('My feature works', async () => {
+test("My feature works", async () => {
   const result = myFunction();
   assert.strictEqual(result, expectedValue);
 });
@@ -87,16 +94,19 @@ test('My feature works', async () => {
 ## Local Testing Tips
 
 ### Run tests before commit
+
 ```bash
 npm run validate
 ```
 
 ### Check specific file syntax
+
 ```bash
 node --check path/to/file.js
 ```
 
 ### Run linter
+
 ```bash
 npm run lint:check
 ```
@@ -104,12 +114,14 @@ npm run lint:check
 ## Troubleshooting
 
 ### "Cannot find module" error
+
 ```bash
 # Install dependencies
 npm install
 ```
 
 ### Tests fail locally but pass in CI
+
 ```bash
 # Set environment variables
 export DB_HOST=localhost
@@ -121,6 +133,7 @@ npm test
 ```
 
 ### ESLint errors
+
 ```bash
 # See full report
 npx eslint . --ext .js

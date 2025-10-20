@@ -1,274 +1,329 @@
-  1. КОНЦЕПЦИЯ И НАЗНАЧЕНИЕ
+1. КОНЦЕПЦИЯ И НАЗНАЧЕНИЕ
 
-  MySandbox - это веб-приложение для проведения онлайн сеансов песочной терапии между психологом и клиентом в режиме реального времени. Приложение
-  реализует совместную работу на виртуальном холсте с библиотекой терапевтических изображений.
+MySandbox - это веб-приложение для проведения онлайн сеансов песочной терапии между психологом и клиентом в режиме реального времени. Приложение
+реализует совместную работу на виртуальном холсте с библиотекой терапевтических изображений.
 
-  Целевая аудитория:
-  - Психологи-терапевты (инициаторы сессий)
-  - Клиенты (участники по ссылке-приглашению)
+Целевая аудитория:
 
-  ---
-  2. АРХИТЕКТУРА И ТЕХНОЛОГИЧЕСКИЙ СТЕК
+- Психологи-терапевты (инициаторы сессий)
+- Клиенты (участники по ссылке-приглашению)
 
-  Backend (Node.js 18.x):
+---
 
-  - Express.js - веб-фреймворк
-  - WebSocket (ws) - сигнальный сервер для WebRTC
-  - MySQL - база данных (mysql2 с промисами)
-  - Session management - express-session
-  - Authentication - bcrypt для хеширования паролей
+2. АРХИТЕКТУРА И ТЕХНОЛОГИЧЕСКИЙ СТЕК
 
-  Frontend:
+Backend (Node.js 18.x):
 
-  - Konva.js - манипуляции с canvas (drag-and-drop, transformations)
-  - jQuery + jQuery UI - DOM-манипуляции и UI компоненты
-  - WebRTC - P2P соединение для обмена данными
-  - EJS - шаблонизатор
+- Express.js - веб-фреймворк
+- WebSocket (ws) - сигнальный сервер для WebRTC
+- MySQL - база данных (mysql2 с промисами)
+- Session management - express-session
+- Authentication - bcrypt для хеширования паролей
 
-  Communication Stack:
+Frontend:
 
-  Психолог ←→ WebSocket Server ←→ Клиент
-       ↓         (signaling)        ↓
-       ←─────── WebRTC P2P ─────────→
-             (data channel)
+- Konva.js - манипуляции с canvas (drag-and-drop, transformations)
+- jQuery + jQuery UI - DOM-манипуляции и UI компоненты
+- WebRTC - P2P соединение для обмена данными
+- EJS - шаблонизатор
 
-  ---
-  3. МЕХАНИЗМ РАБОТЫ СЕССИЙ
+Communication Stack:
 
-  A. Создание сессии (routes/session.js:42-52)
+Психолог ←→ WebSocket Server ←→ Клиент
+↓ (signaling) ↓
+←─────── WebRTC P2P ─────────→
+(data channel)
 
-  POST /session/init
-  → Создает запись в БД с двумя UUID:
-    - sessionUuid (для психолога)
-    - uuid (opponent ID для клиента)
-  → Возвращает ссылку: BASE_URL/s/{opponentId}
+---
 
-  B. Подключение клиента (routes/s.js:25-38)
+3. МЕХАНИЗМ РАБОТЫ СЕССИЙ
 
-  GET /s/:opponentSessionId
-  → Находит sessionUuid по opponent ID
-  → Рендерит canvas с категориями изображений
+A. Создание сессии (routes/session.js:42-52)
 
-  C. Установка P2P соединения (public/p2pConnection.js)
+POST /session/init
+→ Создает запись в БД с двумя UUID: - sessionUuid (для психолога) - uuid (opponent ID для клиента)
+→ Возвращает ссылку: BASE_URL/s/{opponentId}
 
-  Этапы подключения:
+B. Подключение клиента (routes/s.js:25-38)
 
-  1. WebSocket Registration (строки 25-32)
+GET /s/:opponentSessionId
+→ Находит sessionUuid по opponent ID
+→ Рендерит canvas с категориями изображений
+
+C. Установка P2P соединения (public/p2pConnection.js)
+
+Этапы подключения:
+
+1. WebSocket Registration (строки 25-32)
+
+
     - Оба участника открывают WS-соединение к серверу
     - Регистрируются с уникальными clientId
-  2. WebRTC Signaling (строки 64-108)
+
+2. WebRTC Signaling (строки 64-108)
+
+
     - Инициатор (с меньшим clientId) создает offer
     - Получатель создает answer
     - Обмен ICE-кандидатами через WebSocket
-  3. DataChannel Establishment (строки 110-130)
+
+3. DataChannel Establishment (строки 110-130)
+
+
     - Прямой P2P канал для обмена данными о холсте
     - Очередь сообщений (pendingMessages) для надежности
-  4. Auto-Reconnection (строки 84-94)
+
+4. Auto-Reconnection (строки 84-94)
+
+
     - Отслеживание состояния connectionState
     - Переподключение каждые 3 секунды при обрыве
 
-  ---
-  4. СТРУКТУРА БАЗЫ ДАННЫХ
+---
 
-  Таблица sandboxes (DB/sandbox.sql:80-89)
+4. СТРУКТУРА БАЗЫ ДАННЫХ
 
-  - id (PK)
-  - name, ownerId
-  - sessionUuid (UUID для психолога)
-  - uuid (UUID для клиента/оппонента)
-  - createdt (timestamp)
+Таблица sandboxes (DB/sandbox.sql:80-89)
 
-  Таблица categories (DB/sandbox.sql:25-32)
+- id (PK)
+- name, ownerId
+- sessionUuid (UUID для психолога)
+- uuid (UUID для клиента/оппонента)
+- createdt (timestamp)
 
-  15 категорий терапевтических изображений:
-  - Люди, Мебель, Архитектура, Транспорт, Военные
-  - Медицина, Животные, Волшебные существа, Динозавры
-  - Смерть, Стихии, Природа, Соединения, Стройка, Еда
+Таблица categories (DB/sandbox.sql:25-32)
 
-  Таблица categoryimage (DB/sandbox.sql:52-60)
+15 категорий терапевтических изображений:
 
-  483 SVG-изображения для терапевтической работы
+- Люди, Мебель, Архитектура, Транспорт, Военные
+- Медицина, Животные, Волшебные существа, Динозавры
+- Смерть, Стихии, Природа, Соединения, Стройка, Еда
 
-  Таблица sessionimage (DB/sandbox.sql:109-114)
+Таблица categoryimage (DB/sandbox.sql:52-60)
 
-  Снимки состояния canvas для каждой сессии
+483 SVG-изображения для терапевтической работы
 
-  Таблица users (DB/sandbox.sql:134-141)
+Таблица sessionimage (DB/sandbox.sql:109-114)
 
-  Пользователи с bcrypt-паролями
+Снимки состояния canvas для каждой сессии
 
-  ---
-  5. ОСНОВНЫЕ КОМПОНЕНТЫ
+Таблица users (DB/sandbox.sql:134-141)
 
-  A. WebSocket Signaling Server (app.js:109-166)
+Пользователи с bcrypt-паролями
 
-  const clients = new Map(); // clientId → WebSocket
+---
 
-  Обработка сообщений:
-  - "register" → регистрация клиента
-  - "offer/answer/ice" → проброс между пирами
+5. ОСНОВНЫЕ КОМПОНЕНТЫ
 
-  B. P2P Connection Module (public/p2pConnection.js)
+A. WebSocket Signaling Server (app.js:109-166)
 
-  Экспортируемый API:
-  startP2PConnection(clientId, targetId, onMessageCallback, onStatusChange)
-  → returns { send(), isConnected(), close() }
+const clients = new Map(); // clientId → WebSocket
 
-  Статусы подключения:
-  - ws-closed - WebSocket разорван
-  - ws-reconnecting - переподключение WS
-  - reconnecting - переподключение peer
-  - connected - канал открыт
-  - disconnected - канал закрыт
-  - closed - вручную закрыто
+Обработка сообщений:
 
-  C. Repository Layer
+- "register" → регистрация клиента
+- "offer/answer/ice" → проброс между пирами
 
-  sandboxRepository.js (repository/sandboxRepository.js)
-  - insertNewSandbox() - создание сессии
-  - getSandboxBySessionUuid() - поиск по UUID психолога
-  - getSandboxByUuid() - поиск по UUID клиента
+B. P2P Connection Module (public/p2pConnection.js)
 
-  categoryRepository.js
-  - getCategories() - загрузка категорий изображений
+Экспортируемый API:
+startP2PConnection(clientId, targetId, onMessageCallback, onStatusChange)
+→ returns { send(), isConnected(), close() }
 
-  ---
-  6. БЕЗОПАСНОСТЬ И КОНФИГУРАЦИЯ
+Статусы подключения:
 
-  ⚠️ Критические проблемы безопасности:
+- ws-closed - WebSocket разорван
+- ws-reconnecting - переподключение WS
+- reconnecting - переподключение peer
+- connected - канал открыт
+- disconnected - канал закрыт
+- closed - вручную закрыто
 
-  1. Hardcoded Session Secret (app.js:54)
-  app.use(session({
-    secret: 'secret-key', // ❌ НЕ БЕЗОПАСНО!
-  1. Рекомендация: Использовать переменную окружения
-  2. SSL Configuration
+C. Repository Layer
+
+sandboxRepository.js (repository/sandboxRepository.js)
+
+- insertNewSandbox() - создание сессии
+- getSandboxBySessionUuid() - поиск по UUID психолога
+- getSandboxByUuid() - поиск по UUID клиента
+
+categoryRepository.js
+
+- getCategories() - загрузка категорий изображений
+
+---
+
+6. БЕЗОПАСНОСТЬ И КОНФИГУРАЦИЯ
+
+⚠️ Критические проблемы безопасности:
+
+1. Hardcoded Session Secret (app.js:54)
+   app.use(session({
+   secret: 'secret-key', // ❌ НЕ БЕЗОПАСНО!
+1. Рекомендация: Использовать переменную окружения
+1. SSL Configuration
+
+
     - JAWSDB: rejectUnauthorized: false (dbConfig.js:14)
     - Необходимо для некоторых провайдеров, но снижает безопасность
-  3. WebSocket без шифрования (p2pConnection.js:26)
-  ws = new WebSocket(`ws://${location.host}`);
-  3. Рекомендация: Использовать wss:// в продакшене
-  4. CORS и Origin Validation
+
+3. WebSocket без шифрования (p2pConnection.js:26)
+   ws = new WebSocket(`ws://${location.host}`);
+4. Рекомендация: Использовать wss:// в продакшене
+5. CORS и Origin Validation
+
+
     - Отсутствует проверка origin для WebSocket соединений
     - Уязвимость к CSRF-атакам
 
-  Database Configuration (dbConfig.js)
+Database Configuration (dbConfig.js)
 
-  - Приоритет JAWSDB_MARIA_URL (Heroku addon)
-  - Fallback на индивидуальные переменные
-  - Auto-SSL для AWS RDS
+- Приоритет JAWSDB_MARIA_URL (Heroku addon)
+- Fallback на индивидуальные переменные
+- Auto-SSL для AWS RDS
 
-  ---
-  7. DEPLOYMENT И CI/CD
+---
 
-  GitHub Actions (.github/workflows/deploy.yml)
+7. DEPLOYMENT И CI/CD
 
-  - Триггеры: push в master/main или вручную
-  - Целевая платформа: Ubuntu EC2 instance
-  - Процесс:
-    a. SSH-подключение с паролем
-    b. Установка зависимостей (Node 18, MySQL, PM2)
-    c. Клонирование репозитория
-    d. Автоматическое создание БД с безопасными credentials
-    e. Импорт DB/timeweb.sandbox.sql (primary) или DB/sandbox.sql
-    f. Запуск через PM2
+GitHub Actions (.github/workflows/deploy.yml)
 
-  Manual Deployment Script
+- Триггеры: push в master/main или вручную
+- Целевая платформа: Ubuntu EC2 instance
+- Процесс:
+  a. SSH-подключение с паролем
+  b. Установка зависимостей (Node 18, MySQL, PM2)
+  c. Клонирование репозитория
+  d. Автоматическое создание БД с безопасными credentials
+  e. Импорт DB/timeweb.sandbox.sql (primary) или DB/sandbox.sql
+  f. Запуск через PM2
 
-  scripts/manual-deploy.sh
-  - Полный bootstrap-скрипт для новой Ubuntu-машины
-  - Автогенерация паролей MySQL
-  - PM2 autostart configuration
+Manual Deployment Script
 
-  ---
-  8. ОСОБЕННОСТИ РЕАЛИЗАЦИИ
+scripts/manual-deploy.sh
 
-  Плюсы:
+- Полный bootstrap-скрипт для новой Ubuntu-машины
+- Автогенерация паролей MySQL
+- PM2 autostart configuration
 
-  1. P2P Architecture
+---
+
+8. ОСОБЕННОСТИ РЕАЛИЗАЦИИ
+
+Плюсы:
+
+1. P2P Architecture
+
+
     - Минимальная нагрузка на сервер после handshake
     - Низкая латентность между участниками
     - WebSocket только для signaling
-  2. Auto-Reconnection
+
+2. Auto-Reconnection
+
+
     - Устойчивость к временным обрывам связи
     - Очередь сообщений при недоступности канала
-  3. Модульная структура
+
+3. Модульная структура
+
+
     - Разделение на Repository/Service/Controller
     - Возможность расширения
-  4. Терапевтический контент
+
+4. Терапевтический контент
+
+
     - 15 категорий, 483 изображения
     - SVG-формат для масштабируемости
 
-  Минусы:
+Минусы:
 
-  1. Security Issues
+1. Security Issues
+
+
     - Hardcoded secrets
     - Нет HTTPS enforcement
     - Отсутствие rate limiting
-  2. No Session Persistence
+
+2. No Session Persistence
+
+
     - Состояние canvas теряется при обрыве
     - Нет автосохранения композиций
-  3. Scaling Limitations
+
+3. Scaling Limitations
+
+
     - In-memory clients Map (app.js:107)
     - Не подходит для horizontal scaling без Redis
-  4. Error Handling
+
+4. Error Handling
+
+
     - Недостаточная обработка edge cases
     - Нет graceful degradation
 
-  ---
-  9. РЕКОМЕНДАЦИИ ПО УЛУЧШЕНИЮ
+---
 
-  Критичные (Безопасность):
+9. РЕКОМЕНДАЦИИ ПО УЛУЧШЕНИЮ
 
-  1. Переместить secret в .env:
-     SESSION_SECRET=<криптостойкий рандомный ключ>
+Критичные (Безопасность):
 
-  2. Enforce HTTPS/WSS:
-     if (process.env.NODE_ENV === 'production') {
-       require('express-sslify').HTTPS({ trustProtoHeader: true })
-     }
+1. Переместить secret в .env:
+   SESSION_SECRET=<криптостойкий рандомный ключ>
 
-  3. Добавить CORS middleware для WebSocket
+2. Enforce HTTPS/WSS:
+   if (process.env.NODE_ENV === 'production') {
+   require('express-sslify').HTTPS({ trustProtoHeader: true })
+   }
 
-  4. Rate limiting (express-rate-limit)
+3. Добавить CORS middleware для WebSocket
 
-  Средний приоритет (Надежность):
+4. Rate limiting (express-rate-limit)
 
-  1. Сохранение состояния canvas:
-     - Auto-save каждые 30 сек
-     - Recovery после reconnect
+Средний приоритет (Надежность):
 
-  2. Redis для clients Map:
-     - Горизонтальное масштабирование
-     - Shared state между инстансами
+1. Сохранение состояния canvas:
+   - Auto-save каждые 30 сек
+   - Recovery после reconnect
 
-  3. Логирование и мониторинг:
-     - Pino для structured logging
-     - Metrics для Prometheus/Grafana
+2. Redis для clients Map:
+   - Горизонтальное масштабирование
+   - Shared state между инстансами
 
-  Низкий приоритет (UX):
+3. Логирование и мониторинг:
+   - Pino для structured logging
+   - Metrics для Prometheus/Grafana
 
-  1. Мобильная оптимизация (mobile.css существует, но требует доработки)
-  2. История сессий для психолога
-  3. Экспорт композиции в PNG/PDF
-  4. Аудио/видео чат для сопровождения терапии
+Низкий приоритет (UX):
 
-  ---
-  10. ВЫВОДЫ
+1. Мобильная оптимизация (mobile.css существует, но требует доработки)
+2. История сессий для психолога
+3. Экспорт композиции в PNG/PDF
+4. Аудио/видео чат для сопровождения терапии
 
-  MySandbox - это специализированное приложение с четко определенной domain-моделью для онлайн песочной терапии.
+---
 
-  Сильные стороны:
-  - Правильно выбранный WebRTC для real-time collaboration
-  - Простая и понятная архитектура
-  - Готовая библиотека терапевтических изображений
+10. ВЫВОДЫ
 
-  Требует внимания:
-  - Безопасность (критично для медицинских данных!)
-  - Persistence (восстановление сессий)
-  - Масштабируемость (если планируется рост пользователей)
+MySandbox - это специализированное приложение с четко определенной domain-моделью для онлайн песочной терапии.
 
-  Готовность к продакшену: 70%
-  - Функционал работает ✅
-  - Deployment автоматизирован ✅
-  - Безопасность требует доработки ⚠️
-  - Мониторинг отсутствует ⚠️
+Сильные стороны:
+
+- Правильно выбранный WebRTC для real-time collaboration
+- Простая и понятная архитектура
+- Готовая библиотека терапевтических изображений
+
+Требует внимания:
+
+- Безопасность (критично для медицинских данных!)
+- Persistence (восстановление сессий)
+- Масштабируемость (если планируется рост пользователей)
+
+Готовность к продакшену: 70%
+
+- Функционал работает ✅
+- Deployment автоматизирован ✅
+- Безопасность требует доработки ⚠️
+- Мониторинг отсутствует ⚠️

@@ -39,10 +39,12 @@ npm run validate
 ```
 
 **Что проверяет:**
+
 - ✅ Синтаксис JavaScript (< 1 сек)
 - ✅ Качество кода с ESLint (предупреждения, не блокирует)
 
 **Результат:**
+
 ```
 ✅ Syntax Check: PASSED
 📊 Linting: 200+ warnings (informational)
@@ -57,12 +59,14 @@ npm test
 ```
 
 **Что проверяет:**
+
 - ✅ Все модули загружаются без ошибок
 - ✅ Express app корректно инициализируется
 - ✅ P2P модули имеют нужную функциональность
 - ✅ Dependencies работают (UUID, bcrypt, WebSocket)
 
 **Результат:**
+
 ```
 ✔ 13 tests passed
 ⏱️  Runtime: ~650ms
@@ -138,26 +142,26 @@ $ npm test
 
 ### Smoke Tests (tests/smoke.test.js)
 
-| Тест | Что проверяет |
-|------|---------------|
-| Core modules | constants.js, logger.js, dbConfig.js загружаются |
-| App structure | Express app инициализируется корректно |
-| Constants | BASE_URL и MAIN_SITE_URL определены |
-| Repositories | Файлы репозиториев существуют и валидны |
-| UUID generation | uuid библиотека работает |
-| Bcrypt | Хеширование паролей работает |
-| WebSocket | ws модуль доступен |
-| Express middleware | app.locals настроен правильно |
+| Тест               | Что проверяет                                    |
+| ------------------ | ------------------------------------------------ |
+| Core modules       | constants.js, logger.js, dbConfig.js загружаются |
+| App structure      | Express app инициализируется корректно           |
+| Constants          | BASE_URL и MAIN_SITE_URL определены              |
+| Repositories       | Файлы репозиториев существуют и валидны          |
+| UUID generation    | uuid библиотека работает                         |
+| Bcrypt             | Хеширование паролей работает                     |
+| WebSocket          | ws модуль доступен                               |
+| Express middleware | app.locals настроен правильно                    |
 
 ### P2P Tests (tests/p2p.test.js)
 
-| Тест | Что проверяет |
-|------|---------------|
-| P2P module exists | p2pConnection.js существует |
-| Valid JavaScript | Синтаксис P2P модуля валиден |
+| Тест                  | Что проверяет                         |
+| --------------------- | ------------------------------------- |
+| P2P module exists     | p2pConnection.js существует           |
+| Valid JavaScript      | Синтаксис P2P модуля валиден          |
 | Global Promise module | p2pConnectionGlobalPromise.js валиден |
-| Reconnection logic | Логика переподключения присутствует |
-| Message queuing | Механизм очереди сообщений есть |
+| Reconnection logic    | Логика переподключения присутствует   |
+| Message queuing       | Механизм очереди сообщений есть       |
 
 ---
 
@@ -219,11 +223,13 @@ npm run validate
 ### Если тесты падают локально:
 
 1. **Проверьте синтаксис:**
+
    ```bash
    node --check app.js
    ```
 
 2. **Установите зависимости:**
+
    ```bash
    npm install
    ```
