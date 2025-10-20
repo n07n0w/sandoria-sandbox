@@ -1,0 +1,183 @@
+name: Quick CI Tests
+
+# Запускается на всех ветках при push и pull request
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:  # Позволяет запустить вручную
+
+jobs:
+  quick-test:
+    name: Quick Tests (Syntax + Smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # Максимум 5 минут, должно быть быстро
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      # 1. Checkout кода
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # 3. Установка зависимостей (только production + dev для линтинга)
+      - name: 📦 Install dependencies
+        run: |
+          npm ci --ignore-scripts
+          npm install --save-dev eslint
+
+      # 4. Проверка синтаксиса основных файлов
+      - name: ✅ Syntax Check
+        run: |
+          echo "🔍 Checking main application files..."
+          node --check app.js
+          node --check bin/www
+          node --check init-db.js
+          node --check dbConfig.js
+          node --check dbConnection.js
+          node --check constants.js
+          node --check logger.js
+          echo "✅ Syntax check passed!"
+
+      # 5. Проверка routes
+      - name: ✅ Check Routes Syntax
+        run: |
+          echo "🔍 Checking route files..."
+          for file in routes/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+          echo "✅ Routes syntax check passed!"
+
+      # 6. Проверка repositories
+      - name: ✅ Check Repository Files
+        run: |
+          echo "🔍 Checking repository files..."
+          for file in repository/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+          echo "✅ Repository syntax check passed!"
+
+      # 7. Проверка controllers
+      - name: ✅ Check Controllers
+        run: |
+          echo "🔍 Checking controller files..."
+          for file in controllers/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+          echo "✅ Controllers syntax check passed!"
+
+      # 8. Проверка public JavaScript (только наши файлы)
+      - name: ✅ Check Public JS
+        run: |
+          echo "🔍 Checking custom public JavaScript files..."
+          node --check public/p2pConnection.js
+          node --check public/javascripts/p2pConnectionGlobalPromise.js
+          echo "✅ Public JS syntax check passed!"
+
+      # 9. ESLint (информативно, не блокирует)
+      - name: 🔍 ESLint (informational)
+        run: |
+          echo "🔍 Running ESLint..."
+          npm run lint:check || true
+        continue-on-error: true
+
+      # 10. Smoke Tests (быстрые базовые тесты)
+      - name: 🧪 Run Smoke Tests
+        run: |
+          echo "🧪 Running smoke tests..."
+          npm run test
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_USER: test
+          DB_PASSWORD: test
+          DB_NAME: test_db
+
+      # 11. Проверка наличия критических файлов
+      - name: 📋 Check Critical Files
+        run: |
+          echo "🔍 Checking for critical files..."
+
+          # Проверка основных файлов
+          test -f package.json || { echo "❌ package.json missing!"; exit 1; }
+          test -f app.js || { echo "❌ app.js missing!"; exit 1; }
+          test -f bin/www || { echo "❌ bin/www missing!"; exit 1; }
+
+          # Проверка структуры директорий
+          test -d routes || { echo "❌ routes/ directory missing!"; exit 1; }
+          test -d repository || { echo "❌ repository/ directory missing!"; exit 1; }
+          test -d controllers || { echo "❌ controllers/ directory missing!"; exit 1; }
+          test -d public || { echo "❌ public/ directory missing!"; exit 1; }
+          test -d views || { echo "❌ views/ directory missing!"; exit 1; }
+
+          # Проверка P2P файлов
+          test -f public/p2pConnection.js || { echo "❌ P2P connection file missing!"; exit 1; }
+          test -f public/javascripts/p2pConnectionGlobalPromise.js || { echo "❌ P2P global promise file missing!"; exit 1; }
+
+          echo "✅ All critical files present!"
+
+      # 12. Анализ размера bundle (информативно)
+      - name: 📊 Bundle Size Analysis
+        run: |
+          echo "📊 Analyzing file sizes..."
+
+          echo "📦 Main application files:"
+          du -h app.js bin/www init-db.js 2>/dev/null || true
+
+          echo ""
+          echo "📦 P2P connection files:"
+          du -h public/p2pConnection.js public/javascripts/p2pConnectionGlobalPromise.js 2>/dev/null || true
+
+          echo ""
+          echo "📦 Total size of custom JS:"
+          find . -name "*.js" \
+            -not -path "./node_modules/*" \
+            -not -path "./public/javascripts/jquery*" \
+            -not -path "./public/javascripts/konva*" \
+            -not -path "./public/javascripts/peerjs*" \
+            -not -name "*.min.js" \
+            -exec du -ch {} + | tail -1
+        continue-on-error: true
+
+      # 13. Summary
+      - name: ✅ Test Summary
+        if: success()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ ALL QUICK TESTS PASSED!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Syntax checks: PASSED"
+          echo "✅ Smoke tests: PASSED"
+          echo "✅ File structure: PASSED"
+          echo ""
+          echo "🚀 Your code is ready for the next step!"
+
+      # 14. Failure summary
+      - name: ❌ Failure Summary
+        if: failure()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "❌ TESTS FAILED!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Please check the logs above to see what failed."
+          echo ""
+          echo "Common issues:"
+          echo "  • Syntax errors in JavaScript files"
+          echo "  • Missing dependencies in package.json"
+          echo "  • Broken module imports"
+          echo ""
+          echo "Run locally:"
+          echo "  npm run validate"

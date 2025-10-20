@@ -4,3 +4,11 @@
 logs/
 .DS_Store
 public/images/screenshots/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Test results
+test-results/
+junit.xml
