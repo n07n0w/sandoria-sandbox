@@ -156,7 +156,6 @@
 	};
 
 	const notifyImageSelect = (jsonData) => {
-//		saveKonvaState();
 		sendEvent(jsonData);
 	};
 
@@ -1639,22 +1638,18 @@ console.log({
 			initDataChannel: initDataChannel
 		};
 		console.log("saveP2PDataToLocalStorage", p2pSettings);
-		localStorage.setItem('p2psettings', JSON.stringify(p2pSettings));
+		sessionStorage.setItem('p2psettings', JSON.stringify(p2pSettings));
 	};
 
 	const loadP2PDataFromLocalStorage = () => {
-		const p2pSettings = JSON.parse(localStorage.getItem('p2psettings'));
+		const p2pSettings = JSON.parse(sessionStorage.getItem('p2psettings'));
 		console.log("loadP2PDataFromLocalStorage", p2pSettings);
 		return p2pSettings;
 	};
 
 	const saveKonvaState = () => {
 		const data = stage.toJSON();
-//		console.log("saveKonvaState", data);
-		localStorage.setItem('konvaAppState', data);
-//		const historyRecord = JSON.stringify(eventHistory);
-//		localStorage.setItem('eventHistory', historyRecord);
-//		console.log(`History Record Size: ${historyRecord.length} bytes`);
+		sessionStorage.setItem('konvaAppState', data);
 	};
 
 	const stageFromJson = async (stageJson) => {
@@ -1726,28 +1721,12 @@ console.log({
 	};
 
 	const loadKonvaState = async () => {
-		const stored = localStorage.getItem('konvaAppState');
+		const stored = sessionStorage.getItem('konvaAppState');
 		await stageFromJson(stored);
-/*
-		if (stored) {
-			let containerElement = $('#container')[0];
-			stage = Konva.Node.create(JSON.parse(stored), containerElement);
-
-			stage.find('Image').forEach((imageNode) => {
-				const src = imageNode.getAttr('src'); // Retrieve the saved source
-				const image = new Image();
-				image.onload = () => {
-					imageNode.image(image);
-					imageNode.getLayer().batchDraw();
-				};
-				image.src = src; // Load the image from the source
-			});
-		}
-*/
 	};
 
 	const loadKonvaStateNew = async function () {
-		const eventHistoryLS = localStorage.getItem('eventHistory');
+		const eventHistoryLS = sessionStorage.getItem('eventHistory');
 		eventHistory = JSON.parse(eventHistoryLS || '[]');
 		for (const event of eventHistory) {
 //		eventHistory.forEach(event => async {
@@ -1783,10 +1762,10 @@ console.log({
 			sendEvent(disconnectEvent());
 		}
 //		myPeer?.destroy();
+		removeAll();
 		myConn?.close();
 		onConnectionClosed();
 		sessionStorage.clear();
-		localStorage.clear();
 	}
 
 	function onMessage(data) {
@@ -1794,7 +1773,6 @@ console.log({
 		if (typeof data === 'object' && data.hasOwnProperty('event')) {
 			try {
 				eval(data.event)(data);
-//				saveKonvaState();
 			} catch (ex) {
 				console.log(ex);
 			}
@@ -1816,7 +1794,7 @@ console.log({
 //			await loadKonvaState();
 			await reLoadStateAfterReconnect();
 			await restoreOpponentStage();
-			const eventHistoryLS = localStorage.getItem('eventHistory')
+			const eventHistoryLS = sessionStorage.getItem('eventHistory')
 			if (!firstCategorySelected && !eventHistoryLS) {
 				selectFirstCategoryFromStart();
 				firstCategorySelected = true;
@@ -1825,7 +1803,7 @@ console.log({
 		} else if (state === 'ws-closed') {
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
-			saveKonvaState();
+//			saveKonvaState();
 			updateConnectionState(false);
 			showStatus("❌ Соединение потеряно", "red");
 		} else if (state === 'reconnecting') {
