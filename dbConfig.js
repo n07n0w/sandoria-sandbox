@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 
 function parseJawsDBUrl() {
   const dbUrl = process.env.JAWSDB_MARIA_URL || process.env.JAWSDB_URL;
@@ -21,7 +21,7 @@ function parseJawsDBUrl() {
 const jawsConfig = parseJawsDBUrl();
 
 // Check if the host is AWS RDS
-const isAWSRDS = (host) => host && host.includes(".rds.amazonaws.com");
+const isAWSRDS = (host) => host && host.includes('.rds.amazonaws.com');
 
 const config = jawsConfig || {
   host: process.env.DB_HOST,
@@ -42,7 +42,7 @@ const config = jawsConfig || {
 // Validate required configuration
 if (!config.host || !config.user || !config.database) {
   throw new Error(
-    "Missing required database configuration: host, user, and database are required",
+    'Missing required database configuration: host, user, and database are required',
   );
 }
 

@@ -1,24 +1,24 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
 
-const pool = require("../dbConnection");
-const logger = require("../logger");
+const pool = require('../dbConnection');
+const logger = require('../logger');
 const CategoryRepository =
-  require("../repository/categoryRepository").CategoryRepository;
+  require('../repository/categoryRepository').CategoryRepository;
 var categoryRepository = new CategoryRepository();
 
 async function getSessionIdByOpponentSessionId(opponentSessionId) {
-  logger.info(["getSessionIdByOpponentSessionId :: START"], opponentSessionId);
+  logger.info(['getSessionIdByOpponentSessionId :: START'], opponentSessionId);
   try {
     let values = [opponentSessionId];
-    var sql = "SELECT sessionUuid FROM sandboxes WHERE uuid = ?";
+    var sql = 'SELECT sessionUuid FROM sandboxes WHERE uuid = ?';
     const [results] = await pool.execute(sql, values);
     logger.info(results);
     logger.info(results[0]);
-    logger.info(["getSessionIdByOpponentSessionId :: END"], opponentSessionId);
-    return results[0]["sessionUuid"];
+    logger.info(['getSessionIdByOpponentSessionId :: END'], opponentSessionId);
+    return results[0]['sessionUuid'];
   } catch (error) {
-    logger.error("getCategories ERROR:", error);
+    logger.error('getCategories ERROR:', error);
     return null;
   }
 }
@@ -28,16 +28,16 @@ const handleGetSession = async (req, res) => {
   var categories = await categoryRepository.getCategories();
   var sessionId = await getSessionIdByOpponentSessionId(opponentSessionId);
   if (!sessionId)
-    return res.status(400).json({ message: "Cannot find appropriate session" });
+    return res.status(400).json({ message: 'Cannot find appropriate session' });
 
-  res.render("index", {
+  res.render('index', {
     categories: categories,
     sessionId: sessionId,
     opponentSessionId: opponentSessionId,
-    title: "Express",
+    title: 'Express',
   });
 };
 
-router.get("/:opponentSessionId", handleGetSession);
+router.get('/:opponentSessionId', handleGetSession);
 
 module.exports = router;

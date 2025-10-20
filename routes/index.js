@@ -1,14 +1,14 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
 
-const pool = require("../dbConnection");
-const logger = require("../logger");
+const pool = require('../dbConnection');
+const logger = require('../logger');
 const CategoryRepository =
-  require("../repository/categoryRepository").CategoryRepository;
+  require('../repository/categoryRepository').CategoryRepository;
 var categoryRepository = new CategoryRepository();
 
 async function getUser(location, area, rooms, maxNum) {
-  logger.info(["getLocationSimilars :: START", location, area, rooms, maxNum]);
+  logger.info(['getLocationSimilars :: START', location, area, rooms, maxNum]);
   let connection = null;
   try {
     connection = await pool.getConnection();
@@ -31,7 +31,7 @@ async function getUser(location, area, rooms, maxNum) {
     connection.release();
     return results;
   } catch (error) {
-    logger.error("Error connecting to the MySQL server:", error);
+    logger.error('Error connecting to the MySQL server:', error);
     if (connection) connection.release();
     return null;
   }
@@ -41,13 +41,13 @@ const handleGetIndex = async (req, res, next) => {
   try {
     var user = req.session.user;
     var categories = await categoryRepository.getCategories();
-    res.render("index", {
+    res.render('index', {
       user: user,
       categories: categories,
-      title: "Express",
+      title: 'Express',
     });
   } catch (error) {
-    logger.error("Error in handleGetIndex:", error);
+    logger.error('Error in handleGetIndex:', error);
     next(error); // Pass error to Express error handler
   }
 };
@@ -57,12 +57,12 @@ const handleLogTrace = async (req, res) => {
   console.info(logEntry);
   //	const logMessage = `[${logEntry.timestamp}] Type: ${logEntry.type}, Message: ${logEntry.message}\nStack: ${logEntry.trace}\n\n`;
   console.trace(logEntry);
-  res.status(200).send("Trace logged successfully");
+  res.status(200).send('Trace logged successfully');
 };
 
 /* GET home page. */
-router.get("/", handleGetIndex);
+router.get('/', handleGetIndex);
 
-router.post("/log-trace", handleLogTrace);
+router.post('/log-trace', handleLogTrace);
 
 module.exports = router;

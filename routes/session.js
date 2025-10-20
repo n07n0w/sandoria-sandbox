@@ -1,31 +1,31 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
 
-const pool = require("../dbConnection");
-const logger = require("../logger");
-const constants = require("../constants");
+const pool = require('../dbConnection');
+const logger = require('../logger');
+const constants = require('../constants');
 
 const CategoryRepository =
-  require("../repository/categoryRepository").CategoryRepository;
+  require('../repository/categoryRepository').CategoryRepository;
 var categoryRepository = new CategoryRepository();
 
 const SandboxRepository =
-  require("../repository/sandboxRepository").SandboxRepository;
+  require('../repository/sandboxRepository').SandboxRepository;
 var sandboxRepository = new SandboxRepository();
 
 const configurationDB = {
-  configuration: require("../model/configuration.json"),
+  configuration: require('../model/configuration.json'),
 };
 
 const handleGetSession = async (req, res, next) => {
   var sessionId = req.params.sessionId;
   var opponentSessionId = req.params.opponentSessionId;
   var categories = await categoryRepository.getCategories();
-  res.render("index", {
+  res.render('index', {
     categories: categories,
     sessionId: sessionId,
     opponentSessionId: opponentSessionId,
-    title: "Express",
+    title: 'Express',
   });
 };
 
@@ -33,11 +33,11 @@ const handleGetSessionView = async (req, res, next) => {
   var user = req.session.user;
   var sessionId = req.params.sessionId;
   var categories = await categoryRepository.getCategories();
-  res.render("index", {
+  res.render('index', {
     user: user,
     categories: categories,
     sessionId: sessionId,
-    title: "Express",
+    title: 'Express',
   });
 };
 
@@ -49,7 +49,7 @@ const handlePostSessionInit = async (req, res, next) => {
   var newSandbox = await sandboxRepository.getSandboxById(
     sandboxInsertResult.insertId,
   );
-  var sessionLink = constants.BASE_URL.concat("/s/", newSandbox.uuid);
+  var sessionLink = constants.BASE_URL.concat('/s/', newSandbox.uuid);
 
   res.json({
     sessionId: newSandbox.sessionUuid,
@@ -58,9 +58,9 @@ const handlePostSessionInit = async (req, res, next) => {
   });
 };
 
-router.get("/sid_:sessionId/opsid_:opponentSessionId", handleGetSession);
-router.get("/view/:sessionId", handleGetSessionView);
+router.get('/sid_:sessionId/opsid_:opponentSessionId', handleGetSession);
+router.get('/view/:sessionId', handleGetSessionView);
 
-router.post("/init", handlePostSessionInit);
+router.post('/init', handlePostSessionInit);
 
 module.exports = router;

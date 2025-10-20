@@ -1,25 +1,25 @@
-const pool = require("../dbConnection");
-const logger = require("../logger");
+const pool = require('../dbConnection');
+const logger = require('../logger');
 
 const CategoryRepository = function () {
   this.categories;
 
   this.getCategories = async function () {
-    logger.info(["getCategories :: START"]);
-    if (typeof this.categories === "undefined") {
+    logger.info(['getCategories :: START']);
+    if (typeof this.categories === 'undefined') {
       logger.info([
-        "Categories cache not init. Loading categories from database.",
+        'Categories cache not init. Loading categories from database.',
       ]);
       var categories = new Map();
       try {
         var sql =
-          "SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryimage ci ON ci.categoryId = c.id";
+          'SELECT c.*, ci.id AS imageId, ci.categoryId, ci.image, ci.title AS imageTitle FROM categories c INNER JOIN categoryimage ci ON ci.categoryId = c.id';
         const [results] = await pool.execute(sql);
         if (!results || results.length === 0) {
-          logger.info(["No categories found in database, using empty map"]);
+          logger.info(['No categories found in database, using empty map']);
           this.categories = new Map();
         } else {
-          logger.info(["Found", results.length, "categories"]);
+          logger.info(['Found', results.length, 'categories']);
           for (let category of results) {
             let categoryId = category.id;
             let image = {
@@ -28,7 +28,7 @@ const CategoryRepository = function () {
               title: category.imageTitle,
             };
             let existingCategory = categories.get(categoryId);
-            if (typeof existingCategory === "undefined") {
+            if (typeof existingCategory === 'undefined') {
               let cat = {
                 name: category.name,
                 id: category.id,
@@ -45,11 +45,11 @@ const CategoryRepository = function () {
           this.categories = categories;
         }
       } catch (error) {
-        logger.error("getCategories ERROR:", error);
+        logger.error('getCategories ERROR:', error);
         this.categories = new Map();
       }
     }
-    logger.info(["getCategories :: END"]);
+    logger.info(['getCategories :: END']);
     return this.categories;
   };
 };

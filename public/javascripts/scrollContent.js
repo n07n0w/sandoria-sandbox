@@ -1,7 +1,7 @@
 ﻿(() => {
-  const content = document.getElementById("categoryImages");
-  const thumb = document.getElementById("scrollThumb");
-  const track = document.getElementById("scrollTrack");
+  const content = document.getElementById('categoryImages');
+  const thumb = document.getElementById('scrollThumb');
+  const track = document.getElementById('scrollTrack');
 
   function updateThumb() {
     const contentHeight = content.scrollHeight;
@@ -19,20 +19,20 @@
   }
 
   // Прокрутка контента -> двигаем скроллбар
-  content.addEventListener("scroll", updateThumb);
+  content.addEventListener('scroll', updateThumb);
 
   // Обработка перетаскивания скроллбара
   let isDragging = false;
   let startY, startScrollTop;
 
-  thumb.addEventListener("mousedown", (e) => {
+  thumb.addEventListener('mousedown', (e) => {
     isDragging = true;
     startY = e.clientY;
     startScrollTop = content.scrollTop;
-    document.body.style.userSelect = "none";
+    document.body.style.userSelect = 'none';
   });
 
-  document.addEventListener("mousemove", (e) => {
+  document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     const dy = e.clientY - startY;
     const contentHeight = content.scrollHeight;
@@ -41,12 +41,12 @@
     content.scrollTop = startScrollTop + scrollAmount;
   });
 
-  document.addEventListener("mouseup", () => {
+  document.addEventListener('mouseup', () => {
     isDragging = false;
-    document.body.style.userSelect = "";
+    document.body.style.userSelect = '';
   });
 
   // Инициализация
   updateThumb();
-  window.addEventListener("resize", updateThumb);
+  window.addEventListener('resize', updateThumb);
 })();

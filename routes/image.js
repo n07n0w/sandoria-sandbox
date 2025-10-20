@@ -1,13 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const imageController = require("../controllers/imageController");
-const multer = require("multer");
+const imageController = require('../controllers/imageController');
+const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post(
-  "/:sessionId",
-  upload.single("imgBase64"),
+  '/:sessionId',
+  upload.single('imgBase64'),
   imageController.handlePost,
 );
 

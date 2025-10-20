@@ -1,9 +1,9 @@
-const mysql = require("mysql2/promise");
-const fs = require("fs").promises;
-const path = require("path");
-const config = require("./dbConfig");
+const mysql = require('mysql2/promise');
+const fs = require('fs').promises;
+const path = require('path');
+const config = require('./dbConfig');
 
-console.log("Database config loaded:", {
+console.log('Database config loaded:', {
   host: config.host,
   port: config.port,
   database: config.database,
@@ -20,7 +20,7 @@ async function tryConnect(config, retries = 5, delay = 5000) {
     try {
       console.log(`Connection attempt ${i + 1} of ${retries}...`);
       const connection = await mysql.createConnection(config);
-      console.log("Connection successful!");
+      console.log('Connection successful!');
       return connection;
     } catch (err) {
       console.error(`Connection attempt ${i + 1} failed:`, err.message);
@@ -36,29 +36,29 @@ async function initializeDatabase() {
   try {
     // First connect without database to create it if needed
     const { database, ...configWithoutDB } = config;
-    console.log("Attempting to connect to database server...");
+    console.log('Attempting to connect to database server...');
     connection = await tryConnect(configWithoutDB);
 
     // Create database if not exists
-    console.log("Creating database if not exists...");
+    console.log('Creating database if not exists...');
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
     await connection.query(`USE ${database}`);
 
     // Read and execute the SQL file
-    console.log("Reading SQL file...");
+    console.log('Reading SQL file...');
     const sqlFile = await fs.readFile(
-      path.join(__dirname, "DB", "sandbox.sql"),
-      "utf8",
+      path.join(__dirname, 'DB', 'sandbox.sql'),
+      'utf8',
     );
 
     // Split SQL file into individual statements
     const statements = sqlFile
-      .split(";")
+      .split(';')
       .map((statement) => statement.trim())
       .filter((statement) => statement.length > 0);
 
     // Execute each statement
-    console.log("Executing SQL statements...");
+    console.log('Executing SQL statements...');
     for (const statement of statements) {
       if (statement.length > 0) {
         try {
@@ -72,9 +72,9 @@ async function initializeDatabase() {
       }
     }
 
-    console.log("Database initialized successfully");
+    console.log('Database initialized successfully');
   } catch (err) {
-    console.error("Error initializing database:", err);
+    console.error('Error initializing database:', err);
     throw err;
   } finally {
     if (connection) {
@@ -87,11 +87,11 @@ async function initializeDatabase() {
 if (require.main === module) {
   initializeDatabase()
     .then(() => {
-      console.log("Database initialization completed");
+      console.log('Database initialization completed');
       process.exit(0);
     })
     .catch((err) => {
-      console.error("Database initialization failed:", err);
+      console.error('Database initialization failed:', err);
       process.exit(1);
     });
 }
