@@ -106,6 +106,8 @@
         if (onStatusChange) onStatusChange('ws-closed');
         if (!closedManually) {
           if (onStatusChange) onStatusChange('ws-reconnecting');
+          setupWebSocket();
+/*
           setTimeout(() => {
             try {
               setupWebSocket();
@@ -113,6 +115,7 @@
               log('Reconnection failed', e);
             }
           }, 2000);
+*/
         }
       };
 
@@ -209,6 +212,7 @@
             !closedManually
           ) {
             if (onStatusChange) onStatusChange('reconnecting');
+/*
             setTimeout(() => {
               try {
                 setupPeerConnection();
@@ -216,6 +220,8 @@
                 log('Re-setup failed', e);
               }
             }, 3000);
+*/
+            setupPeerConnection();
           }
         } catch (e) {
           log('onconnectionstatechange handler error', e);
