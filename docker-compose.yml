@@ -38,12 +38,6 @@ services:
     env_file:
       - .env
       - .env.version
-    #environment:
-    #  DB_HOST: db
-    #  DB_USER: sandboxuser
-    #  DB_PASSWORD: sandboxuser_pass
-    #  DB_NAME: sandbox
-    #  BASE_URL: box.sandoria.org
     depends_on:
       db:
         condition: service_healthy
