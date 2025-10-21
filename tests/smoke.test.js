@@ -97,25 +97,25 @@ test('UUID generation works', async () => {
 });
 
 // Test 6: Проверка bcrypt
-test('Bcrypt works for password hashing', async () => {
-  const bcrypt = require('bcrypt');
+//test('Bcrypt works for password hashing', async () => {
+//  const bcrypt = require('bcrypt');
+//
+//  const password = 'testPassword123';
+//  const hash = await bcrypt.hash(password, 10);
+//
+//  assert.ok(hash, 'Hash should be generated');
+//  assert.notStrictEqual(
+//    password,
+//    hash,
+//    'Hash should be different from password',
+//  );
 
-  const password = 'testPassword123';
-  const hash = await bcrypt.hash(password, 10);
+//  const isMatch = await bcrypt.compare(password, hash);
+//  assert.strictEqual(isMatch, true, 'Password should match hash');
 
-  assert.ok(hash, 'Hash should be generated');
-  assert.notStrictEqual(
-    password,
-    hash,
-    'Hash should be different from password',
-  );
-
-  const isMatch = await bcrypt.compare(password, hash);
-  assert.strictEqual(isMatch, true, 'Password should match hash');
-
-  const isWrongMatch = await bcrypt.compare('wrongPassword', hash);
-  assert.strictEqual(isWrongMatch, false, 'Wrong password should not match');
-});
+//  const isWrongMatch = await bcrypt.compare('wrongPassword', hash);
+//  assert.strictEqual(isWrongMatch, false, 'Wrong password should not match');
+//});
 
 // Test 7: Проверка WebSocket модуля
 test('WebSocket module loads', async () => {

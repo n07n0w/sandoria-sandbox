@@ -189,3 +189,15 @@ jobs:
           echo ""
           echo "Run locally:"
           echo "  npm run validate"
+
+      - name: Execute remote SSH commands using password
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd /home/sandoria-sandbox/
+            docker-compose down
+            git pull
+            docker-compose up -d --build
