@@ -1,4 +1,18 @@
-﻿(function (global) {
+﻿(function() {
+  const originalLog = console.log;
+  console.log = function(...args) {
+    const stack = new Error().stack
+      .split('\n')
+      .slice(2, 5) // кілька рядків для контексту
+      .join('\n');
+    
+    originalLog.apply(console, args);
+    originalLog('%cStack trace:', 'color: gray');
+    originalLog(stack);
+  };
+})();
+
+(function (global) {
   function startP2PConnection(
     clientId,
     targetId,
@@ -62,14 +76,18 @@
     };
 
     function sendMessage(data) {
+      console.log("sendMessage", data);
       const text = typeof data === 'string' ? data : JSON.stringify(data);
       if (dataChannel && dataChannel.readyState === 'open') {
+		dataChannel.send(text);
+/*
         try {
           dataChannel.send(text);
         } catch (e) {
           log('Failed to send via dataChannel', e);
           pendingMessages.push(text);
         }
+*/
       } else {
         log('⏳ Queueing message...');
         pendingMessages.push(text);
@@ -200,6 +218,17 @@
       };
 
       peerConnection.onconnectionstatechange = () => {
+        const state = peerConnection.connectionState;
+        log("🔄 RTC state:", state);
+        if ((state === "disconnected" || state === "failed") && !closedManually) {
+          if (onStatusChange) {
+            onStatusChange("reconnecting");
+          }
+          setupPeerConnection()
+        }
+      };
+
+      peerConnection.onconnectionstatechangeBAD = () => {
         try {
           const state = peerConnection.connectionState;
           log('🔄 RTC state:', state);
