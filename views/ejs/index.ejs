@@ -758,7 +758,7 @@
 		}
 	}
 
-	const scaleAllSceneImagesOnLayer = (layer, oldW, oldH, newW, newH) => {
+	function scaleAllSceneImagesOnLayer(layer, oldW, oldH, newW, newH) {
 		if (oldW == newW && oldH == newH) {
 			return;
 		}
@@ -1217,7 +1217,7 @@
 		});
 
 		sandboxLayer.on('dragmove', function(evt) {
-			console.log(evt);
+//			console.log(evt);
 			if (clientMode || canDoctorEditImages) {
 				let node = evt.target;
 				const boxes = [node.getClientRect()];
@@ -1653,33 +1653,19 @@ console.log({
 	};
 
 	const stageFromJson = async (stageJson) => {
+		console.log("stageFromJson", stageJson);
 		if (stageJson) {
-//			let containerElement = $('#container')[0];
 			let containerElement = $('#containerHidden')[0];
 			const originalStage = stage;
 			const originalSandboxWidth = originalStage.width();
 			const originalSandboxHeight = originalStage.height();
-//			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
 			const stageReload = Konva.Node.create(JSON.parse(stageJson), containerElement);
 			const sandboxLayerReload = stageReload.findOne('#sandboxLayer');
 			const backgroundLayerReload = stageReload.findOne('#backgroundLayer');
 			background = backgroundLayerReload.findOne('#backgroundImg');
 
-//			scaleAllSceneImagesOnLayer(sandboxLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
-//			scaleAllSceneImagesOnLayer(backgroundLayer, stage.width(), stage.height(), originalSandboxWidth, originalSandboxHeight);
-//			stage.width(originalSandboxWidth);
-//			stage.height(originalSandboxHeight);
-/*
-			if (typeof background !== 'undefined') {
-				backgroundImage.width = originalSandboxWidth;
-				backgroundImage.height = originalSandboxHeight;
-				background.width(originalSandboxWidth);
-				background.height(originalSandboxHeight);
-			}
-*/
-
-//			stage.find('Image').forEach((imageNode) => {
-			sandboxLayerReload.find('Image').forEach((imageNode) => {
+			sandboxLayerReload.find('Image').forEach((imageNode, nodeIndex, arr) => {
+				const isLast = nodeIndex === arr.length - 1;
 				const src = imageNode.getAttr('src'); // Retrieve the saved source
 				const image = new Image();
 				image.onload = () => {
@@ -1700,6 +1686,9 @@ console.log({
 				transformer.remove();
 				sandboxLayer.add(transformer);
 				transformer.nodes([imageNode]);
+				if (isLast) {
+					scaleAllSceneImagesOnLayer(sandboxLayer, stageReload.width(), stageReload.height(), originalSandboxWidth, originalSandboxHeight);
+				}
 			});
 
 			backgroundLayerReload.find('Image').forEach((imageNode) => {
@@ -1715,8 +1704,8 @@ console.log({
 				imageNode.width(originalSandboxWidth);
 				imageNode.height(originalSandboxHeight);
 				backgroundImage = image;
+				backgroundLayer.add(imageNode);
 			});
-
 		}
 	};
 
