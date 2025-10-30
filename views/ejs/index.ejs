@@ -806,16 +806,16 @@
 		scaleAllSceneImagesOnLayer(sandboxLayer, oldW, oldH, newW, newH);
 	};
 
-      function levelUp() {
-          transformer.nodes().forEach(function (currentValue, index, arr) {
-//              currentValue.moveUp();
-              currentValue.moveToTop();
-//              if (notifyViewer) {
-                var event = levelUpEvent();
-                notifyLevelUp(event);
-//              }
-          });
-      }
+	function levelUp(data, notify = false) {
+		const shouldNotify = data?.notify || notify;
+		transformer.nodes().forEach(function (currentValue, index, arr) {
+			currentValue.moveToTop();
+			if (shouldNotify) {
+				var event = levelUpEvent();
+				notifyLevelUp(event);
+			}
+		});
+	}
 
 	const updateTransformerInteractionMode = () => {
 		if (transformer) {
@@ -861,16 +861,16 @@
 		updateTransformerInteractionMode();
 	};
 
-      function levelDown() {
-          transformer.nodes().forEach(function (currentNode, index, arr) {
-//              currentNode.moveDown();
-              currentNode.moveToBottom();
-//              if (notifyViewer) {
-                var event = levelDownEvent();
-                notifyLevelDown(event);
-//              }
-          });
-      }
+	function levelDown(data, notify = false) {
+		const shouldNotify = data?.notify || notify;
+		transformer.nodes().forEach(function (currentNode, index, arr) {
+			currentNode.moveToBottom();
+			if (shouldNotify) {
+				var event = levelDownEvent();
+				notifyLevelDown(event);
+			}
+		});
+	}
 
       function saveStateToImage() {
         var event = saveStateToImageEvent();
@@ -1217,7 +1217,6 @@
 		});
 
 		sandboxLayer.on('dragmove', function(evt) {
-//			console.log(evt);
 			if (clientMode || canDoctorEditImages) {
 				let node = evt.target;
 				const boxes = [node.getClientRect()];
@@ -2224,12 +2223,12 @@ console.log({
 					</p>
 				<% } %>
 
-					<p class="control_line" onclick="levelDown()">
+					<p class="control_line" onclick="levelDown(null, true)">
 						<span class="icon"><img src="/images/svg/control_back.svg"></span>
 						<span class="label">На задний план</span>
 					</p>
 
-					<p class="control_line" onclick="levelUp()">
+					<p class="control_line" onclick="levelUp(null, true)">
 						<span class="icon"><img src="/images/svg/control_forward.svg"></span>
 						<span class="label">На передний план</span>
 					</p>
