@@ -1,12 +1,15 @@
 ﻿(function() {
   const originalLog = console.log;
+
   console.log = function(...args) {
+    const now = new Date();
+    const time = now.toISOString().split('T')[1].replace('Z', ''); // 12:34:56.789
     const stack = new Error().stack
       .split('\n')
-      .slice(2, 5) // кілька рядків для контексту
+      .slice(2, 5)
       .join('\n');
-    
-    originalLog.apply(console, args);
+
+    originalLog(`%c[${time}]`, 'color: #888', ...args);
     originalLog('%cStack trace:', 'color: gray');
     originalLog(stack);
   };
@@ -336,10 +339,8 @@
       }
     }
 
-    // 🟢 ВАЖЛИВО: запускаємо WebSocket підключення
     setupWebSocket();
 
-    // ✅ Повертаємо API
     return {
       send: sendMessage,
       isConnected: () => isReady,
@@ -347,7 +348,6 @@
     };
   }
 
-  // Async обгортка
   function startP2PConnectionAsync(
     clientId,
     targetId,
@@ -368,7 +368,6 @@
             resolve(connection);
           }
 
-          // Опціонально: відхиляємо, якщо зʼєднання не вдалося
           if (status === 'failed' || status === 'closed') {
             reject(new Error(`P2P connection failed with status: ${status}`));
           }
@@ -377,7 +376,6 @@
     });
   }
 
-  // Глобальне API
   global.startP2PConnection = startP2PConnection;
   global.startP2PConnectionAsync = startP2PConnectionAsync;
 })(this);
