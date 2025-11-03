@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>WebRTC ICE Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f6f6f6;
+      color: #222;
+      padding: 20px;
+    }
+    pre {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: auto;
+      max-height: 70vh;
+    }
+    button {
+      padding: 8px 16px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>WebRTC ICE Gathering Test</h1>
+  <p>Натисни кнопку, щоб перевірити швидкість збирання ICE кандидатів:</p>
+  <button id="testLocal">Тест без STUN</button>
+  <button id="testStun">Тест зі STUN</button>
+  <pre id="log"></pre>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const log = (...args) => {
+      const text = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' ');
+      logEl.textContent += text + '\n';
+      console.log(...args);
+    };
+
+    async function testICE(iceServers, label) {
+      log(`\n-----------------------------`);
+      log(`🔹 ${label}`);
+      console.time(label);
+
+      const pc = new RTCPeerConnection({ iceServers });
+      const channel = pc.createDataChannel("test");
+
+      pc.onicegatheringstatechange = () => {
+        log("🌀 ICE gathering state:", pc.iceGatheringState);
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          log("📡 Кандидат:", event.candidate.candidate);
+        } else {
+          log("✅ ICE gathering complete (null candidate)");
+          console.timeEnd(label);
+          pc.close();
+        }
+      };
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+    }
+
+    document.getElementById('testLocal').onclick = () =>
+      testICE([], "Без STUN (локально)");
+
+    document.getElementById('testStun').onclick = () =>
+      testICE([{ urls: "stun:stun.l.google.com:19302" }], "Зі STUN (Google)");
+  </script>
+</body>
+</html>

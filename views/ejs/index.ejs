@@ -1392,6 +1392,9 @@
 
 		const leftSideWidth = $('.left_side_menu').width();
 		let sandboxWidth = screenWidth - leftSideWidth - minRsideWidth;
+if (isNaN(sandboxWidth)) {
+	return;
+}
 		const categoryImagesStyleRightShift = parseFloat(getCssRuleProperty('#categoryImages', 'right'));
 		categoryImageMaxPanelWidth = screenWidth - leftSideWidth - categoryImagesStyleRightShift;
 
