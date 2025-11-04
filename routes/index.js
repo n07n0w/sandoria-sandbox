@@ -1,6 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
+
+const LOGS_DIR = path.join(__dirname, '../logs');
+
 const pool = require('../dbConnection');
 const logger = require('../logger');
 const CategoryRepository =
@@ -52,6 +58,31 @@ const handleGetIndex = async (req, res, next) => {
   }
 };
 
+const handleGetLogsDownload = async (req, res, next) => {
+  if (!fs.existsSync(LOGS_DIR)) {
+    return res.status(404).send('Logs folder not found');
+  }
+
+  // Назва архіву
+  const zipName = 'logs.zip';
+
+  res.setHeader('Content-Disposition', `attachment; filename=${zipName}`);
+  res.setHeader('Content-Type', 'application/zip');
+
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  archive.pipe(res);
+
+  // Додати всю директорію "logs" в архів
+  archive.directory(LOGS_DIR, false); // false — не створює вкладену папку logs у середині архіву
+
+  archive.finalize();
+
+  archive.on('error', (err) => {
+    console.error('Archive error:', err);
+    res.status(500).send('Error while creating archive');
+  });
+};
+
 const handleLogTrace = async (req, res) => {
   const logEntry = req.body;
   console.info(logEntry);
@@ -62,6 +93,8 @@ const handleLogTrace = async (req, res) => {
 
 /* GET home page. */
 router.get('/', handleGetIndex);
+
+router.get('/logs/download', handleGetLogsDownload);
 
 router.post('/log-trace', handleLogTrace);
 
