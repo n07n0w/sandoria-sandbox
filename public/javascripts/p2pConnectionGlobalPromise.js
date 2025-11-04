@@ -220,7 +220,7 @@
         setupDataChannel(event.channel);
       };
 
-      peerConnection.onconnectionstatechange = () => {
+      peerConnection.onconnectionstatechangeFix = () => {
         const state = peerConnection.connectionState;
         log("🔄 RTC state:", state);
         if ((state === "disconnected" || state === "failed") && !closedManually) {
@@ -231,7 +231,7 @@
         }
       };
 
-      peerConnection.onconnectionstatechangeBAD = () => {
+      peerConnection.onconnectionstatechange = () => {
         try {
           const state = peerConnection.connectionState;
           log('🔄 RTC state:', state);
