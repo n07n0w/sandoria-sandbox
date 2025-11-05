@@ -1,0 +1,107 @@
+name: Deploy to Production
+
+# Деплой запускается только при push (не на pull request)
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch: # Позволяет запустить вручную
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          script: |
+            VERSION="${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
+            BRANCH="${{ github.ref_name }}"
+            COMMIT="${{ github.sha }}"
+            BUILD="${{ github.run_number }}"
+            BUILT_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            SHORT_COMMIT="${COMMIT:0:7}"
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🚀 Starting Deployment"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📦 VERSION:    $VERSION"
+            echo "🌿 BRANCH:     $BRANCH"
+            echo "🔖 COMMIT:     $SHORT_COMMIT"
+            echo "🔢 BUILD:      $BUILD"
+            echo "⏰ BUILT_AT:   $BUILT_AT"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+            # Создаем файл с метаданными версии
+            cat > /home/sandoria-sandbox/.env.version <<EOF
+            VERSION=$VERSION
+            BRANCH=$BRANCH
+            COMMIT=$SHORT_COMMIT
+            BUILD=$BUILD
+            BUILT_AT=$BUILT_AT
+            EOF
+
+            echo ""
+            echo "📥 Pulling latest code..."
+            cd /home/sandoria-sandbox/
+            git pull
+
+            echo ""
+            echo "🛑 Stopping containers..."
+            docker-compose down
+
+            echo ""
+            echo "🏗️  Building and starting containers..."
+            docker-compose up -d --build
+
+            echo ""
+            echo "⏳ Waiting for application to start..."
+            sleep 5
+
+            echo ""
+            echo "🔍 Checking container status..."
+            docker-compose ps
+
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "✅ Deployment Complete!"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: ✅ Deployment Summary
+        if: success()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ DEPLOYMENT SUCCESSFUL!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🌐 Application deployed to production"
+          echo "🔖 Version: ${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+          echo "🔖 Commit: ${{ github.sha }}"
+          echo ""
+          echo "🎉 Your changes are now live!"
+
+      - name: ❌ Deployment Failed
+        if: failure()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "❌ DEPLOYMENT FAILED!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Please check the logs above for details."
+          echo ""
+          echo "Common issues:"
+          echo "  • SSH connection problems"
+          echo "  • Docker build failures"
+          echo "  • Git pull conflicts"
+          echo "  • Container startup errors"
+          echo ""
+          echo "💡 Check server logs:"
+          echo "  ssh ${{ secrets.USER }}@${{ secrets.HOST }}"
+          echo "  cd /home/sandoria-sandbox"
+          echo "  docker-compose logs"
