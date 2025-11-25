@@ -113,62 +113,64 @@ async function initWebSocket(server) {
   var wss = new WebSocket.Server({ server }); // WebSocket на тому ж сервері
   console.log('WebSocket:', wss);
 
-  wss.on('connection', (ws) => {
-    console.log('New client connected');
-    let clientId = null;
+    function broadcastPresence(sessionId, isOnline) {
+        const msg = JSON.stringify({
+            type: "presence",
+            sessionId,
+            status: isOnline ? "online" : "offline"
+        });
 
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log('New message', data);
-
-        // 1. Перше повідомлення від клієнта: реєстрація ID
-        if (data.type === 'register') {
-          clientId = data.clientId;
-          clients.set(clientId, ws);
-          console.log(`🟢 Client registered: ${clientId}`);
-          return;
+        for (const ws of clients.values()) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(msg);
+            }
         }
+    }
 
-        // 2. Інші типи — signaling (offer/answer/ice)
-        if (!clientId) {
-          console.warn('Received signaling message from unregistered client');
-          return;
-        }
+    wss.on('connection', (ws) => {
+        console.log("WS connection opened");
+        let registeredId = null;
 
-        if (!data.targetId) {
-          console.warn('Received signaling message without targetId');
-          return;
-        }
+        ws.on('message', (raw) => {
+            let msg;
+            try {
+                msg = JSON.parse(raw);
+            } catch (e) {
+                console.log("Invalid JSON:", raw);
+                return;
+            }
 
-        const targetSocket = clients.get(data.targetId);
-        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-          targetSocket.send(
-            JSON.stringify({
-              type: data.type,
-              sdp: data.sdp,
-              candidate: data.candidate,
-              fromId: clientId,
-            }),
-          );
-        } else {
-          console.warn(
-            `Target client ${data.targetId} not found or not connected`,
-          );
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-        // Don't crash the connection, just log the error
-      }
+            // Client must register after connect        // CHANGED
+            if (msg.action === 'register') {
+                registeredId = msg.sessionId;
+
+                clients.set(registeredId, ws);
+                console.log("Registered:", registeredId);
+
+                // notify others
+                broadcastPresence(registeredId, true);   // NEW
+                return;
+            }
+
+            // Route messages by msg.to                  // CHANGED
+            if (msg.to) {
+                const target = clients.get(msg.to);
+                if (target && target.readyState === WebSocket.OPEN) {
+                    target.send(JSON.stringify(msg));
+                }
+            }
+        });
+
+        ws.on('close', () => {
+            if (registeredId) {
+                clients.delete(registeredId);
+                console.log("Disconnected:", registeredId);
+                broadcastPresence(registeredId, false);  // NEW
+            }
+        });
     });
 
-    ws.on('close', () => {
-      if (clientId) {
-        clients.delete(clientId);
-        console.log(`🔴 Client disconnected: ${clientId}`);
-      }
-    });
-  });
+    console.log("WebSocket server attached");
 }
 
 // Export both the app and the initialization function

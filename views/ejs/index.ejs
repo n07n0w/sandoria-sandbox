@@ -80,7 +80,11 @@
 <%/*
 	<script src="/javascripts/p2pConnectionGlobalPromise.js"></script>
 */%>
+<%/*
 	<script src="/javascripts/p2pConnectionGlobalPromise.v2.js"></script>
+*/%>
+
+	<script src="/javascripts/reliableWS.v2.js"></script>
 	
   <script type="text/javascript">
 //      const leftSideWidth = 208;	// ширина левой части не мняется!
@@ -108,6 +112,8 @@
 	  var clientMode = <%=clientMode %>;
 	  var firstCategorySelected = false;
 	  var canDoctorEditImages = true;
+	  var meConnected = false;
+	  var opponentConnected = false;
 	  const ratio = 8;
 
 
@@ -743,6 +749,7 @@
 	}
 
 	function removeAll() {
+		console.log("removeAll")
 		var nodes = sandboxLayer.find(node => {
 			return 'Image' === node.className;
 		});
@@ -1469,11 +1476,10 @@ console.log({
 
 		element = document.getElementById('categoryImages');
 		let categoryImageHeight = screenHeight - rSideContentHeight;
-		element.style.height = categoryImageHeight + 'px';
-//		element.style.width = (rSideContentWidth + 10) + 'px';
-//		const categoryImagesStyleRightShift = parseFloat(getCssRuleProperty('#categoryImages', 'right'));
-		element.style.width = (categoryImageMinPanelWidth - categoryImagesStyleRightShift) + 'px';
-//		element.style.width = categoryImageMinPanelWidth + 'px';
+		if (element) {
+			element.style.height = categoryImageHeight + 'px';
+			element.style.width = (categoryImageMinPanelWidth - categoryImagesStyleRightShift) + 'px';
+		}
 
 		let topCategoriesHeight = $("#top_categories").height();
 		var slider = $("#categoryImageSlider");
@@ -1594,7 +1600,7 @@ console.log({
 	const selectFirstCategoryFromStart = function() {
 		// Надо найти первую катерогию в списке, взять ее ID ("cid" аттрибут) и выбрать ее
 		let allCategories = $(".topCategory");
-		if (typeof allCategories !== 'undefined') {
+		if (typeof allCategories !== 'undefined' && 0 < allCategories.length) {
 			categorySelect(categorySelectEvent(allCategories[0].attributes['cid'].value, allCategories[0].attributes['cname'].value), true);
 		}
 	};
@@ -1629,7 +1635,6 @@ console.log({
 			showInvitePopup(res);
 			saveP2PDataToLocalStorage(res.sessionId, res.opponentSessionId, false);
 			launchPeer(res.sessionId, res.opponentSessionId, false);
-//			launchPeer('1', '2', false);
 
 			inviteClientBtn.removeClass("pressed");
 			var anchor = inviteClientBtn.find('a')[0];
@@ -1780,14 +1785,10 @@ console.log({
 		sendEvent(event);
 	};
 
-	async function onStatusChange(state) {
-		console.log("⚡ Status:", state);
-		if (state === 'connected') {
-			showStatus("✅ Подключено", "green");
-			updateConnectionState(true);
-			onConnectionEstablished();
+	const setOpponentConnected = async () => {
+		opponentConnected = true;
+		if (meConnected && opponentConnected) {
 		<%if (clientMode) { %>
-//			await loadKonvaState();
 			await reLoadStateAfterReconnect();
 			await restoreOpponentStage();
 			const eventHistoryLS = sessionStorage.getItem('eventHistory')
@@ -1796,10 +1797,50 @@ console.log({
 				firstCategorySelected = true;
 			}
 		<% } %>
+		}
+	}
+
+	const opponentConnectionInformEvent = () => {
+		var jsonData = {};
+		jsonData['event']  = 'setOpponentConnected';
+		jsonData['notify'] = false;
+		jsonData['skipFromHistory']  = true;
+		return jsonData;
+	}
+
+	async function informOpponentAboutConnection() {
+		const event = opponentConnectionInformEvent(stage.toJSON());
+		sendEvent(event);
+	}
+
+	async function onStatusChange(state) {
+		console.log("⚡ Status:", state);
+		if (state === 'connected') {
+			showStatus("✅ Подключено", "green");
+			if (!meConnected) {
+				meConnected = true;
+				informOpponentAboutConnection();
+			}
+			updateConnectionState(true);
+			onConnectionEstablished();
+		<%if (clientMode) { %>
+//			await loadKonvaState();
+/*
+			await reLoadStateAfterReconnect();
+			await restoreOpponentStage();
+			const eventHistoryLS = sessionStorage.getItem('eventHistory')
+			if (!firstCategorySelected && !eventHistoryLS) {
+				selectFirstCategoryFromStart();
+				firstCategorySelected = true;
+			}
+*/
+		<% } %>
 		} else if (state === 'ws-closed') {
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
 //			saveKonvaState();
+			meConnected = false;
+			opponentConnected = false;
 			updateConnectionState(false);
 			showStatus("❌ Соединение потеряно", "red");
 		} else if (state === 'reconnecting') {
@@ -1808,15 +1849,70 @@ console.log({
 	}
 
 	const reLoadStateAfterReconnect = () => {
-		removeAll();
+//		removeAll();
 		loadKonvaState();
 	};
+
+function startWS(sessionId, opponentSessionId, onConnectedHandler) {
+
+    const ws = createReliableWS(
+        null,                 // auto URL
+        sessionId,
+        opponentSessionId,
+        {
+            ack: true,
+            heartbeat: true
+        }
+    );
+
+    ws.onConnected(() => {
+        console.log("WS connected");
+
+        if (onConnectedHandler)
+            onConnectedHandler();
+
+        ws.send({ type: "hello", text: "Hi " + opponentSessionId });
+    });
+
+    ws.onReconnect(() => {
+        console.log("WS reconnected");
+    });
+
+    ws.onDisconnected(() => {
+        console.log("WS disconnected");
+    });
+
+    ws.onMessage((msg) => {
+        console.log("RECEIVED MESSAGE:", msg);
+        onMessage(msg);
+    });
+
+    ws.onPresence((p) => {
+        console.log("PRESENCE:", p);
+
+        if (p.sessionId === opponentSessionId) {
+            if (p.status === "online")
+                console.log("Opponent joined the session!");
+
+            if (p.status === "offline")
+                console.log("Opponent left the session");
+        }
+    });
+
+    return ws;
+}
 
 	const launchPeer = async function(sessionId, opponentSessionId, isDataChannelInitiator = true, onConnectionHandler) {
 		console.log("launchPeer", sessionId, opponentSessionId);
 //		const myConn = startP2PConnection(sessionId, opponentSessionId, onMessage, onStatusChange);
 //		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
-		myConn = await startP2PConnectionAsync(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+//		myConn = await startP2PConnectionAsync(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
+//		const ws = createReliableWS(null, sessionId, opponentSessionId,
+		myConn = await startWS(sessionId, opponentSessionId, onConnectionHandler);
+/*
+		myConn = createReliableWS(null, sessionId, opponentSessionId,
+			{ ack: true });
+
 		if (onConnectionHandler) onConnectionHandler();
 		myConn.send(`Hi ${opponentSessionId}`);
 
@@ -1824,6 +1920,7 @@ console.log({
 		if (myConn.isConnected()) {
 			myConn.send("Connected");
 		}
+*/
 	};
 
 	const getElementWidth = function(element) {
@@ -1926,7 +2023,7 @@ console.log({
 		document.getElementById('progress').style.display = 'none';
 	};
 
-  $( function() {
+  $(async function() {
     var dialog, form,
  
       // From https://html.spec.whatwg.org/multipage/input.html#e-mail-state-%28type=email%29
@@ -1939,10 +2036,7 @@ console.log({
 
     <% if (typeof sessionId !== 'undefined') { %>
 
-//	launchPeer('<%=sessionId %>', '<%=opponentSessionId %>');
-//	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true, reLoadStateAfterReconnect);
 	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
-//	launchPeer('2', '1', true);
 
     <% } %>
 
@@ -2068,11 +2162,12 @@ console.log({
 	updateTransformerInteractionMode();
 	$("#iterations").hide();
     <% if (!(typeof sessionId !== 'undefined')) { %>
-		selectFirstCategoryFromStart();
+//		selectFirstCategoryFromStart();
 	<% } %>
 	$('#inviteClientBtn').click(inviteClient);
 
-	loadSandboxWithProgress();
+	await loadSandboxWithProgress();
+	selectFirstCategoryFromStart();
 
 	var p2psettings = loadP2PDataFromLocalStorage();
 	if (p2psettings) {
