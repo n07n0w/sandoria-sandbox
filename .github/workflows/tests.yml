@@ -1,4 +1,4 @@
-name: Quick CI Tests
+name: CI Tests
 
 # Запускается на всех ветках при push и pull request
 on:
@@ -171,7 +171,7 @@ jobs:
           echo "✅ Smoke tests: PASSED"
           echo "✅ File structure: PASSED"
           echo ""
-          echo "🚀 Your code is ready for the next step!"
+          echo "🚀 Your code is ready for deployment!"
 
       # 14. Failure summary
       - name: ❌ Failure Summary
@@ -189,37 +189,3 @@ jobs:
           echo ""
           echo "Run locally:"
           echo "  npm run validate"
-
-      - name: Execute remote SSH commands and inject version metadata
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          script: |
-            VERSION="${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
-            BRANCH="${{ github.ref_name }}"
-            COMMIT="${{ github.sha }}"
-            BUILD="${{ github.run_number }}"
-            BUILT_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            SHORT_COMMIT="${COMMIT:0:7}"
-
-            echo "Deploy metadata:"
-            echo "  VERSION=$VERSION"
-            echo "  BRANCH=$BRANCH"
-            echo "  COMMIT=$SHORT_COMMIT"
-            echo "  BUILD=$BUILD"
-            echo "  BUILT_AT=$BUILT_AT"
-
-            cat > /home/sandoria-sandbox/.env.version <<EOF
-            VERSION=$VERSION
-            BRANCH=$BRANCH
-            COMMIT=$SHORT_COMMIT
-            BUILD=$BUILD
-            BUILT_AT=$BUILT_AT
-            EOF
-
-            cd /home/sandoria-sandbox/
-            docker-compose down
-            git pull
-            docker-compose up -d --build
