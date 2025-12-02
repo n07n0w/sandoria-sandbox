@@ -1,6 +1,7 @@
 require('./console-logger');
 var createError = require('http-errors');
 var express = require('express');
+const compression = require('compression');
 const http = require('http');
 const WebSocket = require('ws');
 const session = require('express-session');
@@ -33,6 +34,11 @@ app.locals.peerserversecure = constants.PEER_SERVER_SECURE;
 app.set('views', path.join(__dirname, 'views/ejs'));
 app.set('view engine', 'ejs');
 
+app.use(compression({
+    level: 6,      // compression level (0–9)
+    threshold: 0   // compress everything
+}));
+
 app.use(logger('dev'));
 app.use(express.json());
 //app.use(express.urlencoded({ extended: false }));
@@ -57,6 +63,11 @@ app.use(
     saveUninitialized: false,
   }),
 );
+
+app.use('/images/svg', express.static('public/images/svg', {
+    maxAge: '1d',
+    immutable: true
+}));
 
 // Don't set up routes until database is initialized
 let routesInitialized = false;

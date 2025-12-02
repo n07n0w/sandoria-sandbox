@@ -1817,12 +1817,15 @@ console.log({
 		console.log("⚡ Status:", state);
 		if (state === 'connected') {
 			showStatus("✅ Подключено", "green");
+/*
 			if (!meConnected) {
 				meConnected = true;
 				informOpponentAboutConnection();
 			}
 			updateConnectionState(true);
 			onConnectionEstablished();
+*/
+			updateConnectionState(true);
 		<%if (clientMode) { %>
 //			await loadKonvaState();
 /*
@@ -1839,8 +1842,8 @@ console.log({
 		} else if (state === 'ws-reconnecting') {
 		} else if (state === 'disconnected') {
 //			saveKonvaState();
-			meConnected = false;
-			opponentConnected = false;
+//			meConnected = false;
+//			opponentConnected = false;
 			updateConnectionState(false);
 			showStatus("❌ Соединение потеряно", "red");
 		} else if (state === 'reconnecting') {
@@ -1853,10 +1856,22 @@ console.log({
 		loadKonvaState();
 	};
 
-function startWS(sessionId, opponentSessionId, onConnectedHandler) {
+function startWS(
+    sessionId,
+    opponentSessionId,
+    {
+        onConnected,
+        onDisconnected,
+        onReconnected,
+        onOpponentJoined,
+        onOpponentLeft,
+        onOpponentReconnected,
+        onMessage
+    } = {}        // параметри НЕобов’язкові
+) {
 
     const ws = createReliableWS(
-        null,                 // auto URL
+        null,
         sessionId,
         opponentSessionId,
         {
@@ -1865,37 +1880,66 @@ function startWS(sessionId, opponentSessionId, onConnectedHandler) {
         }
     );
 
+    // -------------------------------
+    //  OUR CONNECTION EVENTS
+    // -------------------------------
+
     ws.onConnected(() => {
         console.log("WS connected");
 
-        if (onConnectedHandler)
-            onConnectedHandler();
-
-        ws.send({ type: "hello", text: "Hi " + opponentSessionId });
-    });
-
-    ws.onReconnect(() => {
-        console.log("WS reconnected");
+        if (onConnected)
+            onConnected();
     });
 
     ws.onDisconnected(() => {
         console.log("WS disconnected");
+
+        if (onDisconnected)
+            onDisconnected();
     });
 
+    ws.onReconnect(() => {
+        console.log("WS reconnected");
+
+        if (onReconnected)
+            onReconnected();
+    });
+
+    // -------------------------------
+    //  MESSAGE EVENT
+    // -------------------------------
     ws.onMessage((msg) => {
-        console.log("RECEIVED MESSAGE:", msg);
-        onMessage(msg);
+        console.log("MESSAGE:", msg);
+
+        if (onMessage)
+            onMessage(msg);
     });
 
+    // -------------------------------
+    //  PRESENCE EVENTS
+    // -------------------------------
     ws.onPresence((p) => {
         console.log("PRESENCE:", p);
 
-        if (p.sessionId === opponentSessionId) {
-            if (p.status === "online")
-                console.log("Opponent joined the session!");
+        if (p.sessionId !== opponentSessionId)
+            return;
 
-            if (p.status === "offline")
-                console.log("Opponent left the session");
+        // Opponent joined
+        if (p.status === "online") {
+
+            // Перше підключення
+            if (onOpponentJoined)
+                onOpponentJoined();
+
+            // Так само можемо трактувати як "reconnected"
+            if (onOpponentReconnected)
+                onOpponentReconnected();
+        }
+
+        // Opponent left
+        if (p.status === "offline") {
+            if (onOpponentLeft)
+                onOpponentLeft();
         }
     });
 
@@ -1908,7 +1952,76 @@ function startWS(sessionId, opponentSessionId, onConnectedHandler) {
 //		myConn = startP2PConnection(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
 //		myConn = await startP2PConnectionAsync(sessionId, opponentSessionId, isDataChannelInitiator, onMessage, onStatusChange);
 //		const ws = createReliableWS(null, sessionId, opponentSessionId,
-		myConn = await startWS(sessionId, opponentSessionId, onConnectionHandler);
+////		myConn = await startWS(sessionId, opponentSessionId, onConnectionHandler);
+		myConn = startWS(sessionId, opponentSessionId, {
+			onConnected: async () => {
+//				uiSetMyStatus("online");
+				onStatusChange("connected");
+			<%if (clientMode) { %>
+				await reLoadStateAfterReconnect();
+				await restoreOpponentStage();
+				const eventHistoryLS = sessionStorage.getItem('eventHistory')
+				if (!firstCategorySelected && !eventHistoryLS) {
+					selectFirstCategoryFromStart();
+					firstCategorySelected = true;
+				}
+			<% } %>
+			},
+
+			onDisconnected: async () => {
+//				uiSetMyStatus("offline");
+				onStatusChange("disconnected");
+			},
+
+			onReconnected: async () => {
+//				uiSetMyStatus("online");
+				console.log("I am back online");
+//				onStatusChange("connected");
+			<%if (clientMode) { %>
+				await reLoadStateAfterReconnect();
+				await restoreOpponentStage();
+				const eventHistoryLS = sessionStorage.getItem('eventHistory')
+				if (!firstCategorySelected && !eventHistoryLS) {
+					selectFirstCategoryFromStart();
+					firstCategorySelected = true;
+				}
+			<% } %>
+			},
+
+			onOpponentJoined: async () => {
+//				uiSetOpponentStatus("online");
+				console.log("Opponent joined!");
+				onStatusChange("connected");
+			},
+
+			onOpponentLeft: async () => {
+//				uiSetOpponentStatus("offline");
+				console.log("Opponent left!");
+				onStatusChange("disconnected");
+			},
+
+			onOpponentReconnected: async () => {
+//				uiSetOpponentStatus("online");
+				console.log("Opponent reconnected!");
+//				informOpponentAboutConnection();
+			<%if (clientMode) { %>
+				await reLoadStateAfterReconnect();
+				await restoreOpponentStage();
+				const eventHistoryLS = sessionStorage.getItem('eventHistory')
+				if (!firstCategorySelected && !eventHistoryLS) {
+					selectFirstCategoryFromStart();
+					firstCategorySelected = true;
+				}
+			<% } %>
+
+			},
+
+			onMessage: (msg) => {
+				console.log("incoming:", msg);
+				onMessage(msg);
+			}
+		});
+
 /*
 		myConn = createReliableWS(null, sessionId, opponentSessionId,
 			{ ack: true });
@@ -1987,6 +2100,7 @@ function startWS(sessionId, opponentSessionId, onConnectedHandler) {
 			document.getElementById('progress-value').textContent = percent;
 		};
 
+/*
 		const loadImage = (img) => {
 			return new Promise((resolve, reject) => {
 				const tempImg = new Image();
@@ -1999,6 +2113,15 @@ function startWS(sessionId, opponentSessionId, onConnectedHandler) {
 				tempImg.onerror = reject;
 				tempImg.src = img.getAttribute('data-src');
 			});
+		};
+*/
+		const loadImage = async (img) => {
+			const url = img.getAttribute('data-src');
+			const response = await fetch(url, { cache: "force-cache" });
+			const blob = await response.blob();
+			img.src = URL.createObjectURL(blob);
+			loaded++;
+//			updateProgress();
 		};
 
 		const cores = navigator.hardwareConcurrency || 4; // fallback на 4, if brawser not support
