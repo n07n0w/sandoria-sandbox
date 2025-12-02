@@ -2121,7 +2121,7 @@ function startWS(
 			const blob = await response.blob();
 			img.src = URL.createObjectURL(blob);
 			loaded++;
-//			updateProgress();
+			updateProgress();
 		};
 
 		const cores = navigator.hardwareConcurrency || 4; // fallback на 4, if brawser not support
