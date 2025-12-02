@@ -1732,7 +1732,7 @@ console.log({
 		for (const event of eventHistory) {
 //		eventHistory.forEach(event => async {
 			event.fromHistory = true;
-			onMessage(event);
+			processMessage(event);
 			sendEvent(event);
 			await sleep(30);
 		}
@@ -1769,7 +1769,7 @@ console.log({
 		sessionStorage.clear();
 	}
 
-	function onMessage(data) {
+	function processMessage(data) {
 		console.log("✉️ Message:", data);
 		if (typeof data === 'object' && data.hasOwnProperty('event')) {
 			try {
@@ -2018,7 +2018,7 @@ function startWS(
 
 			onMessage: (msg) => {
 				console.log("incoming:", msg);
-				onMessage(msg);
+				processMessage(msg);
 			}
 		});
 
@@ -2100,7 +2100,6 @@ function startWS(
 			document.getElementById('progress-value').textContent = percent;
 		};
 
-/*
 		const loadImage = (img) => {
 			return new Promise((resolve, reject) => {
 				const tempImg = new Image();
@@ -2114,7 +2113,8 @@ function startWS(
 				tempImg.src = img.getAttribute('data-src');
 			});
 		};
-*/
+
+/*
 		const loadImage = async (img) => {
 			const url = img.getAttribute('data-src');
 			const response = await fetch(url, { cache: "force-cache" });
@@ -2123,6 +2123,7 @@ function startWS(
 			loaded++;
 			updateProgress();
 		};
+*/
 
 		const cores = navigator.hardwareConcurrency || 4; // fallback на 4, if brawser not support
 		const MAX_PARALLEL = cores;
