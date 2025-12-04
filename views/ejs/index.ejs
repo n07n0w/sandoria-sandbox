@@ -489,7 +489,7 @@
 	};
 
     const meDragEvent = function (evt) {
-		console.log("meDragEvent", evt);
+//		console.log("meDragEvent", evt);
 		const stageWidth = stage.width();
 		const stageHeight = stage.height();
 
@@ -748,8 +748,8 @@
 		}
 	}
 
-	function removeAll() {
-		console.log("removeAll")
+	function removeAllInner() {
+		console.log("removeAllInner");
 		var nodes = sandboxLayer.find(node => {
 			return 'Image' === node.className;
 		});
@@ -761,6 +761,24 @@
 			currentValue.destroy();
 		});
 		transformer.detach();
+	}
+
+	function removeAll() {
+		console.log("removeAll")
+/*
+		var nodes = sandboxLayer.find(node => {
+			return 'Image' === node.className;
+		});
+		nodes.forEach(function (currentValue, index, arr) {
+			currentValue.destroy();
+		});
+
+		transformer.nodes().forEach(function (currentValue, index, arr) {
+			currentValue.destroy();
+		});
+		transformer.detach();
+*/
+		removeAllInner();
 		sandboxLayer.draw();
 		if (notifyViewer) {
 			var event = removeAllEvent();
@@ -1667,6 +1685,8 @@ console.log({
 	const stageFromJson = async (stageJson) => {
 		console.log("stageFromJson", stageJson);
 		if (stageJson) {
+//			removeAll();
+			removeAllInner();
 			let containerElement = $('#containerHidden')[0];
 			const originalStage = stage;
 			const originalSandboxWidth = originalStage.width();
@@ -1770,7 +1790,7 @@ console.log({
 	}
 
 	function processMessage(data) {
-		console.log("✉️ Message:", data);
+//		console.log("✉️ Message:", data);
 		if (typeof data === 'object' && data.hasOwnProperty('event')) {
 			try {
 				eval(data.event)(data);
@@ -2017,7 +2037,7 @@ function startWS(
 			},
 
 			onMessage: (msg) => {
-				console.log("incoming:", msg);
+//				console.log("incoming:", msg);
 				processMessage(msg);
 			}
 		});
