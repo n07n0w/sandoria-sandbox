@@ -1966,6 +1966,7 @@ function startWS(
     return ws;
 }
 
+	const seen = new Set();
 	const launchPeer = async function(sessionId, opponentSessionId, isDataChannelInitiator = true, onConnectionHandler) {
 		console.log("launchPeer", sessionId, opponentSessionId);
 //		const myConn = startP2PConnection(sessionId, opponentSessionId, onMessage, onStatusChange);
@@ -2038,6 +2039,8 @@ function startWS(
 
 			onMessage: (msg) => {
 //				console.log("incoming:", msg);
+				if (seen.has(msg.id)) return;
+				seen.add(msg.id);
 				processMessage(msg);
 			}
 		});
