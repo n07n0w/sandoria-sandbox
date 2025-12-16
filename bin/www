@@ -1,5 +1,16 @@
 #!/usr/bin/env node
 
+// Initialize Sentry before any other imports
+require('dotenv').config();
+const Sentry = require('@sentry/node');
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.SENTRY_ENVIRONMENT || 'development',
+  sampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE) || 1.0,
+});
+
 /**
  * Module dependencies.
  */
@@ -28,6 +39,7 @@ var server = http.createServer(app);
 process.on("uncaughtException", function (err) {
   console.error("Uncaught exception:", err);
   console.error(err.stack);
+  Sentry.captureException(err);
   process.exit(1);
 });
 
@@ -35,6 +47,7 @@ process.on("uncaughtException", function (err) {
 process.on("unhandledRejection", function (reason, promise) {
   console.error("Unhandled Rejection at:", promise);
   console.error("Reason:", reason);
+  Sentry.captureException(reason instanceof Error ? reason : new Error(reason));
 });
 
 /**

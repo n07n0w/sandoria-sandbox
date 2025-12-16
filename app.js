@@ -13,6 +13,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// Sentry middleware
+const Sentry = require('@sentry/node');
+
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Base URL:', baseUrl);
@@ -66,6 +69,9 @@ app.use(
   }),
 );
 
+// Sentry request handler
+app.use(Sentry.Handlers.requestHandler());
+
 /*
 app.use('/images/svg', express.static('public/images/svg', {
     maxAge: '1d',
@@ -103,6 +109,9 @@ async function initializeApp() {
       console.log('404 Not Found:', req.path);
       next(createError(404));
     });
+
+    // Sentry error handler (must be before other error handlers)
+    app.use(Sentry.Handlers.errorHandler());
 
     // error handler
     app.use(function (err, req, res, next) {
@@ -152,6 +161,7 @@ async function initWebSocket(server) {
                 msg = JSON.parse(raw);
             } catch (e) {
                 console.log("Invalid JSON:", raw);
+                Sentry.captureException(e, { extra: { raw: raw.toString() } });
                 return;
             }
 

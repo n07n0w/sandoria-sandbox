@@ -17,10 +17,15 @@ jobs:
 
       - name: 🚀 Deploy to Server
         uses: appleboy/ssh-action@v1
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: ${{ secrets.SENTRY_ENVIRONMENT }}
+          SENTRY_SAMPLE_RATE: ${{ secrets.SENTRY_SAMPLE_RATE }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.KEY }}
+          envs: SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE
           script: |
             VERSION="${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
             BRANCH="${{ github.ref_name }}"
@@ -46,6 +51,16 @@ jobs:
             COMMIT=$SHORT_COMMIT
             BUILD=$BUILD
             BUILT_AT=$BUILT_AT
+            EOF
+
+            # Создаем .env файл с Sentry конфигурацией
+            cat > /home/sandoria-sandbox/.env <<EOF
+            # Sentry Configuration
+            SENTRY_DSN=${SENTRY_DSN}
+            SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+            SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
+
+            # Add other environment variables here as needed
             EOF
 
             echo ""
