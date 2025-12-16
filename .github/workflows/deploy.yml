@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches: ["**"]
-  workflow_dispatch: # Позволяет запустить вручную
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -21,17 +21,17 @@ jobs:
       image: ${{ steps.image.outputs.image }}
       digest: ${{ steps.build.outputs.digest }}
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔐 Log in to Container Registry
+      - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏷️ Extract metadata
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -43,7 +43,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value={{branch}}-latest
 
-      - name: 🏗️ Build and push Docker image
+      - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -58,58 +58,13 @@ jobs:
             COMMIT=${{ github.sha }}
             BUILD=${{ github.run_number }}
 
-      - name: 🔍 Debug Build Information
-        env:
-          BRANCH_NAME: ${{ github.ref_name }}
-          COMMIT_SHA: ${{ github.sha }}
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🏷️ DOCKER BUILD INFORMATION"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "Branch: ${BRANCH_NAME}"
-          echo "Full SHA: ${COMMIT_SHA}"
-          echo "Short SHA: ${COMMIT_SHA:0:7}"
-          echo ""
-          echo "📦 Generated tags:"
-          echo "${{ steps.meta.outputs.tags }}"
-          echo ""
-          echo "🎯 Image will be available as:"
-          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_NAME}-${COMMIT_SHA:0:7}"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-      - name: 📝 Output image reference
-        id: image
-        env:
-          BRANCH_NAME: ${{ github.ref_name }}
-          COMMIT_SHA: ${{ github.sha }}
-        run: echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_NAME}-${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
-
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
     steps:
-      - name: 🔍 Verify Image Exists in Registry
-        run: |
-          echo "Verifying image exists: ${{ needs.build.outputs.image }}"
-          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-          # Try to pull the image to verify it exists
-          if docker pull ${{ needs.build.outputs.image }}; then
-            echo "✅ Image verified in registry"
-            docker rmi ${{ needs.build.outputs.image }} # Clean up local copy
-          else
-            echo "❌ Image not found in registry!"
-            echo "This deployment would fail. Checking available tags..."
-
-            # List available tags for debugging
-            REPO_NAME=$(echo "${{ needs.build.outputs.image }}" | cut -d: -f1)
-            echo "Repository: ${REPO_NAME}"
-            echo "Expected tag: ${{ needs.build.outputs.image }}"
-            exit 1
-          fi
-      - name: 🚀 Deploy to Server
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -130,18 +85,6 @@ jobs:
             BUILT_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             SHORT_COMMIT="${COMMIT:0:7}"
 
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🚀 Starting Deployment"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📦 VERSION:    $VERSION"
-            echo "🌿 BRANCH:     $BRANCH"
-            echo "🔖 COMMIT:     $SHORT_COMMIT"
-            echo "🔢 BUILD:      $BUILD"
-            echo "⏰ BUILT_AT:   $BUILT_AT"
-            echo "🐳 IMAGE:      $DOCKER_IMAGE"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-            # Создаем файл с метаданными версии
             cat > /home/sandoria-sandbox/.env.version <<EOF
             VERSION=$VERSION
             BRANCH=$BRANCH
@@ -151,7 +94,6 @@ jobs:
             DOCKER_IMAGE=$DOCKER_IMAGE
             EOF
 
-            # Создаем .env файл с конфигурацией
             cat > /home/sandoria-sandbox/.env <<EOF
             # Sentry Configuration
             SENTRY_DSN=${SENTRY_DSN}
@@ -173,14 +115,9 @@ jobs:
             PORT=3000
             EOF
 
-            echo ""
-            echo "📥 Updating code and configs..."
             cd /home/sandoria-sandbox/
             git pull
 
-            echo ""
-            echo "🔍 Checking database connectivity..."
-            # Check if MySQL is running and accessible
             if ! mysqladmin ping -h localhost -u sandboxuser -p'sandboxuser_pass' --silent; then
               echo "❌ Cannot connect to MySQL database. Please ensure MySQL is running on the host."
               exit 1
@@ -192,13 +129,7 @@ jobs:
             docker-compose -f docker-compose.prod.yml stop app 2>/dev/null || echo "No container to stop"
             docker-compose -f docker-compose.prod.yml rm -f app 2>/dev/null || echo "No container to remove"
 
-            echo ""
-            echo "🔐 Logging in to GitHub Container Registry..."
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            echo ""
-            echo "🐳 Pulling new Docker image..."
-            echo "🎯 Target image: ${DOCKER_IMAGE}"
 
             # Retry logic for Docker pull
             retry_pull() {
