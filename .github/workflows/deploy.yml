@@ -108,7 +108,7 @@ jobs:
             DOCKER_IMAGE=$DOCKER_IMAGE
             EOF
 
-            # Создаем .env файл с Sentry конфигурацией
+            # Создаем .env файл с конфигурацией
             cat > /home/sandoria-sandbox/.env <<EOF
             # Sentry Configuration
             SENTRY_DSN=${SENTRY_DSN}
@@ -118,12 +118,16 @@ jobs:
             # Docker Image
             DOCKER_IMAGE=${DOCKER_IMAGE}
 
-            # Database Configuration (add your DB settings here)
-            # DB_HOST=db
-            # DB_PORT=3306
-            # DB_USER=sandboxuser
-            # DB_PASSWORD=sandboxuser_pass
-            # DB_NAME=sandbox
+            # Database Configuration (host database connection)
+            DB_HOST=localhost
+            DB_PORT=3306
+            DB_USER=sandboxuser
+            DB_PASSWORD=sandboxuser_pass
+            DB_NAME=sandbox
+
+            # Application Configuration
+            NODE_ENV=production
+            PORT=3000
             EOF
 
             echo ""
@@ -132,9 +136,18 @@ jobs:
             git pull
 
             echo ""
+            echo "🔍 Checking database connectivity..."
+            # Check if MySQL is running and accessible
+            if ! mysqladmin ping -h localhost -u sandboxuser -p'sandboxuser_pass' --silent; then
+              echo "❌ Cannot connect to MySQL database. Please ensure MySQL is running on the host."
+              exit 1
+            fi
+            echo "✅ Database is accessible"
+
+            echo ""
             echo "🛑 Stopping application container..."
-            docker-compose stop app
-            docker-compose rm -f app
+            docker-compose -f docker-compose.prod.yml stop app 2>/dev/null || echo "No container to stop"
+            docker-compose -f docker-compose.prod.yml rm -f app 2>/dev/null || echo "No container to remove"
 
             echo ""
             echo "🐳 Pulling new Docker image..."
@@ -142,7 +155,7 @@ jobs:
 
             echo ""
             echo "🚀 Starting application with new image..."
-            docker-compose up -d app
+            docker-compose -f docker-compose.prod.yml up -d app
 
             echo ""
             echo "⏳ Waiting for application to start..."
@@ -150,15 +163,31 @@ jobs:
 
             echo ""
             echo "🔍 Checking container status..."
-            docker-compose ps
+            docker-compose -f docker-compose.prod.yml ps
 
             echo ""
             echo "📋 Application logs (last 20 lines):"
-            docker-compose logs --tail=20 app
+            docker-compose -f docker-compose.prod.yml logs --tail=20 app
+
+            echo ""
+            echo "🩺 Final health check..."
+            # Wait a bit more for the application to fully start
+            sleep 15
+
+            # Check if application responds to health endpoint
+            if curl -f -s http://localhost:3001/health > /dev/null; then
+              echo "✅ Application health check passed"
+            else
+              echo "⚠️  Application health check failed - app may still be starting"
+              echo "📋 Recent logs:"
+              docker-compose -f docker-compose.prod.yml logs --tail=10 app
+            fi
 
             echo ""
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "✅ Deployment Complete!"
+            echo "🌐 Application available at: http://your-server:3001"
+            echo "🩺 Health check: http://your-server:3001/health"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: ✅ Deployment Summary

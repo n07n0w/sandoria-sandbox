@@ -92,6 +92,7 @@ async function initializeApp() {
 
     if (!routesInitialized) {
       console.log('Initializing routes...');
+      app.use('/', require('./routes/health')); // Health check endpoint
       app.use('/', require('./routes/index'));
       app.use('/users', require('./routes/users'));
       app.use('/register', require('./routes/register'));

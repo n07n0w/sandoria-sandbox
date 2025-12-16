@@ -3,7 +3,7 @@ FROM node:18-alpine AS base
 
 # Install security updates and dependencies
 RUN apk update && apk upgrade && \
-    apk add --no-cache dumb-init && \
+    apk add --no-cache dumb-init curl && \
     addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
