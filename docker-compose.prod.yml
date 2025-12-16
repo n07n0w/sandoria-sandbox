@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: ${DOCKER_IMAGE:-ghcr.io/n07n0w/sandoria-sandbox:latest}
+    image: ${DOCKER_IMAGE:-ghcr.io/n07n0w/sandoria-sandbox:latest-dev}
     container_name: sandbox-app
     restart: unless-stopped
     env_file:
