@@ -23,6 +23,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy application code
 COPY --chown=nextjs:nodejs . .
 
+# Create logs directory with correct permissions
+RUN mkdir -p /app/logs && chown nextjs:nodejs /app/logs
+
 # Build args for version info
 ARG VERSION=0.0.0
 ARG BRANCH=unknown
