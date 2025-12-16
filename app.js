@@ -16,6 +16,15 @@ var logger = require('morgan');
 // Sentry middleware
 const Sentry = require('@sentry/node');
 
+// Initialize Sentry before using handlers
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.SENTRY_ENVIRONMENT || 'development',
+    sampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE) || 1.0,
+  });
+}
+
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Base URL:', baseUrl);
@@ -69,8 +78,10 @@ app.use(
   }),
 );
 
-// Sentry request handler
-app.use(Sentry.Handlers.requestHandler());
+// Sentry request handler (conditional)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 /*
 app.use('/images/svg', express.static('public/images/svg', {
@@ -111,8 +122,10 @@ async function initializeApp() {
       next(createError(404));
     });
 
-    // Sentry error handler (must be before other error handlers)
-    app.use(Sentry.Handlers.errorHandler());
+    // Sentry error handler (conditional, must be before other error handlers)
+    if (process.env.SENTRY_DSN) {
+      app.use(Sentry.Handlers.errorHandler());
+    }
 
     // error handler
     app.use(function (err, req, res, next) {

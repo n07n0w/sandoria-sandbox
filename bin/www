@@ -4,12 +4,7 @@
 require('dotenv').config();
 const Sentry = require('@sentry/node');
 
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.SENTRY_ENVIRONMENT || 'development',
-  sampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE) || 1.0,
-});
+// Sentry initialization moved to app.js to fix loading order
 
 /**
  * Module dependencies.
