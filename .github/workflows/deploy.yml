@@ -41,6 +41,7 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{branch}}-latest
 
       - name: 🏗️ Build and push Docker image
         id: build
@@ -57,9 +58,31 @@ jobs:
             COMMIT=${{ github.sha }}
             BUILD=${{ github.run_number }}
 
+      - name: 🔍 Debug Build Information
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🏷️ DOCKER BUILD INFORMATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Branch: ${BRANCH_NAME}"
+          echo "Full SHA: ${COMMIT_SHA}"
+          echo "Short SHA: ${COMMIT_SHA:0:7}"
+          echo ""
+          echo "📦 Generated tags:"
+          echo "${{ steps.meta.outputs.tags }}"
+          echo ""
+          echo "🎯 Image will be available as:"
+          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_NAME}-${COMMIT_SHA:0:7}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
       - name: 📝 Output image reference
         id: image
-        run: echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_NAME}-${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy to Server
@@ -67,6 +90,25 @@ jobs:
     needs: build
     timeout-minutes: 10
     steps:
+      - name: 🔍 Verify Image Exists in Registry
+        run: |
+          echo "Verifying image exists: ${{ needs.build.outputs.image }}"
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          # Try to pull the image to verify it exists
+          if docker pull ${{ needs.build.outputs.image }}; then
+            echo "✅ Image verified in registry"
+            docker rmi ${{ needs.build.outputs.image }} # Clean up local copy
+          else
+            echo "❌ Image not found in registry!"
+            echo "This deployment would fail. Checking available tags..."
+
+            # List available tags for debugging
+            REPO_NAME=$(echo "${{ needs.build.outputs.image }}" | cut -d: -f1)
+            echo "Repository: ${REPO_NAME}"
+            echo "Expected tag: ${{ needs.build.outputs.image }}"
+            exit 1
+          fi
       - name: 🚀 Deploy to Server
         uses: appleboy/ssh-action@v1
         env:
@@ -156,7 +198,51 @@ jobs:
 
             echo ""
             echo "🐳 Pulling new Docker image..."
-            docker pull ${DOCKER_IMAGE}
+            echo "🎯 Target image: ${DOCKER_IMAGE}"
+
+            # Retry logic for Docker pull
+            retry_pull() {
+              local image=$1
+              local max_attempts=3
+              local attempt=1
+
+              while [ $attempt -le $max_attempts ]; do
+                echo "🔄 Pull attempt $attempt/$max_attempts for: $image"
+                if docker pull "$image"; then
+                  echo "✅ Successfully pulled image on attempt $attempt"
+                  return 0
+                fi
+
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "⏳ Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+                attempt=$((attempt + 1))
+              done
+              return 1
+            }
+
+            # Try to pull the specific version
+            if ! retry_pull "${DOCKER_IMAGE}"; then
+              echo "❌ Failed to pull specific image: ${DOCKER_IMAGE}"
+
+              # Extract repository for fallback
+              REPO=$(echo ${DOCKER_IMAGE} | cut -d: -f1)
+              BRANCH_LATEST="${REPO}:${{ github.ref_name }}-latest"
+
+              echo "🔄 Attempting fallback to branch latest: ${BRANCH_LATEST}"
+              if retry_pull "${BRANCH_LATEST}"; then
+                echo "⚠️ Using fallback image: ${BRANCH_LATEST}"
+                export DOCKER_IMAGE="${BRANCH_LATEST}"
+                # Update .env with fallback
+                sed -i "s|DOCKER_IMAGE=.*|DOCKER_IMAGE=${DOCKER_IMAGE}|" /home/sandoria-sandbox/.env
+              else
+                echo "❌ All pull attempts failed. Deployment cannot continue."
+                echo "🔍 Available tags for debugging:"
+                docker search $(echo ${REPO} | cut -d/ -f2-) --limit 5 || true
+                exit 1
+              fi
+            fi
 
             echo ""
             echo "🚀 Starting application with new image..."
@@ -175,17 +261,47 @@ jobs:
             docker-compose -f docker-compose.prod.yml logs --tail=20 app
 
             echo ""
-            echo "🩺 Final health check..."
-            # Wait a bit more for the application to fully start
-            sleep 15
+            echo "🩺 Comprehensive health check..."
 
-            # Check if application responds to health endpoint
-            if curl -f -s http://localhost:3001/health > /dev/null; then
-              echo "✅ Application health check passed"
-            else
-              echo "⚠️  Application health check failed - app may still be starting"
+            # Wait for container to be ready
+            max_wait=120
+            wait_time=0
+            check_interval=5
+
+            while [ $wait_time -lt $max_wait ]; do
+              # Check Docker health status first
+              HEALTH_STATUS=$(docker-compose -f docker-compose.prod.yml ps --format json app 2>/dev/null | jq -r '.[0].Health // "none"' 2>/dev/null || echo "unknown")
+
+              if [ "$HEALTH_STATUS" = "healthy" ] || docker-compose -f docker-compose.prod.yml ps app | grep -q "Up.*healthy"; then
+                echo "✅ Container health check passed"
+
+                # Verify HTTP endpoint
+                if curl -f -s --max-time 10 http://localhost:3001/health > /dev/null; then
+                  echo "✅ Application HTTP health check passed"
+                  echo "🎉 Deployment verification complete!"
+                  break
+                fi
+              fi
+
+              if [ $wait_time -eq 0 ]; then
+                echo "⏳ Waiting for application to become healthy (max ${max_wait}s)..."
+              fi
+
+              sleep $check_interval
+              wait_time=$((wait_time + check_interval))
+
+              if [ $((wait_time % 30)) -eq 0 ]; then
+                echo "⏳ Still waiting... ($wait_time/${max_wait}s elapsed)"
+              fi
+            done
+
+            if [ $wait_time -ge $max_wait ]; then
+              echo "❌ Health check timed out after ${max_wait}s"
+              echo "📋 Container status:"
+              docker-compose -f docker-compose.prod.yml ps
               echo "📋 Recent logs:"
-              docker-compose -f docker-compose.prod.yml logs --tail=10 app
+              docker-compose -f docker-compose.prod.yml logs --tail=30 app
+              echo "⚠️ Deployment may have issues, but container is started"
             fi
 
             echo ""
