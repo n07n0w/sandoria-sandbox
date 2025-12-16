@@ -1,0 +1,45 @@
+---
+default_stages: [pre-commit]
+exclude: >
+  (?x)^(
+  .ansible|
+  .cache|
+  .gitignore|
+  .pytest_cache|
+  .ruff_cache|
+  .terraform|
+  .venv|
+  .vscode/launch.json|
+  common/.ansible|
+  data|
+  tmp
+  )
+repos:
+  - repo: https://github.com/mxab/pre-commit-trivy
+    rev: v0.16.0
+    hooks:
+      - id: trivyfs-docker
+        stages: ["pre-push"]
+        args:
+          - --config
+          - .trivy.yml
+          - --show-suppressed
+          - --severity
+          - HIGH,CRITICAL
+          - . # last arg indicates the path/file to scan
+      - id: trivyconfig-docker
+        stages: ["pre-push"]
+        args:
+          - --config
+          - .trivy.yml
+          - --severity
+          - HIGH,CRITICAL
+          - . # last arg indicates the path/file to scan
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: "v8.29.1"
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: "0.35.0"
+    hooks:
+      - id: check-github-workflows
