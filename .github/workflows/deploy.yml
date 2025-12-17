@@ -79,11 +79,16 @@ jobs:
           SENTRY_SAMPLE_RATE: ${{ secrets.SENTRY_SAMPLE_RATE }}
           DOCKER_IMAGE: ${{ needs.build.outputs.image }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.KEY }}
-          envs: SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE,DOCKER_IMAGE,GHCR_TOKEN
+          envs: SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE,DOCKER_IMAGE,GHCR_TOKEN,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME
           script: |
             VERSION="${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
             BRANCH="${{ github.ref_name }}"
@@ -109,27 +114,35 @@ jobs:
 
             # Docker Image
             DOCKER_IMAGE=${DOCKER_IMAGE}
-
-            # Database Configuration (host database connection)
-            DB_HOST=localhost
-            DB_PORT=3306
-            DB_USER=sandboxuser
-            DB_PASSWORD=sandboxuser_pass
-            DB_NAME=sandbox
-
-            # Application Configuration
             NODE_ENV=production
             PORT=3000
+
+            # Database Configuration
+            DB_HOST=${DB_HOST:-host.docker.internal}
+            DB_PORT=${DB_PORT:-3306}
+            DB_USER=${DB_USER}
+            DB_PASSWORD=${DB_PASSWORD}
+            DB_NAME=${DB_NAME}
             EOF
 
             cd /home/sandoria-sandbox/
             git pull
 
+            # Test database connectivity from host
             if ! mysqladmin ping -h localhost -u sandboxuser -p'sandboxuser_pass' --silent; then
               echo "❌ Cannot connect to MySQL database. Please ensure MySQL is running on the host."
               exit 1
             fi
-            echo "✅ Database is accessible"
+            echo "✅ Database is accessible from host"
+
+            # Get host IP for Docker container to use as fallback
+            HOST_IP=$(hostname -I | awk '{print $1}')
+            echo "Host IP detected: $HOST_IP"
+
+            # Add host IP to .env as fallback
+            echo "" >> /home/sandoria-sandbox/.env
+            echo "# Host IP for Docker fallback" >> /home/sandoria-sandbox/.env
+            echo "HOST_IP=$HOST_IP" >> /home/sandoria-sandbox/.env
 
             echo ""
             echo "🛑 Stopping application container..."

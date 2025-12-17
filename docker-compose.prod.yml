@@ -14,8 +14,8 @@ services:
       - logs-data:/app/logs
     environment:
       # Database connection to host MySQL
-      DB_HOST: host.docker.internal
-      DB_PORT: 3306
+      DB_HOST: ${DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-3306}
       DB_USER: ${DB_USER:-sandboxuser}
       DB_PASSWORD: ${DB_PASSWORD:-sandboxuser_pass}
       DB_NAME: ${DB_NAME:-sandbox}
