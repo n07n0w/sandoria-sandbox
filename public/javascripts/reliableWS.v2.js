@@ -1,4 +1,40 @@
-﻿(function () {
+﻿/*
+(function() {
+  const originalLog = console.log;
+  console.log = function(...args) {
+    const now = new Date();
+    const time = now.toISOString().split('T')[1].replace('Z', ''); // 12:34:56.789
+    const stack = new Error().stack
+      .split('\n')
+      .slice(2, 5)
+      .join('\n');
+    originalLog(`%c[${time}]`, 'color: #888', ...args);
+    originalLog('%cStack trace:', 'color: gray');
+    originalLog(stack);
+  };
+})();
+*/
+
+(function () {
+  const originalLog = console.log;
+  const originalTrace = console.trace;
+
+  console.log = function (...args) {
+    const now = new Date();
+    const time = now.toISOString().split('T')[1].replace('Z', '');
+
+    // сам лог
+    originalLog(`%c[${time}]`, 'color:#888', ...args);
+
+    // stack trace
+    if (originalTrace) {
+      originalTrace.call(console, 'Stack trace');
+    }
+  };
+})();
+
+
+(function () {
     // Expose globally
     window.createReliableWS = function (url, mySessionId, peerSessionId, options = {}) {
         // --------------- defaults / config ---------------

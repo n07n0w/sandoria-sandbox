@@ -116,7 +116,6 @@
 	  var opponentConnected = false;
 	  const ratio = 8;
 
-
 	  var maxImageWidth  = <%=maxImageWidth %>;
 	  var maxImageHeight = <%=maxImageHeight %>;
 	  var categoryImagesPerRow = <%=categoryImagesPerRow %>;
@@ -1679,6 +1678,8 @@ console.log({
 
 	const saveKonvaState = () => {
 		const data = stage.toJSON();
+		console.log("saveKonvaState", data)
+//		console.trace("saveKonvaState");
 		sessionStorage.setItem('konvaAppState', data);
 	};
 
@@ -1789,6 +1790,7 @@ console.log({
 		sessionStorage.clear();
 	}
 
+/*
 	function processMessage(data) {
 //		console.log("✉️ Message:", data);
 		if (typeof data === 'object' && data.hasOwnProperty('event')) {
@@ -1797,6 +1799,27 @@ console.log({
 			} catch (ex) {
 				console.log(ex);
 			}
+		}
+	}
+*/
+
+	function processMessage(data) {
+		if (!data || typeof data !== 'object') return;
+
+		const { event } = data;
+		if (!event) return;
+
+		const handler = eventHandlers[event];
+
+		if (typeof handler !== 'function') {
+			console.warn('Unknown event:', event);
+			return;
+		}
+
+		try {
+			handler(data);
+		} catch (err) {
+			console.error('Error handling event:', event, err);
 		}
 	}
 
@@ -2446,6 +2469,27 @@ function startWS(
 		el.textContent = `Статус: ${text}`;
 		el.style.backgroundColor = color || "gray";
 	}
+
+	const eventHandlers = {
+		imageSelect,
+		positionedImageSelect,
+		shapeClick,
+		shapeDrag,
+		meDrag,
+		transform,
+		removeSelected,
+		removeAll,
+		copySelected,
+		skewSelected,
+		levelUp,
+		levelDown,
+		saveStateToImage,
+		showCanvasImage,
+		restoreState,
+		categorySelect,
+		setOpponentConnected,
+	};
+
 
   </script>
 
