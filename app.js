@@ -13,6 +13,23 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// Sentry middleware
+const Sentry = require('@sentry/node');
+
+// Initialize Sentry before using handlers
+console.log('SENTRY_DSN configured:', !!process.env.SENTRY_DSN);
+if (process.env.SENTRY_DSN) {
+  console.log('Initializing Sentry...');
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.SENTRY_ENVIRONMENT || 'development',
+    sampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE) || 1.0,
+  });
+  console.log('Sentry initialized. Handlers available:', !!Sentry.Handlers);
+} else {
+  console.log('Sentry not initialized - no DSN provided');
+}
+
 console.log('Starting application...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Base URL:', baseUrl);
@@ -66,6 +83,11 @@ app.use(
   }),
 );
 
+// Sentry request handler (conditional)
+if (process.env.SENTRY_DSN && Sentry.Handlers) {
+  app.use(Sentry.Handlers.requestHandler());
+}
+
 /*
 app.use('/images/svg', express.static('public/images/svg', {
     maxAge: '1d',
@@ -86,6 +108,7 @@ async function initializeApp() {
 
     if (!routesInitialized) {
       console.log('Initializing routes...');
+      app.use('/', require('./routes/health')); // Health check endpoint
       app.use('/', require('./routes/index'));
       app.use('/users', require('./routes/users'));
       app.use('/register', require('./routes/register'));
@@ -103,6 +126,11 @@ async function initializeApp() {
       console.log('404 Not Found:', req.path);
       next(createError(404));
     });
+
+    // Sentry error handler (conditional, must be before other error handlers)
+    if (process.env.SENTRY_DSN && Sentry.Handlers) {
+      app.use(Sentry.Handlers.errorHandler());
+    }
 
     // error handler
     app.use(function (err, req, res, next) {
@@ -152,6 +180,7 @@ async function initWebSocket(server) {
                 msg = JSON.parse(raw);
             } catch (e) {
                 console.log("Invalid JSON:", raw);
+                Sentry.captureException(e, { extra: { raw: raw.toString() } });
                 return;
             }
 

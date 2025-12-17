@@ -37,6 +37,20 @@
   <script src="/javascripts/konva.min.js"></script>
 */%>
 
+<!-- Sentry Browser SDK -->
+<script
+  src="https://browser.sentry-cdn.com/7.81.1/bundle.tracing.min.js"
+  integrity="sha384-PGz5k6dOaayoOYEhrOEa8Uq+FYHoAZ8ZLO3m8EsKqNK8mCT7VHfRLbN2qJKfD3Rq"
+  crossorigin="anonymous"
+></script>
+<script>
+  Sentry.init({
+    dsn: "https://4b99af41772db25cd148a47c895aa301@o4510206422024192.ingest.de.sentry.io/4510545546641488",
+    environment: "production",
+    sampleRate: 0.1,
+  });
+</script>
+
 
 
 <style>

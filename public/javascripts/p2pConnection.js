@@ -40,6 +40,9 @@
     ws.onclose = () => {
       log('❌ WebSocket closed');
       if (!closedManually) {
+        Sentry.captureMessage('WebSocket connection closed unexpectedly', 'warning', {
+          extra: { clientId, targetId }
+        });
         log('🔁 Reconnecting WebSocket in 2s...');
         setTimeout(setupWebSocket, 2000);
       }
@@ -103,6 +106,9 @@
 
       if (state === 'failed' || state === 'disconnected') {
         log('⚠️ Connection lost. Reconnecting in 3s...');
+        Sentry.captureMessage(`Peer connection ${state}`, 'error', {
+          extra: { clientId, targetId, connectionState: state }
+        });
         setTimeout(() => {
           if (!closedManually) setupPeerConnection();
         }, 3000);
@@ -126,6 +132,12 @@
               targetId,
             }),
           );
+        })
+        .catch((error) => {
+          log('❌ Failed to create offer:', error);
+          Sentry.captureException(error, {
+            extra: { clientId, targetId, operation: 'createOffer' }
+          });
         });
     }
   }

@@ -1,26 +1,94 @@
-name: Deploy to Production
+name: Build and Deploy
 
-# Деплой запускается только при push (не на pull request)
 on:
   push:
     branches: ["**"]
-  workflow_dispatch: # Позволяет запустить вручную
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    timeout-minutes: 15
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest-dev,enable={{is_default_branch}}
+            type=raw,value={{branch}}-latest
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}
+            BRANCH=${{ github.ref_name }}
+            COMMIT=${{ github.sha }}
+            BUILD=${{ github.run_number }}
+
+      - name: Output image reference
+        id: image
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_NAME}-${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
+
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
+    needs: build
     timeout-minutes: 10
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🚀 Deploy to Server
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: ${{ secrets.SENTRY_ENVIRONMENT }}
+          SENTRY_SAMPLE_RATE: ${{ secrets.SENTRY_SAMPLE_RATE }}
+          DOCKER_IMAGE: ${{ needs.build.outputs.image }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.KEY }}
+          envs: SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE,DOCKER_IMAGE,GHCR_TOKEN,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME
           script: |
             VERSION="${{ contains(github.ref, 'refs/tags') && github.ref_name || '0.0.0' }}"
             BRANCH="${{ github.ref_name }}"
@@ -29,49 +97,169 @@ jobs:
             BUILT_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             SHORT_COMMIT="${COMMIT:0:7}"
 
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🚀 Starting Deployment"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📦 VERSION:    $VERSION"
-            echo "🌿 BRANCH:     $BRANCH"
-            echo "🔖 COMMIT:     $SHORT_COMMIT"
-            echo "🔢 BUILD:      $BUILD"
-            echo "⏰ BUILT_AT:   $BUILT_AT"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-            # Создаем файл с метаданными версии
             cat > /home/sandoria-sandbox/.env.version <<EOF
             VERSION=$VERSION
             BRANCH=$BRANCH
             COMMIT=$SHORT_COMMIT
             BUILD=$BUILD
             BUILT_AT=$BUILT_AT
+            DOCKER_IMAGE=$DOCKER_IMAGE
             EOF
 
-            echo ""
-            echo "📥 Pulling latest code..."
+            cat > /home/sandoria-sandbox/.env <<EOF
+            # Sentry Configuration
+            SENTRY_DSN=${SENTRY_DSN}
+            SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+            SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
+
+            # Docker Image
+            DOCKER_IMAGE=${DOCKER_IMAGE}
+            NODE_ENV=production
+            PORT=3000
+
+            # Database Configuration
+            DB_HOST=${DB_HOST:-host.docker.internal}
+            DB_PORT=${DB_PORT:-3306}
+            DB_USER=${DB_USER}
+            DB_PASSWORD=${DB_PASSWORD}
+            DB_NAME=${DB_NAME}
+            EOF
+
             cd /home/sandoria-sandbox/
             git pull
 
-            echo ""
-            echo "🛑 Stopping containers..."
-            docker-compose down
+            # Test database connectivity from host
+            if ! mysqladmin ping -h localhost -u sandboxuser -p'sandboxuser_pass' --silent; then
+              echo "❌ Cannot connect to MySQL database. Please ensure MySQL is running on the host."
+              exit 1
+            fi
+            echo "✅ Database is accessible from host"
+
+            # Get host IP for Docker container to use as fallback
+            HOST_IP=$(hostname -I | awk '{print $1}')
+            echo "Host IP detected: $HOST_IP"
+
+            # Add host IP to .env as fallback
+            echo "" >> /home/sandoria-sandbox/.env
+            echo "# Host IP for Docker fallback" >> /home/sandoria-sandbox/.env
+            echo "HOST_IP=$HOST_IP" >> /home/sandoria-sandbox/.env
 
             echo ""
-            echo "🏗️  Building and starting containers..."
-            docker-compose up -d --build
+            echo "🛑 Stopping application container..."
+            docker-compose -f docker-compose.prod.yml stop app 2>/dev/null || echo "No container to stop"
+            docker-compose -f docker-compose.prod.yml rm -f app 2>/dev/null || echo "No container to remove"
+
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Retry logic for Docker pull
+            retry_pull() {
+              local image=$1
+              local max_attempts=3
+              local attempt=1
+
+              while [ $attempt -le $max_attempts ]; do
+                echo "🔄 Pull attempt $attempt/$max_attempts for: $image"
+                if docker pull "$image"; then
+                  echo "✅ Successfully pulled image on attempt $attempt"
+                  return 0
+                fi
+
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "⏳ Waiting 10 seconds before retry..."
+                  sleep 10
+                fi
+                attempt=$((attempt + 1))
+              done
+              return 1
+            }
+
+            # Try to pull the specific version
+            if ! retry_pull "${DOCKER_IMAGE}"; then
+              echo "❌ Failed to pull specific image: ${DOCKER_IMAGE}"
+
+              # Extract repository for fallback
+              REPO=$(echo ${DOCKER_IMAGE} | cut -d: -f1)
+              BRANCH_LATEST="${REPO}:${{ github.ref_name }}-latest"
+
+              echo "🔄 Attempting fallback to branch latest: ${BRANCH_LATEST}"
+              if retry_pull "${BRANCH_LATEST}"; then
+                echo "⚠️ Using fallback image: ${BRANCH_LATEST}"
+                export DOCKER_IMAGE="${BRANCH_LATEST}"
+                # Update .env with fallback
+                sed -i "s|DOCKER_IMAGE=.*|DOCKER_IMAGE=${DOCKER_IMAGE}|" /home/sandoria-sandbox/.env
+              else
+                echo "❌ All pull attempts failed. Deployment cannot continue."
+                echo "🔍 Available tags for debugging:"
+                docker search $(echo ${REPO} | cut -d/ -f2-) --limit 5 || true
+                exit 1
+              fi
+            fi
+
+            echo ""
+            echo "🚀 Starting application with new image..."
+            docker-compose -f docker-compose.prod.yml up -d app
 
             echo ""
             echo "⏳ Waiting for application to start..."
-            sleep 5
+            sleep 10
 
             echo ""
             echo "🔍 Checking container status..."
-            docker-compose ps
+            docker-compose -f docker-compose.prod.yml ps
+
+            echo ""
+            echo "📋 Application logs (last 20 lines):"
+            docker-compose -f docker-compose.prod.yml logs --tail=20 app
+
+            echo ""
+            echo "🩺 Comprehensive health check..."
+
+            # Wait for container to be ready
+            max_wait=120
+            wait_time=0
+            check_interval=5
+
+            while [ $wait_time -lt $max_wait ]; do
+              # Check Docker health status first
+              HEALTH_STATUS=$(docker-compose -f docker-compose.prod.yml ps --format json app 2>/dev/null | jq -r '.[0].Health // "none"' 2>/dev/null || echo "unknown")
+
+              if [ "$HEALTH_STATUS" = "healthy" ] || docker-compose -f docker-compose.prod.yml ps app | grep -q "Up.*healthy"; then
+                echo "✅ Container health check passed"
+
+                # Verify HTTP endpoint
+                if curl -f -s --max-time 10 http://localhost:3001/health > /dev/null; then
+                  echo "✅ Application HTTP health check passed"
+                  echo "🎉 Deployment verification complete!"
+                  break
+                fi
+              fi
+
+              if [ $wait_time -eq 0 ]; then
+                echo "⏳ Waiting for application to become healthy (max ${max_wait}s)..."
+              fi
+
+              sleep $check_interval
+              wait_time=$((wait_time + check_interval))
+
+              if [ $((wait_time % 30)) -eq 0 ]; then
+                echo "⏳ Still waiting... ($wait_time/${max_wait}s elapsed)"
+              fi
+            done
+
+            if [ $wait_time -ge $max_wait ]; then
+              echo "❌ Health check timed out after ${max_wait}s"
+              echo "📋 Container status:"
+              docker-compose -f docker-compose.prod.yml ps
+              echo "📋 Recent logs:"
+              docker-compose -f docker-compose.prod.yml logs --tail=30 app
+              echo "⚠️ Deployment may have issues, but container is started"
+            fi
 
             echo ""
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "✅ Deployment Complete!"
+            echo "🌐 Application available at: http://your-server:3001"
+            echo "🩺 Health check: http://your-server:3001/health"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: ✅ Deployment Summary
