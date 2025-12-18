@@ -1,35 +1,31 @@
 version: "3.9"
 
+
 services:
   app:
-    image: ${DOCKER_IMAGE:-ghcr.io/n07n0w/sandoria-sandbox:latest-dev}
-    container_name: sandbox-app
+    image: ${DOCKER_IMAGE}
     restart: unless-stopped
-    env_file:
-      - .env
-      - .env.version
-    ports:
-      - "3001:3000"
-    volumes:
-      - logs-data:/app/logs
-    environment:
-      # Database connection to host MySQL
-      DB_HOST: ${DB_HOST:-host.docker.internal}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_USER: ${DB_USER:-sandboxuser}
-      DB_PASSWORD: ${DB_PASSWORD:-sandboxuser_pass}
-      DB_NAME: ${DB_NAME:-sandbox}
-      NODE_ENV: production
-    # Allow container to access host services
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    # Health check for the application
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  env_file:
+    - .env
+    - .env.version
+  ports:
+    - "3001:3000"
+  volumes:
+    - logs-data:/app/logs
+  environment:
+    NODE_ENV: production
+    PORT: 3000
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 40s
+  logging:
+    driver: json-file
+    options:
+    max-size: "10m"
+    max-file: "3"
 
 volumes:
   logs-data:
