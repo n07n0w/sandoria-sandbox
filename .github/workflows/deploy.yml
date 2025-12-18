@@ -39,6 +39,8 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             VERSION=0.0.0
             BRANCH=${{ github.ref_name }}
