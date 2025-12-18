@@ -107,6 +107,11 @@ jobs:
             # Run new container
             docker run -d \
             --name sandbox-app \
+            -e DB_HOST=${DB_HOST} \
+            -e DB_PORT=${DB_PORT} \
+            -e DB_USER=${DB_USER} \
+            -e DB_PASSWORD=${DB_PASSWORD} \
+            -e DB_NAME=${DB_NAME} \
             --restart unless-stopped \
             -p 3001:3000 \
             --env-file $APP_DIR/.env \
