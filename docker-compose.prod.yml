@@ -16,8 +16,8 @@ services:
       # Database connection to host MySQL
       DB_HOST: ${DB_HOST:-host.docker.internal}
       DB_PORT: ${DB_PORT:-3306}
-      DB_USER: ${DB_USER:-sandboxuser}
-      DB_PASSWORD: ${DB_PASSWORD:-sandboxuser_pass}
+      DB_USER: ${DB_USER:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
       DB_NAME: ${DB_NAME:-sandbox}
       NODE_ENV: production
     # Allow container to access host services
