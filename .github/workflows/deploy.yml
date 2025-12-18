@@ -47,3 +47,47 @@ jobs:
             
       - id: image
         run: echo "image=ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1
+        env:
+          DOCKER_IMAGE: ${{ needs.build.outputs.image }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: ${{ secrets.SENTRY_ENVIRONMENT }}
+          SENTRY_SAMPLE_RATE: ${{ secrets.SENTRY_SAMPLE_RATE }}
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          envs: DOCKER_IMAGE,GHCR_TOKEN,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE
+          script: |
+            APP_DIR=/opt/sandoria-sandbox
+            mkdir -p $APP_DIR
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+            cat > $APP_DIR/.env <<EOF
+              NODE_ENV=production
+              PORT=3000
+              DB_HOST=${DB_HOST}
+              DB_PORT=${DB_PORT}
+              DB_USER=${DB_USER}
+              DB_PASSWORD=${DB_PASSWORD}
+              DB_NAME=${DB_NAME}
+              SENTRY_DSN=${SENTRY_DSN}
+              SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+              SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
+            EOF
+            cat > $APP_DIR/.env.version <<EOF
+              DOCKER_IMAGE=${DOCKER_IMAGE}
+            EOF
+            cd $APP_DIR
+            docker-compose pull app
+            docker-compose up -d --no-deps app
