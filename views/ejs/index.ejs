@@ -1455,6 +1455,7 @@ if (isNaN(sandboxWidth)) {
 		rightSideWidth = Math.max(rightSideWidth, categoryColumnCountInWidth * (w1 + w2) - w2);
 		rSideContentElement.width(rightSideWidth);
 
+/*
 console.log({
 	'sandboxWidth' : sandboxWidth,
 	'sandboxHeight' : sandboxHeight,
@@ -1466,7 +1467,7 @@ console.log({
 	'w1' : w1,
 	'w2' : w2,
 	'categoryColumnCountInWidth' : categoryColumnCountInWidth});
-
+*/
 		sandboxWidth = screenWidth - rightSideWidth - leftSideWidth;
 		sandboxHeight = sandboxWidth / sizeRelations;
 		if (sandboxHeight > screenHeight) {
@@ -1474,6 +1475,7 @@ console.log({
 			sandboxWidth = sandboxHeight * sizeRelations;
 		}
 
+/*
 console.log({
 	'sandboxWidth' : sandboxWidth,
 	'sandboxHeight' : sandboxHeight,
@@ -1481,6 +1483,7 @@ console.log({
 	'screenHeight' : screenHeight,
 	'leftSideWidth' : leftSideWidth,
 	'rightSideWidth' : rightSideWidth, });
+*/
 /*
 		const columnGap = getCssRuleProperty('.images_visible', 'column-gap');
 		let rightSideWidth = 3 * $('.imageCell').width() + 2 * parseFloat(columnGap);
@@ -1628,7 +1631,7 @@ console.log({
       return jsonData;
     };
 
-	const selectFirstCategoryFromStart = function() {
+	const selectFirstCategoryFromStart = async function() {
 		// Надо найти первую катерогию в списке, взять ее ID ("cid" аттрибут) и выбрать ее
 		let allCategories = $(".topCategory");
 		if (typeof allCategories !== 'undefined' && 0 < allCategories.length) {
@@ -1850,7 +1853,7 @@ console.log({
 			await restoreOpponentStage();
 			const eventHistoryLS = sessionStorage.getItem('eventHistory')
 			if (!firstCategorySelected && !eventHistoryLS) {
-				selectFirstCategoryFromStart();
+				await selectFirstCategoryFromStart();
 				firstCategorySelected = true;
 			}
 		<% } %>
@@ -2019,10 +2022,12 @@ function startWS(
 				await reLoadStateAfterReconnect();
 				await restoreOpponentStage();
 				const eventHistoryLS = sessionStorage.getItem('eventHistory')
+/*
 				if (!firstCategorySelected && !eventHistoryLS) {
-					selectFirstCategoryFromStart();
+					await selectFirstCategoryFromStart();
 					firstCategorySelected = true;
 				}
+*/
 			<% } %>
 			},
 
@@ -2040,7 +2045,7 @@ function startWS(
 				await restoreOpponentStage();
 				const eventHistoryLS = sessionStorage.getItem('eventHistory')
 				if (!firstCategorySelected && !eventHistoryLS) {
-					selectFirstCategoryFromStart();
+					await selectFirstCategoryFromStart();
 					firstCategorySelected = true;
 				}
 			<% } %>
@@ -2067,7 +2072,7 @@ function startWS(
 				await restoreOpponentStage();
 				const eventHistoryLS = sessionStorage.getItem('eventHistory')
 				if (!firstCategorySelected && !eventHistoryLS) {
-					selectFirstCategoryFromStart();
+					await selectFirstCategoryFromStart();
 					firstCategorySelected = true;
 				}
 			<% } %>
@@ -2351,7 +2356,7 @@ function startWS(
 	$('#inviteClientBtn').click(inviteClient);
 
 	await loadSandboxWithProgress();
-	selectFirstCategoryFromStart();
+	await selectFirstCategoryFromStart();
 
 	var p2psettings = loadP2PDataFromLocalStorage();
 	if (p2psettings) {
