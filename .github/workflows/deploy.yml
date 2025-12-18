@@ -25,6 +25,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: docker/metadata-action@v5
         id: meta
         with:
@@ -32,3 +33,17 @@ jobs:
           tags: |
             type=sha,prefix=${{ github.ref_name }}-
             type=raw,value=${{ github.ref_name }}-latest
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            VERSION=0.0.0
+            BRANCH=${{ github.ref_name }}
+            COMMIT=${{ github.sha }}
+            BUILD=${{ github.run_number }}
+            
+      - id: image
+        run: echo "image=ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
