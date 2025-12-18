@@ -100,11 +100,13 @@ let routesInitialized = false;
 
 async function initializeApp() {
   try {
+/*
     if (process.env.NODE_ENV === 'production') {
       console.log('Attempting to initialize database...');
       await initializeDatabase();
       console.log('Database initialized successfully');
     }
+*/
 
     if (!routesInitialized) {
       console.log('Initializing routes...');
