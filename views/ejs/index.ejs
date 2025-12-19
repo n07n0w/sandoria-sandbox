@@ -40,15 +40,25 @@
 <!-- Sentry Browser SDK -->
 <script
   src="https://browser.sentry-cdn.com/7.81.1/bundle.tracing.min.js"
-  integrity="sha384-PGz5k6dOaayoOYEhrOEa8Uq+FYHoAZ8ZLO3m8EsKqNK8mCT7VHfRLbN2qJKfD3Rq"
+  integrity="sha384-rWSEepPCbEPOsIC1n7IhewOEkC07lsmRF5i6HJeUGJhUcNSiAddW/MOI8gW9/bWX"
   crossorigin="anonymous"
 ></script>
 <script>
-  Sentry.init({
-    dsn: "https://4b99af41772db25cd148a47c895aa301@o4510206422024192.ingest.de.sentry.io/4510545546641488",
-    environment: "production",
-    sampleRate: 0.1,
-  });
+  // Initialize Sentry with error handling
+  try {
+    if (typeof Sentry !== 'undefined') {
+      Sentry.init({
+        dsn: "https://4b99af41772db25cd148a47c895aa301@o4510206422024192.ingest.de.sentry.io/4510545546641488",
+        environment: "production",
+        sampleRate: 0.1,
+      });
+      console.log('Sentry initialized successfully');
+    } else {
+      console.warn('Sentry SDK failed to load - error tracking disabled');
+    }
+  } catch (error) {
+    console.error('Failed to initialize Sentry:', error);
+  }
 </script>
 
 

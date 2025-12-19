@@ -69,8 +69,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          # key: ${{ secrets.KEY }}
-          password: "${{ secrets.PASSWORD }}"
+          key: ${{ secrets.KEY }}
           envs: DOCKER_IMAGE,GHCR_TOKEN,GHCR_USERNAME,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE
           script: |
             APP_DIR=/opt/sandoria-sandbox

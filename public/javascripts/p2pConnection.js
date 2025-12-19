@@ -11,6 +11,32 @@
 
   const log = (msg) => console.log(`[${clientId}] ${msg}`);
 
+  // Safe Sentry wrapper - handles cases where Sentry is not available
+  const safeSentry = {
+    captureMessage: (message, level, context) => {
+      try {
+        if (typeof Sentry !== 'undefined' && Sentry.captureMessage) {
+          Sentry.captureMessage(message, level, context);
+        } else {
+          console.warn(`[Sentry] ${level}: ${message}`, context);
+        }
+      } catch (error) {
+        console.error('Failed to capture Sentry message:', error);
+      }
+    },
+    captureException: (error, context) => {
+      try {
+        if (typeof Sentry !== 'undefined' && Sentry.captureException) {
+          Sentry.captureException(error, context);
+        } else {
+          console.error('[Sentry] Exception:', error, context);
+        }
+      } catch (sentryError) {
+        console.error('Failed to capture Sentry exception:', sentryError);
+      }
+    }
+  };
+
   function sendMessage(msg) {
     const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
     if (dataChannel && dataChannel.readyState === 'open') {
@@ -40,7 +66,7 @@
     ws.onclose = () => {
       log('❌ WebSocket closed');
       if (!closedManually) {
-        Sentry.captureMessage('WebSocket connection closed unexpectedly', 'warning', {
+        safeSentry.captureMessage('WebSocket connection closed unexpectedly', 'warning', {
           extra: { clientId, targetId }
         });
         log('🔁 Reconnecting WebSocket in 2s...');
@@ -106,7 +132,7 @@
 
       if (state === 'failed' || state === 'disconnected') {
         log('⚠️ Connection lost. Reconnecting in 3s...');
-        Sentry.captureMessage(`Peer connection ${state}`, 'error', {
+        safeSentry.captureMessage(`Peer connection ${state}`, 'error', {
           extra: { clientId, targetId, connectionState: state }
         });
         setTimeout(() => {
@@ -135,7 +161,7 @@
         })
         .catch((error) => {
           log('❌ Failed to create offer:', error);
-          Sentry.captureException(error, {
+          safeSentry.captureException(error, {
             extra: { clientId, targetId, operation: 'createOffer' }
           });
         });
