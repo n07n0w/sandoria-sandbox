@@ -44,7 +44,7 @@ jobs:
             BRANCH=${{ github.ref_name }}
             COMMIT=${{ github.sha }}
             BUILD=${{ github.run_number }}
-            
+
       - id: image
         run: echo "image=ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
@@ -89,6 +89,7 @@ jobs:
   
             # Write environment files
             cat > $APP_DIR/.env <<EOF
+              BASE_URL=${BASE_URL}
               NODE_ENV=production
               PORT=3000
               DB_HOST=${DB_HOST}
@@ -100,11 +101,11 @@ jobs:
               SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
               SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
             EOF
-              
+
             cat > $APP_DIR/.env.version <<EOF
               DOCKER_IMAGE=${DOCKER_IMAGE}
             EOF
-              
+
             # Run new container
             docker run -d \
             --name sandbox-app \
@@ -113,15 +114,13 @@ jobs:
             -e DB_USER=${DB_USER} \
             -e DB_PASSWORD=${DB_PASSWORD} \
             -e DB_NAME=${DB_NAME} \
-            -e BASE_URL=${BASE_URL}\
+            -e BASE_URL=${BASE_URL} \
             --restart unless-stopped \
             -p 3001:3000 \
             --env-file $APP_DIR/.env \
             --env-file $APP_DIR/.env.version \
             -v /opt/sandoria-sandbox/logs-data:/app/logs \
             "${DOCKER_IMAGE}"
-            
-            # Optional: check if container started
             sleep 5
             if docker ps --filter "name=sandbox-app" --filter "status=running" | grep -q sandbox-app; then
             echo "✅ Container started successfully"
