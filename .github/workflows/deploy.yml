@@ -71,42 +71,31 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.KEY }}
-          envs: DBASE_URL,OCKER_IMAGE,GHCR_TOKEN,GHCR_USERNAME,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE
+          envs: BASE_URL,DOCKER_IMAGE,GHCR_TOKEN,GHCR_USERNAME,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SENTRY_DSN,SENTRY_ENVIRONMENT,SENTRY_SAMPLE_RATE
           script: |
             APP_DIR=/opt/sandoria-sandbox
             mkdir -p $APP_DIR
             mkdir -p /opt/sandoria-sandbox/logs-data
-  
-            # Login to GHCR
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
-  
-            # Pull latest image
             docker pull "${DOCKER_IMAGE}"
-  
-            # Stop and remove old container if exists
             docker stop sandbox-app || true
             docker rm sandbox-app || true
-  
-            # Write environment files
             cat > $APP_DIR/.env <<EOF
-              BASE_URL=${BASE_URL}
-              NODE_ENV=production
-              PORT=3000
-              DB_HOST=${DB_HOST}
-              DB_PORT=${DB_PORT}
-              DB_USER=${DB_USER}
-              DB_PASSWORD=${DB_PASSWORD}
-              DB_NAME=${DB_NAME}
-              SENTRY_DSN=${SENTRY_DSN}
-              SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
-              SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
+            BASE_URL=${BASE_URL}
+            NODE_ENV=production
+            PORT=3000
+            DB_HOST=${DB_HOST}
+            DB_PORT=${DB_PORT}
+            DB_USER=${DB_USER}
+            DB_PASSWORD=${DB_PASSWORD}
+            DB_NAME=${DB_NAME}
+            SENTRY_DSN=${SENTRY_DSN}
+            SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+            SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE}
             EOF
-
             cat > $APP_DIR/.env.version <<EOF
-              DOCKER_IMAGE=${DOCKER_IMAGE}
+            DOCKER_IMAGE=${DOCKER_IMAGE}
             EOF
-
-            # Run new container
             docker run -d \
             --name sandbox-app \
             -e DB_HOST=${DB_HOST} \
