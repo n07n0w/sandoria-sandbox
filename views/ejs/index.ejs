@@ -248,7 +248,6 @@
 
 	const restoreState = function (jsonObject, notify = false) {
 		stageFromJson(jsonObject.stage);
-//		loadKonvaState();
 	}
 
     const positionedImageSelectEvent = function(imgSource, categoryId, imageId, x, y) {
@@ -1887,7 +1886,6 @@ console.log({
 */
 			updateConnectionState(true);
 		<%if (clientMode) { %>
-//			await loadKonvaState();
 /*
 			await reLoadStateAfterReconnect();
 			await restoreOpponentStage();
@@ -1911,9 +1909,9 @@ console.log({
 		}
 	}
 
-	const reLoadStateAfterReconnect = () => {
+	const reLoadStateAfterReconnect = async () => {
 //		removeAll();
-		loadKonvaState();
+		await loadKonvaState();
 	};
 
 function startWS(
