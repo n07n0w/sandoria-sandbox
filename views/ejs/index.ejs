@@ -2364,7 +2364,10 @@ function startWS(
 	$('#inviteClientBtn').click(inviteClient);
 
 	await loadSandboxWithProgress();
-#	await selectFirstCategoryFromStart();
+	<% if (clientMode) { %>
+	await reLoadStateAfterReconnect();
+	<% } %>
+	await selectFirstCategoryFromStart();
 
 	var p2psettings = loadP2PDataFromLocalStorage();
 	if (p2psettings) {
