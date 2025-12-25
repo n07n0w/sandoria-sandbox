@@ -1636,7 +1636,8 @@ console.log({
       jsonData['categoryId'] = categoryId;
       jsonData['categoryName'] = categoryName;
       jsonData['notify'] = notify;
-	  jsonData['historyCmpFn'] = categorySelectEventCmpFn;
+//	  jsonData['historyCmpFn'] = categorySelectEventCmpFn;
+	  jsonData['skipFromHistory'] = true;
       return jsonData;
     };
 
