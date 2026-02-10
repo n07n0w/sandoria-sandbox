@@ -1431,8 +1431,14 @@
 	var oldSandboxHeight = -1;
 	
 	const recalcSandboxSizes = function(evt) {
-		let screenWidth = window.innerWidth;
-		let screenHeight = window.innerHeight;
+		const view = document.documentElement; // або body
+
+		let screenWidth = view.clientWidth;
+		let screenHeight = view.clientHeight;
+
+//		let screenWidth = window.innerWidth;
+//		let screenHeight = window.innerHeight;
+
 		const sizeRelations = 7/5;
 		let rSideContentElement = $('.rsidecontent');
 //		let rSideContentWidth  = rSideContentElement.width();
@@ -1518,7 +1524,8 @@ console.log({
 		element.width  = rightSideWidth + 'px';
 
 		element = document.getElementById('categoryImages');
-		let categoryImageHeight = screenHeight - rSideContentHeight;
+//		let categoryImageHeight = screenHeight - rSideContentHeight;
+		let categoryImageHeight = screenHeight - rSideContentHeight + 20;
 		if (element) {
 			element.style.height = categoryImageHeight + 'px';
 			element.style.width = (categoryImageMinPanelWidth - categoryImagesStyleRightShift) + 'px';
@@ -2344,11 +2351,13 @@ function startWS(
 //			$(".images_visible").animate({width: (categoryImageMaxPanelWidth-50) + 'px', display: 'block'}, "fast");
 			$(".images_visible").animate({width: (categoryImageMaxPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").addClass('shadow');
+			$(".images_visible").addClass('marginleft60');
 		} else {
 			$("#categoryImages").animate({width: categoryImageMinPanelWidth + 'px'}, "fast");
 //			$(".images_visible").animate({width: (categoryImageMinPanelWidth-50) + 'px', display: 'block'}, "fast");
 			$(".images_visible").animate({width: (categoryImageMinPanelWidth) + 'px', display: 'block'}, "fast");
 			$("#categoryImages").removeClass('shadow');
+			$(".images_visible").removeClass('marginleft60');
 		}
 		categoryImagesSate ^= 1;
 	});
@@ -2586,7 +2595,7 @@ function startWS(
 						<p><a href="#">Пригласить клиента</a></p>
 					</span>
 				</div>
-				<div class="spaces h40">&nbsp;</div>
+				<div class="spaces h20">&nbsp;</div>
 				<div class="inviteBtn btn2" id="takeScreenshotBtn" onclick="saveStateToImage()">
 					<img class="icon" src="/images/svg/make_screenshot.svg" title="Сделать снимок" />
 					<span>
