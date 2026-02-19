@@ -769,6 +769,12 @@
 			removeAll();
 		}
 	}
+	function closeSessionCloseConfirmationDialog(closeSession) {
+		closePopupDialog("#session-close-confirmation-dialog");
+		if (closeSession) {
+			disconnectPeer();
+		}
+	}
 
 	function removeAllInner() {
 		console.log("removeAllInner");
@@ -886,7 +892,9 @@
 
 	const setSwitchInteractionButtonImg = () => {
 		const iconImgSrc = (canDoctorEditImages) ? "/images/svg/interactionModeOn.svg" : "/images/svg/interactionModeOff.svg" ;
+		const labelText = (canDoctorEditImages) ? "Взаимодействие включено" : "Взаимодействие отключено" ;
 		$('#interaction_mode > .icon > img').attr("src", iconImgSrc);
+		$('#interaction_mode > .label').text(labelText);
 	};
 
 	const toggleSwitchInteractionButton = () => {
@@ -1809,8 +1817,13 @@ console.log({
 		inviteClientBtn.addClass('closeSessionBtn');
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Завершить сессию";
-		inviteClientBtn.off('click').on('click', disconnectPeer);
+		inviteClientBtn.off('click').on('click', confirmDisconnectPeer);
+		showPopupDialog('#client-connected-dialog');
 	<% } %>
+	}
+
+	const confirmDisconnectPeer = function(eventData) {
+		showPopupDialog('#session-close-confirmation-dialog');
 	}
 
 	const disconnectPeer = function(eventData) {
@@ -2071,6 +2084,7 @@ function startWS(
 //				uiSetOpponentStatus("online");
 				console.log("Opponent joined!");
 				onStatusChange("connected");
+				onConnectionEstablished();
 			},
 
 			onOpponentLeft: async () => {
@@ -2536,9 +2550,12 @@ function startWS(
 </head>
 <body>
 
+<%/*
 <div id="status" style="padding: 8px; font-weight: bold; color: white; background: gray; width: fit-content; position: fixed">
   Статус: неизвестный
 </div>
+*/%>
+
 
 	<a href="<%=constants.MAIN_SITE_URL %>" target="sandoria_main" class="homeBtn"><img src="/images/svg/home.svg" width="16px" height="16px"/></a>
 	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
@@ -2553,7 +2570,7 @@ function startWS(
 				<% if (!clientMode) { %>
 					<p class="control_line" id="interaction_mode" onclick="switchIneractionMode()">
 						<span class="icon"><img src="/images/svg/interactionModeOff.svg"></span>
-						<span class="label">Взаимодействие</span>
+						<span class="label">Взаимодействие включено</span>
 					</p>
 				<% } %>
 
@@ -2713,6 +2730,68 @@ function startWS(
 				<span>Да</span>
 			</div>
 			<div class="flexbtn_128_56 btn1 mauto" onclick="closeClearConfirmationDialog(false);">
+				<span>Нет</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="client-connected-dialog" width="643" height="422" style="display: none">
+	<div class="connection-status-dialog-content">
+		<div id="icon" class="halign_center">
+			<img src="images/svg/connectionStatusDialogConnected.svg" />
+		</div>
+		<div class="spaces" style="height: 32px;">&nbsp;</div>
+		<div class="halign_center">
+			<strong class="ft31">
+			  <span style="color: #091721;">Клиент</span>
+			  <span style="color: #CE8164;">присоединился</span>
+			</strong>
+		</div>
+		<div class="spaces" style="height: 40px;">&nbsp;</div>
+		<div class="halign_center flex_cg_31">
+			<div onclick="closePopupDialog('#client-connected-dialog');" class="container btn1 ft20" style="width: 197px; height: 56px;">
+				<span>Закрыть окно</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="client-session-finished-dialog" class="flex_center" width="643" height="386" style="display: none">
+	<div class="session-end-dialog-content">
+		<div id="icon" class="halign_center">
+			<img src="images/svg/sessionEndDialogImg.svg" width="77" height="100"/>
+		</div>
+		<div class="spaces" style="height: 32px;">&nbsp;</div>
+		<div class="halign_center">
+			<strong class="ft31">
+			  <span style="color: #CE8164;">Сессия</span>
+			  <span style="color: #091721;">завершена</span>
+			</strong>
+			<div class="spaces" style="height: 16px;">&nbsp;</div>
+			<span style="width: 475px; height: 44px; font-size: 18px">Для работы в песочнице попросите психолога создать новую сессию и отправить вам ссылку</span>
+		</div>
+	</div>
+</div>
+
+<div id="session-close-confirmation-dialog" class="flex_center" width="437" height="272" style="display: none">
+	<div class="session-close-confirmation-dialog-content">
+		<div id="icon" class="halign_center">
+			<strong class="ft32">
+			  <span style="color: #CE8164;">Завершить</span>
+			  <span style="color: #091721;">сессию</span>
+			</strong>
+		</div>
+		<div class="spaces" style="height: 16px;">&nbsp;</div>
+		<div class="halign_center">
+			<div style="font-size: 18px">Вы уверены, что хотите завершить активный сеанс?</div>
+		</div>
+		<div class="spaces" style="height: 32px;">&nbsp;</div>
+		<div class="halign_center flex_cg_31">
+			<div class="flexbtn_128_56 btn2 mauto" onclick="closeSessionCloseConfirmationDialog(true);">
+				<span>Да</span>
+			</div>
+			<div class="flexbtn_128_56 btn1 mauto" onclick="closeSessionCloseConfirmationDialog(false);">
 				<span>Нет</span>
 			</div>
 		</div>
