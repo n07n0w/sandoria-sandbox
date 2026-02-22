@@ -1822,7 +1822,7 @@ console.log({
 		var anchor = inviteClientBtn.find('a')[0];
 		anchor.text = "Завершить сеанс";
 		inviteClientBtn.off('click').on('click', confirmDisconnectPeer);
-		showPopupDialog('#client-connected-dialog');
+//		showPopupDialog('#client-connected-dialog');
 	<% } %>
 	}
 
@@ -2014,7 +2014,8 @@ function startWS(
     ws.onPresence((p) => {
         console.log("PRESENCE:", p);
 
-        if (p.sessionId !== opponentSessionId && p.sessionId !== sessionId)
+//        if (p.sessionId !== opponentSessionId && p.sessionId !== sessionId)
+        if (p.sessionId !== opponentSessionId)
             return;
 
         // Opponent joined
@@ -2075,6 +2076,8 @@ function startWS(
 			<% if (clientMode) { %>
 				stopConnectionProgress();
 				closePopupDialog('#client-connection-progress-dialog');
+			<% } else { %>
+				showPopupDialog('#client-connected-dialog');
 			<% } %>
 			},
 
@@ -2375,8 +2378,8 @@ function startWS(
 	await loadSandboxWithProgress();
 
     <% if (/*typeof sessionId !== 'undefined'*/ clientMode) { %>
-	showPopupDialog('#client-connection-progress-dialog');
-	showConnectionProgress('#client-connection-progress-dialog');
+//	showPopupDialog('#client-connection-progress-dialog');
+//	showConnectionProgress('#client-connection-progress-dialog');
 	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
     <% } %>
 
