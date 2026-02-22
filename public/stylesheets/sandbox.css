@@ -121,6 +121,9 @@ body {
   border: 1px solid lightgray;
   box-shadow: 0px 3px 3px lightgray;
 }
+.control_line.on .icon {
+  box-shadow: none;
+}
 .control_line {
   white-space: break-spaces;
   display: flex;
@@ -583,7 +586,7 @@ body {
   justify-content: center;
   align-items: center;
 }
-.session-end-dialog-content {
+.session-end-dialog-content, .connection-progress-dialog-content {
   width: 579px;
   height: 226px;
 }
