@@ -193,6 +193,19 @@ async function initWebSocket(server) {
                 clients.set(registeredId, ws);
                 console.log("Registered:", registeredId);
 
+                // --- NEW: send current online users to THIS client ---
+                for (const [id, clientWs] of clients.entries()) {
+                    if (id === registeredId) continue; // skip self
+
+                    if (clientWs.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: "presence",
+                            sessionId: id,
+                            status: "online"
+                        }));
+                    }
+                }
+
                 // notify others
                 broadcastPresence(registeredId, true);   // NEW
                 return;

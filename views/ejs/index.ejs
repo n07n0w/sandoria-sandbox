@@ -2378,8 +2378,8 @@ function startWS(
 	await loadSandboxWithProgress();
 
     <% if (/*typeof sessionId !== 'undefined'*/ clientMode) { %>
-//	showPopupDialog('#client-connection-progress-dialog');
-//	showConnectionProgress('#client-connection-progress-dialog');
+	showPopupDialog('#client-connection-progress-dialog');
+	showConnectionProgress('#client-connection-progress-dialog');
 	launchPeer('<%=opponentSessionId %>', '<%=sessionId %>', true);
     <% } %>
 
@@ -2734,7 +2734,7 @@ function startWS(
 <div id="client-connected-dialog" width="643" height="422" style="display: none">
 	<div class="connection-status-dialog-content">
 		<div id="icon" class="halign_center">
-			<img src="images/svg/connectionStatusDialogConnected.svg" />
+			<img src="/images/svg/connectionStatusDialogConnected.svg" />
 		</div>
 		<div class="spaces" style="height: 32px;">&nbsp;</div>
 		<div class="halign_center">
@@ -2755,7 +2755,7 @@ function startWS(
 <div id="client-session-finished-dialog" class="flex_center" width="643" height="386" style="display: none">
 	<div class="session-end-dialog-content">
 		<div id="icon" class="halign_center">
-			<img src="images/svg/sessionEndDialogImg.svg" width="77" height="100"/>
+			<img src="/images/svg/sessionEndDialogImg.svg" width="77" height="100"/>
 		</div>
 		<div class="spaces" style="height: 32px;">&nbsp;</div>
 		<div class="halign_center">
